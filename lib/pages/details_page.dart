@@ -1,5 +1,3 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:mccounting_text/mccounting_text.dart';
 import 'package:pacointro/blocs/main_bloc.dart';

@@ -15,24 +15,24 @@ import 'package:provider/provider.dart';
 import 'blocs/main_bloc.dart';
 
 void main() => runApp(
-  MultiProvider(
-    providers: [
-      Provider<LoginBloc>(
-        create: (context) => LoginBloc.withRepository(
-          FakeRepository(),
-        ),
-        dispose: (context, bloc) => bloc.dispose(),
+      MultiProvider(
+        providers: [
+          Provider<LoginBloc>(
+            create: (context) => LoginBloc.withRepository(
+              FakeRepository(),
+            ),
+            dispose: (context, bloc) => bloc.dispose(),
+          ),
+          Provider<MainBloc>(
+            create: (context) => MainBloc.withRepository(
+              FakeRepository(),
+            ),
+            dispose: (context, bloc) => bloc.dispose(),
+          ),
+        ],
+        child: MyApp(),
       ),
-      Provider<MainBloc>(
-        create: (context) => MainBloc.withRepository(
-          FakeRepository(),
-        ),
-        dispose: (context, bloc) => bloc.dispose(),
-      ),
-    ],
-    child: MyApp(),
-  ),
-);
+    );
 
 class MyApp extends StatelessWidget {
   @override
