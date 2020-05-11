@@ -17,5 +17,5 @@ abstract class DataSource {
   Future<ApiResponse<LastInputProductModel>> getLastInputDate(
       {String code, String debit});
   Future<ApiResponse<SalesProductModel>> getSalesInPeriod(
-      {String code, String debit, String startDate, String endDate});
+      {String code, String debit, DateTime startDate, DateTime endDate});
 }

@@ -241,38 +241,56 @@ class _DetailsPageState extends State<DetailsPage> {
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceBetween,
                                         children: <Widget>[
-                                          Container(
-                                            padding: EdgeInsets.all(8),
-                                            decoration: BoxDecoration(border: Border.all(color: pacoRedDisabledColor, width: 1.0)),
-                                            child: Text(
-                                              DateFormat('dd.MM.yyyy').format(
-                                                  snapshot.data.data
-                                                      .startIntervalStockDate),
-                                              style: textStyle.copyWith(
-                                                  fontWeight: FontWeight.w700,
-                                                  fontSize: 18,
-                                                  color: pacoAppBarColor),
-                                            ),
+                                          StreamBuilder<DateTime>(
+                                            stream: _bloc.startDate,
+                                            builder: (context, snapshotStartDate) {
+                                              return GestureDetector(
+                                                onTap: () async {
+                                                  _bloc.sinkStartDate(await getDate(initialDate: snapshotStartDate.data??DateTime.now()));
+                                                },
+                                                child: Container(
+                                                  padding: EdgeInsets.all(8),
+                                                  decoration: BoxDecoration(border: Border.all(color: pacoRedDisabledColor, width: 1.0)),
+                                                  child: Text(
+                                                    DateFormat('dd.MM.yyyy').format(
+                                                        snapshotStartDate.data??DateTime.now()),
+                                                    style: textStyle.copyWith(
+                                                        fontWeight: FontWeight.w700,
+                                                        fontSize: 18,
+                                                        color: pacoAppBarColor),
+                                                  ),
+                                                ),
+                                              );
+                                            }
                                           ),
 
-                                          Container(
-                                            padding: EdgeInsets.all(8),
-                                            decoration: BoxDecoration(border: Border.all(color: pacoRedDisabledColor, width: 1.0)),
-                                            child: Text(
-                                              DateFormat('dd.MM.yyyy').format(
-                                                  snapshot.data.data
-                                                      .endIntervalStockDate),
-                                              style: textStyle.copyWith(
-                                                  fontWeight: FontWeight.w700,
-                                                  fontSize: 18,
-                                                  color: pacoAppBarColor),
-                                            ),
+                                          StreamBuilder<DateTime>(
+                                            stream: _bloc.endDate,
+                                            builder: (context, snapshotEndDate) {
+                                              return GestureDetector(
+                                                onTap:() async{
+                                                  _bloc.sinkEndDate(await getDate(initialDate: snapshotEndDate.data??DateTime.now()));
+                                                },
+                                                child: Container(
+                                                  padding: EdgeInsets.all(8),
+                                                  decoration: BoxDecoration(border: Border.all(color: pacoRedDisabledColor, width: 1.0)),
+                                                  child: Text(
+                                                    DateFormat('dd.MM.yyyy').format(
+                                                        snapshotEndDate.data??DateTime.now()),
+                                                    style: textStyle.copyWith(
+                                                        fontWeight: FontWeight.w700,
+                                                        fontSize: 18,
+                                                        color: pacoAppBarColor),
+                                                  ),
+                                                ),
+                                              );
+                                            }
                                           ),
 
                                           MaterialButton(
                                             onPressed: (){
                                               print('refresh');
-                                              _bloc.refreshSales("startDate", "endDate");
+                                              _bloc.refreshSales();
                                             },
                                             child: CircleAvatar(
                                               radius: 20,
@@ -404,6 +422,22 @@ class _DetailsPageState extends State<DetailsPage> {
           child: Text('LA COS'),
         ),
       ],
+    );
+  }
+
+  Future<DateTime> getDate({DateTime initialDate}) {
+    return showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: DateTime.now().subtract(Duration(days: 90)),
+      //  DateTime(DateTime.now().year),
+      lastDate: DateTime.now(),
+      builder: (BuildContext context, Widget child) {
+        return Theme(
+          data: ThemeData.light(),
+          child: child,
+        );
+      },
     );
   }
 }

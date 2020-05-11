@@ -41,7 +41,7 @@ class Repository extends PreferencesRepository implements DataSource {
 
   @override
   Future<ApiResponse<SalesProductModel>> getSalesInPeriod(
-      {String code, String debit, String startDate, String endDate}) {
+      {String code, String debit, DateTime startDate, DateTime endDate}) {
     // TODO: implement getSalesInPeriod
     return null;
   }

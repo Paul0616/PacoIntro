@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:barcode_scan/barcode_scan.dart';
+import 'package:flutter/services.dart';
 import 'package:pacointro/models/last_input_product_model.dart';
 import 'package:pacointro/models/location_model.dart';
 import 'package:pacointro/models/product_model.dart';
@@ -13,7 +14,6 @@ import 'package:pacointro/repository/fake_repository.dart';
 import 'package:pacointro/utils/constants.dart';
 import 'package:pacointro/utils/nav_key.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:flutter/services.dart';
 
 import 'base_bloc.dart';
 
@@ -82,6 +82,9 @@ class MainBloc implements BaseBloc {
   var _errorController = BehaviorSubject<String>();
   var _searchEnableForProductController = PublishSubject<bool>();
 
+  var _startDateController = BehaviorSubject<DateTime>();
+  var _endDateController = BehaviorSubject<DateTime>();
+
   /* *******************************************************
     OUTPUT
    ********************************************************/
@@ -127,6 +130,10 @@ class MainBloc implements BaseBloc {
   Stream<bool> get enableSearchProduct =>
       _searchEnableForProductController.stream;
 
+  Stream<DateTime> get startDate => _startDateController.stream;
+
+  Stream<DateTime> get endDate => _endDateController.stream;
+
   /* *******************************************************
     METHODS
    ********************************************************/
@@ -155,8 +162,10 @@ class MainBloc implements BaseBloc {
         code: barcode, debit: _currentLocation.debit));
   }
 
-  _getSales(String barcode, String startDate, String endDate) async {
+  _getSales(String barcode, DateTime startDate, DateTime endDate) async {
     _salesController.sink.add(ApiResponse.loading('loading'));
+    _startDateController.sink.add(startDate);
+    _endDateController.sink.add(endDate);
     _salesController.sink.add(await _repository.getSalesInPeriod(
         code: barcode,
         debit: _currentLocation.debit,
@@ -164,17 +173,26 @@ class MainBloc implements BaseBloc {
         endDate: endDate));
   }
 
+  sinkStartDate(DateTime startDate) {
+    _startDate = startDate;
+    _startDateController.sink.add(startDate);
+  }
+
+  sinkEndDate(DateTime endDate) {
+    _endDate = endDate;
+    _endDateController.sink.add(endDate);
+  }
+
   navigateToDetails() {
     final navKey = NavKey.navKey;
     navKey.currentState.pushNamed(DetailsPage.route);
     _getStockAndDate(_currentBarcode);
     _getLastInput(_currentBarcode);
-    _getSales(_currentBarcode, _startDate.toIso8601String(),
-        _endDate.toIso8601String());
+    _getSales(_currentBarcode, _startDate, _endDate);
   }
 
-  refreshSales(String startDate, String endDate){
-    _getSales(_currentBarcode, startDate, endDate);
+  refreshSales() {
+    _getSales(_currentBarcode, _startDate, _endDate);
   }
 
   Future scan() async {
@@ -233,6 +251,8 @@ class MainBloc implements BaseBloc {
     _stockAndDateController?.close();
     _searchEnableForProductController?.close();
     _currentProductController?.close();
+    _startDateController?.close();
+    _endDateController?.close();
   }
 }
 

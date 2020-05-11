@@ -82,10 +82,12 @@ class FakeRepository extends PreferencesRepository implements DataSource {
 
   @override
   Future<ApiResponse<SalesProductModel>> getSalesInPeriod(
-      {String code, String debit, String startDate, String endDate}) async {
+      {String code, String debit, DateTime startDate, DateTime endDate}) async {
     return await Future.delayed(Duration(milliseconds: 1100), () {
       SalesProductModel sales =
           SalesProductModel.fromMap(JsonDecoder().convert(salesBetweenDates));
+      sales.startIntervalStockDate = startDate;
+      sales.endIntervalStockDate = endDate;
       print("--------->SALES ${sales.sales.toString()}");
       //return ApiResponse.error("Sales in period error");
       return ApiResponse.completed(sales);
