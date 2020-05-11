@@ -241,23 +241,44 @@ class _DetailsPageState extends State<DetailsPage> {
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceBetween,
                                         children: <Widget>[
-                                          Text(
-                                            DateFormat('dd.MM.yyyy').format(
-                                                snapshot.data.data
-                                                    .startIntervalStockDate),
-                                            style: textStyle.copyWith(
-                                                fontWeight: FontWeight.w700,
-                                                fontSize: 18,
-                                                color: pacoAppBarColor),
+                                          Container(
+                                            padding: EdgeInsets.all(8),
+                                            decoration: BoxDecoration(border: Border.all(color: pacoRedDisabledColor, width: 1.0)),
+                                            child: Text(
+                                              DateFormat('dd.MM.yyyy').format(
+                                                  snapshot.data.data
+                                                      .startIntervalStockDate),
+                                              style: textStyle.copyWith(
+                                                  fontWeight: FontWeight.w700,
+                                                  fontSize: 18,
+                                                  color: pacoAppBarColor),
+                                            ),
                                           ),
-                                          Text(
-                                            DateFormat('dd.MM.yyyy').format(
-                                                snapshot.data.data
-                                                    .endIntervalStockDate),
-                                            style: textStyle.copyWith(
-                                                fontWeight: FontWeight.w700,
-                                                fontSize: 18,
-                                                color: pacoAppBarColor),
+
+                                          Container(
+                                            padding: EdgeInsets.all(8),
+                                            decoration: BoxDecoration(border: Border.all(color: pacoRedDisabledColor, width: 1.0)),
+                                            child: Text(
+                                              DateFormat('dd.MM.yyyy').format(
+                                                  snapshot.data.data
+                                                      .endIntervalStockDate),
+                                              style: textStyle.copyWith(
+                                                  fontWeight: FontWeight.w700,
+                                                  fontSize: 18,
+                                                  color: pacoAppBarColor),
+                                            ),
+                                          ),
+
+                                          MaterialButton(
+                                            onPressed: (){
+                                              print('refresh');
+                                              _bloc.refreshSales("startDate", "endDate");
+                                            },
+                                            child: CircleAvatar(
+                                              radius: 20,
+                                              backgroundColor: pacoAppBarColor,
+                                              child: Icon(Icons.refresh, color: pacoLightGray,),
+                                            ),
                                           ),
                                         ]),
                                     SizedBox(

@@ -173,6 +173,10 @@ class MainBloc implements BaseBloc {
         _endDate.toIso8601String());
   }
 
+  refreshSales(String startDate, String endDate){
+    _getSales(_currentBarcode, startDate, endDate);
+  }
+
   Future scan() async {
     try {
       ScanResult barcode = await BarcodeScanner.scan();
