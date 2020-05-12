@@ -3,8 +3,9 @@ import 'package:pacointro/models/base_model.dart';
 class ProductModel extends BaseModel {
   double price;
   String measureUnit;
+  double quantity;
 
-  ProductModel({int id, this.price, this.measureUnit, String name})
+  ProductModel({int id, this.price, this.measureUnit, this.quantity, String name})
       : super(id: id, name: name);
 
   @override
@@ -20,6 +21,8 @@ class ProductModel extends BaseModel {
         id: json["code"],
         name: json["name"],
         price: json["price"],
+        quantity: json["quantity"],
         measureUnit: json["measureUnit"]);
+
   }
 }

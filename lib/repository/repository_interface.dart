@@ -1,5 +1,6 @@
 import 'package:pacointro/models/credentials_model.dart';
 import 'package:pacointro/models/last_input_product_model.dart';
+import 'package:pacointro/models/order_model.dart';
 import 'package:pacointro/models/product_model.dart';
 import 'package:pacointro/models/sales_product_model.dart';
 import 'package:pacointro/models/stock_product_model.dart';
@@ -18,4 +19,10 @@ abstract class DataSource {
       {String code, String debit});
   Future<ApiResponse<SalesProductModel>> getSalesInPeriod(
       {String code, String debit, DateTime startDate, DateTime endDate});
+  Future<ApiResponse<OrderModel>> getOrderByNumber(
+      {int orderNumber, String repository});
+  Future<ApiResponse<int>> getOrderCount(
+      {int orderNumber, String repository});
+  Future<ApiResponse<List<ProductModel>>> getOrderItems(
+      {int orderNumber, String repository});
 }

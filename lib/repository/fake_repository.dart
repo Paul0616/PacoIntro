@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:pacointro/data/fake_data.dart';
 import 'package:pacointro/models/credentials_model.dart';
 import 'package:pacointro/models/last_input_product_model.dart';
+import 'package:pacointro/models/order_model.dart';
 import 'package:pacointro/models/product_model.dart';
 import 'package:pacointro/models/sales_product_model.dart';
 import 'package:pacointro/models/stock_product_model.dart';
@@ -92,5 +93,25 @@ class FakeRepository extends PreferencesRepository implements DataSource {
       //return ApiResponse.error("Sales in period error");
       return ApiResponse.completed(sales);
     });
+  }
+
+  @override
+  Future<ApiResponse<OrderModel>> getOrderByNumber({int orderNumber, String repository}) async {
+    return await Future.delayed(Duration(milliseconds: 900), () {
+      OrderModel orderModel = OrderModel.fromMap(JsonDecoder().convert(order));
+      return ApiResponse.completed(orderModel);
+    });
+  }
+
+  @override
+  Future<ApiResponse<int>> getOrderCount({int orderNumber, String repository}) {
+    // TODO: implement getOrderCount
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<ApiResponse<List<ProductModel>>> getOrderItems({int orderNumber, String repository}) {
+    // TODO: implement getOrderItems
+    throw UnimplementedError();
   }
 }

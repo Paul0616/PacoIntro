@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:pacointro/blocs/main_bloc.dart';
 import 'package:pacointro/models/location_model.dart';
 
-import 'package:pacointro/pages/check_ptroducts_page.dart';
+import 'package:pacointro/pages/CheckProducts/check_products_page.dart';
 
 import 'package:pacointro/utils/constants.dart';
 import 'package:pacointro/utils/nav_key.dart';
 import 'package:pacointro/widgets/menu_button_widget.dart';
 import 'package:pacointro/widgets/top_bar.dart';
 import 'package:provider/provider.dart';
+
+import 'Reception/order_page.dart';
 
 class HomePage extends StatefulWidget {
   static String route = '/HomePage';
@@ -60,12 +62,61 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Padding buildRowButtons() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 32.0),
-      child: Row(
+  Widget buildRowButtons() {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 32.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            MenuButtonWidget(
+              image: Image(
+                color: Colors.white,
+                image: AssetImage('images/check.png'),
+                fit: BoxFit.cover,
+              ),
+              text: Text(
+                'Verificare Produs',
+                style: textStyle.copyWith(color: Colors.black87),
+              ),
+              onTap: () {
+                final navKey = NavKey.navKey;
+                navKey.currentState.pushNamed(CheckProductsPage.route);
+              },
+            ),
+            SizedBox(
+              width: 50,
+            ),
+            MenuButtonWidget(
+              image: Image(
+                color: Colors.white,
+                image: AssetImage('images/box.png'),
+                fit: BoxFit.cover,
+              ),
+              text: Text(
+                'Recepție Marfă',
+                style: textStyle.copyWith(color: Colors.black87),
+              ),
+              onTap: () {
+                print("Reception");
+                final navKey = NavKey.navKey;
+                navKey.currentState.pushNamed(OrderPage.route);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget buildColumnButtons() {
+    return SingleChildScrollView(
+      child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
+          SizedBox(
+            height: 50,
+          ),
           MenuButtonWidget(
             image: Image(
               color: Colors.white,
@@ -77,12 +128,13 @@ class _HomePageState extends State<HomePage> {
               style: textStyle.copyWith(color: Colors.black87),
             ),
             onTap: () {
+              //_bloc.scan();
               final navKey = NavKey.navKey;
               navKey.currentState.pushNamed(CheckProductsPage.route);
             },
           ),
           SizedBox(
-            width: 50,
+            height: 50,
           ),
           MenuButtonWidget(
             image: Image(
@@ -94,49 +146,14 @@ class _HomePageState extends State<HomePage> {
               'Recepție Marfă',
               style: textStyle.copyWith(color: Colors.black87),
             ),
-            onTap: () {},
+            onTap: () {
+              print("Reception");
+              final navKey = NavKey.navKey;
+              navKey.currentState.pushNamed(OrderPage.route);
+            },
           ),
         ],
       ),
-    );
-  }
-
-  Column buildColumnButtons() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        MenuButtonWidget(
-          image: Image(
-            color: Colors.white,
-            image: AssetImage('images/check.png'),
-            fit: BoxFit.cover,
-          ),
-          text: Text(
-            'Verificare Produs',
-            style: textStyle.copyWith(color: Colors.black87),
-          ),
-          onTap: () {
-            //_bloc.scan();
-            final navKey = NavKey.navKey;
-            navKey.currentState.pushNamed(CheckProductsPage.route);
-          },
-        ),
-        SizedBox(
-          height: 50,
-        ),
-        MenuButtonWidget(
-          image: Image(
-            color: Colors.white,
-            image: AssetImage('images/box.png'),
-            fit: BoxFit.cover,
-          ),
-          text: Text(
-            'Recepție Marfă',
-            style: textStyle.copyWith(color: Colors.black87),
-          ),
-          onTap: () {},
-        ),
-      ],
     );
   }
 }

@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:pacointro/blocs/main_bloc.dart';
 import 'package:pacointro/models/product_model.dart';
-import 'package:pacointro/pages/price_page.dart';
+import 'package:pacointro/pages/CheckProducts/price_page.dart';
 import 'package:pacointro/repository/api_response.dart';
 import 'package:pacointro/utils/constants.dart';
 import 'package:pacointro/utils/nav_key.dart';

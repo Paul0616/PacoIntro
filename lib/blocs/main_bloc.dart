@@ -7,8 +7,8 @@ import 'package:pacointro/models/location_model.dart';
 import 'package:pacointro/models/product_model.dart';
 import 'package:pacointro/models/sales_product_model.dart';
 import 'package:pacointro/models/stock_product_model.dart';
-import 'package:pacointro/pages/details_page.dart';
-import 'package:pacointro/pages/price_page.dart';
+import 'package:pacointro/pages/CheckProducts/details_page.dart';
+import 'package:pacointro/pages/CheckProducts/price_page.dart';
 import 'package:pacointro/repository/api_response.dart';
 import 'package:pacointro/repository/fake_repository.dart';
 import 'package:pacointro/utils/constants.dart';
@@ -25,6 +25,7 @@ class MainBloc implements BaseBloc {
   DateTime _endDate = DateTime.now();
   bool isManualSearchForProduct = false;
   String _manualSearchForProductString = '';
+  String _orderNumber = '';
 
   MainBloc.withRepository(this._repository) {
     _currentLocationController.stream
@@ -81,6 +82,7 @@ class MainBloc implements BaseBloc {
   var _salesController = BehaviorSubject<ApiResponse<SalesProductModel>>();
   var _errorController = BehaviorSubject<String>();
   var _searchEnableForProductController = PublishSubject<bool>();
+  var _loadOrderValidationController = PublishSubject<bool>();
 
   var _startDateController = BehaviorSubject<DateTime>();
   var _endDateController = BehaviorSubject<DateTime>();
@@ -129,6 +131,8 @@ class MainBloc implements BaseBloc {
 
   Stream<bool> get enableSearchProduct =>
       _searchEnableForProductController.stream;
+
+  Stream<bool> get loadOrderValidation => _loadOrderValidationController.stream;
 
   Stream<DateTime> get startDate => _startDateController.stream;
 
@@ -218,6 +222,11 @@ class MainBloc implements BaseBloc {
             (searchType == SearchType.BY_CODE ? 0 : 3));
   }
 
+  orderNumberValidation(String orderNumber){
+    _orderNumber = orderNumber;
+    _loadOrderValidationController.sink.add(_orderNumber.length > 0 && int.tryParse(_orderNumber) != null);
+  }
+
   sendSearchBarcodeForProductString(SearchType searchType) {
     _barcodeController.sink.add(ApiResponse.completed(
         BarcodeSearch(_manualSearchForProductString, searchType)));
@@ -253,6 +262,7 @@ class MainBloc implements BaseBloc {
     _currentProductController?.close();
     _startDateController?.close();
     _endDateController?.close();
+    _loadOrderValidationController?.close();
   }
 }
 
