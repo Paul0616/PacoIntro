@@ -10,14 +10,14 @@ import 'package:pacointro/widgets/menu_button_widget.dart';
 import 'package:pacointro/widgets/top_bar.dart';
 import 'package:provider/provider.dart';
 
-class OrderPage extends StatefulWidget {
-  static String route = '/OrderPage';
+class OrderDisplayPage extends StatefulWidget {
+  static String route = '/OrderDisplayPage';
 
   @override
-  _OrderPageState createState() => _OrderPageState();
+  _OrderDisplayPageState createState() => _OrderDisplayPageState();
 }
 
-class _OrderPageState extends State<OrderPage> {
+class _OrderDisplayPageState extends State<OrderDisplayPage> {
   MainBloc _bloc;
 
   @override
@@ -52,7 +52,7 @@ class _OrderPageState extends State<OrderPage> {
               Container(
                 child: Padding(
                   padding: const EdgeInsets.all(64),
-                  child: _inputOrderWidget(),
+                  child: _displayOrderWidget(),
                 ),
               ),
             ],
@@ -63,7 +63,7 @@ class _OrderPageState extends State<OrderPage> {
     );
   }
 
-  Widget _inputOrderWidget(){
+  Widget _displayOrderWidget() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -71,7 +71,7 @@ class _OrderPageState extends State<OrderPage> {
         TextFormField(
           //controller: _controller,
           autofocus: true,
-          onChanged:  _bloc.orderNumberValidation,
+          onChanged: _bloc.orderNumberValidation,
           textInputAction: TextInputAction.done,
           keyboardType: TextInputType.number,
           obscureText: false,
@@ -100,8 +100,8 @@ class _OrderPageState extends State<OrderPage> {
                   ),
                   onPressed: snapshot.hasData && snapshot.data
                       ? () {
-
-                  }
+                          FocusScope.of(context).requestFocus(FocusNode());
+                        }
                       : null,
                   disabledColor: pacoAppBarColor.withOpacity(0.5),
                   disabledTextColor: pacoRedDisabledColor,
@@ -114,5 +114,4 @@ class _OrderPageState extends State<OrderPage> {
       ],
     );
   }
-
 }

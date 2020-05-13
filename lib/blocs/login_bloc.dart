@@ -36,6 +36,7 @@ class LoginBloc implements BaseBloc {
     STREAMS
    ********************************************************/
   var _currentUserController = BehaviorSubject<ApiResponse<UserModel>>();
+  var _localUserController = PublishSubject<String>();
   var _userNameController = BehaviorSubject<String>();
   var _passwordController = BehaviorSubject<String>();
 
@@ -65,6 +66,8 @@ class LoginBloc implements BaseBloc {
         ),
       );
 
+  Stream<String> get localUser => _localUserController.stream;
+
   Stream<String> get password => _passwordController.stream.transform(
           StreamTransformer<String, String>.fromHandlers(
               handleData: (password, sink) {
@@ -91,10 +94,13 @@ class LoginBloc implements BaseBloc {
     if (_currentUser != null) return;
     var user = await _repository.getLocalUser();
     _currentUser = user?.name;
-    if (user != null) _userNameController.sink.add(_currentUser);
-
-    //_currentUserController.sink.add(await _repository.getLocalUser());
+    if (user != null) {
+      _localUserController.sink.add(_currentUser);
+      _userNameController.sink.add(_currentUser);
+    }
   }
+
+//_currentUserController.sink.add(await _repository.getLocalUser());
 
   loginPressed() async {
     _currentUserController.sink.add(ApiResponse.loading('loading'));
@@ -130,6 +136,7 @@ class LoginBloc implements BaseBloc {
   @override
   void dispose() {
     _currentUserController?.close();
+    _localUserController?.close();
     _userNameController?.close();
     _passwordController?.close();
     _repository.dispose();

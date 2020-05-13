@@ -10,7 +10,7 @@ import 'package:pacointro/widgets/menu_button_widget.dart';
 import 'package:pacointro/widgets/top_bar.dart';
 import 'package:provider/provider.dart';
 
-import 'Reception/order_page.dart';
+import 'Reception/order_input_page.dart';
 
 class HomePage extends StatefulWidget {
   static String route = '/HomePage';
@@ -100,7 +100,7 @@ class _HomePageState extends State<HomePage> {
               onTap: () {
                 print("Reception");
                 final navKey = NavKey.navKey;
-                navKey.currentState.pushNamed(OrderPage.route);
+                navKey.currentState.pushNamed(OrderInputPage.route);
               },
             ),
           ],
@@ -149,7 +149,7 @@ class _HomePageState extends State<HomePage> {
             onTap: () {
               print("Reception");
               final navKey = NavKey.navKey;
-              navKey.currentState.pushNamed(OrderPage.route);
+              navKey.currentState.pushNamed(OrderInputPage.route);
             },
           ),
         ],

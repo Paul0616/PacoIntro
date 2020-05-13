@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:pacointro/blocs/login_bloc.dart';
 import 'package:pacointro/pages/CheckProducts/check_products_page.dart';
 import 'package:pacointro/pages/CheckProducts/details_page.dart';
-import 'package:pacointro/pages/Reception/order_page.dart';
+import 'package:pacointro/pages/Reception/order_display_page.dart';
+import 'package:pacointro/pages/Reception/order_input_page.dart';
 import 'package:pacointro/pages/home_page.dart';
 import 'package:pacointro/pages/locations_page.dart';
 import 'package:pacointro/pages/login_page.dart';
@@ -54,7 +55,8 @@ class MyApp extends StatelessWidget {
         ManualSearchingPage.route: (BuildContext context) =>
             ManualSearchingPage(),
         CheckProductsPage.route: (BuildContext context) => CheckProductsPage(),
-        OrderPage.route: (BuildContext context) => OrderPage(),
+        OrderInputPage.route: (BuildContext context) => OrderInputPage(),
+        OrderDisplayPage.route: (BuildContext context) => OrderDisplayPage(),
       },
     );
   }

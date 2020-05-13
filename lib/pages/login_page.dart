@@ -35,12 +35,12 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    _bloc.getCurrentUser();
-    StreamSubscription<String> subscription;
-    subscription = _bloc.userName.listen((name) {
-      _controller.text = name ?? '';
-      subscription.cancel();
-    });
+    //_bloc.getCurrentUser();
+//    StreamSubscription<String> subscription;
+//    subscription = _bloc.userName.listen((name) {
+//      _controller.text = name ?? '';
+//      subscription.cancel();
+//    });
 
     return Scaffold(
       body: Center(
@@ -114,30 +114,38 @@ class _LoginPageState extends State<LoginPage> {
       children: <Widget>[
         Padding(
           padding: EdgeInsets.symmetric(vertical: 8.0),
-          child: TextFormField(
-            controller: _controller,
-            onChanged: _bloc.userNameChanged,
-            textInputAction: TextInputAction.next,
-            keyboardType: TextInputType.emailAddress,
-            obscureText: false,
-            focusNode: _emailFocusNode,
-            onFieldSubmitted: (_) {
-              _fieldFocusChange(context, _emailFocusNode, _passwordFocusNode);
-            },
-            style: textStyle.copyWith(decoration: TextDecoration.none),
-            decoration: InputDecoration(
-              prefixIcon: Icon(Icons.person),
-              contentPadding: EdgeInsets.symmetric(horizontal: 16),
-              border: OutlineInputBorder(
-                borderSide: BorderSide.none,
-                borderRadius: BorderRadius.circular(25.0),
-              ),
-              filled: true,
-              fillColor: pacoLightGray,
-              hintText: "Introduceți numele",
-              hintStyle: textStyle,
-            ),
-          ),
+          child: StreamBuilder<String>(
+              stream: _bloc.localUser,
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  _controller = TextEditingController(text: snapshot.data);
+                }
+                return TextFormField(
+                  controller: _controller,
+                  onChanged: _bloc.userNameChanged,
+                  textInputAction: TextInputAction.next,
+                  keyboardType: TextInputType.emailAddress,
+                  obscureText: false,
+                  focusNode: _emailFocusNode,
+                  onFieldSubmitted: (_) {
+                    _fieldFocusChange(
+                        context, _emailFocusNode, _passwordFocusNode);
+                  },
+                  style: textStyle.copyWith(decoration: TextDecoration.none),
+                  decoration: InputDecoration(
+                    prefixIcon: Icon(Icons.person),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide.none,
+                      borderRadius: BorderRadius.circular(25.0),
+                    ),
+                    filled: true,
+                    fillColor: pacoLightGray,
+                    hintText: "Introduceți numele",
+                    hintStyle: textStyle,
+                  ),
+                );
+              }),
         ),
         TextFormField(
           //controller: Te,
