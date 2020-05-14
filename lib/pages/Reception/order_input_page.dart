@@ -1,13 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:pacointro/blocs/main_bloc.dart';
 import 'package:pacointro/models/location_model.dart';
-
-import 'package:pacointro/pages/CheckProducts/check_products_page.dart';
+import 'package:pacointro/models/order_model.dart';
 import 'package:pacointro/pages/Reception/order_display_page.dart';
-
+import 'package:pacointro/repository/api_response.dart';
 import 'package:pacointro/utils/constants.dart';
 import 'package:pacointro/utils/nav_key.dart';
-import 'package:pacointro/widgets/menu_button_widget.dart';
 import 'package:pacointro/widgets/top_bar.dart';
 import 'package:provider/provider.dart';
 
@@ -53,7 +53,7 @@ class _OrderInputPageState extends State<OrderInputPage> {
               Container(
                 child: Padding(
                   padding: const EdgeInsets.all(64),
-                  child: _inputOrderWidget(),
+                  child: _inputOrderStreamBuilder(),
                 ),
               ),
             ],
@@ -63,6 +63,37 @@ class _OrderInputPageState extends State<OrderInputPage> {
       // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
+
+  Widget _inputOrderStreamBuilder(){
+    return StreamBuilder<ApiResponse<OrderModel>>(
+      stream: _bloc.order,
+      builder: (context, snapshot){
+        if(snapshot.hasData) {
+          switch (snapshot.data.status){
+
+            case Status.LOADING:
+              return Center(
+                child: CircularProgressIndicator(),
+              );
+              break;
+            case Status.COMPLETED:
+            case Status.ERROR:
+              StreamSubscription<String> subscriptionError;
+              subscriptionError = _bloc.errorOccur.listen((message) {
+                if (message.isNotEmpty)
+                  Scaffold.of(context).showSnackBar(SnackBar(
+                    content: Text(message),
+                  ));
+                _bloc.deleteError();
+                subscriptionError.cancel();
+              });
+          }
+          return _inputOrderWidget();
+        }
+        return _inputOrderWidget();
+      });
+  }
+
 
   Widget _inputOrderWidget() {
     return Column(
@@ -103,8 +134,6 @@ class _OrderInputPageState extends State<OrderInputPage> {
                       ? () {
                           FocusScope.of(context).requestFocus(FocusNode());
                           _bloc.getOrder();
-                          final navKey = NavKey.navKey;
-                          navKey.currentState.pushNamed(OrderDisplayPage.route);
                         }
                       : null,
                   disabledColor: pacoAppBarColor.withOpacity(0.5),

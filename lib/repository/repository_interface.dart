@@ -21,7 +21,7 @@ abstract class DataSource {
       {String code, String debit, DateTime startDate, DateTime endDate});
   Future<ApiResponse<OrderModel>> getOrderByNumber(
       {String orderNumber, String repository});
-  Future<ApiResponse<int>> getOrderCount({int orderNumber, String repository});
+  Future<ApiResponse<int>> getOrderCount({String orderNumber, String repository});
   Future<ApiResponse<List<ProductModel>>> getOrderItems(
       {int orderNumber, String repository});
 }

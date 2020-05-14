@@ -100,13 +100,15 @@ class FakeRepository extends PreferencesRepository implements DataSource {
       {String orderNumber, String repository}) async {
     return await Future.delayed(Duration(milliseconds: 900), () {
       OrderModel orderModel = OrderModel.fromMap(JsonDecoder().convert(order));
+      if (orderModel.orderNumber.toString() != orderNumber)
+        return ApiResponse.error('Numar comandă negasit în gestiunea curentă');
       return ApiResponse.completed(orderModel);
     });
   }
 
   @override
   Future<ApiResponse<int>> getOrderCount(
-      {int orderNumber, String repository}) async {
+      {String orderNumber, String repository}) async {
     return await Future.delayed(Duration(milliseconds: 1000), () {
       List items = JsonDecoder().convert(orderItems);
       List<ProductModel> foundedProducts = List<ProductModel>();

@@ -49,5 +49,5 @@ const String orderItems = '['
     '{"code": 5942016302677, "name":"URSUS 0.750ML STICLA", "quantity":12, "measureUnit":"BUC"},'
     '{"code": 5942016303605, "name":"URSUS COOLER F.A. RED ORANGE DOZA 500ML", "quantity":24, "measureUnit":"BUC"},'
     '{"code": 5942016301366, "name":"URSUS DOZE BLACK 500ML", "quantity":24, "measureUnit":"BUC"},'
-    '{"code": 5942016303544, "name":"URSUS RETRO DOZA 500ML", "quantity":24, "measureUnit":"BUC"},'
+    '{"code": 5942016303544, "name":"URSUS RETRO DOZA 500ML", "quantity":24, "measureUnit":"BUC"}'
     ']';

@@ -6,6 +6,7 @@ class OrderModel {
   DateTime orderDate;
   double supplierFiscalCode;
   String supplierName;
+  int productsCount;
 
   OrderModel(
       {this.id,
@@ -22,6 +23,7 @@ class OrderModel {
         DateFormat('MM/dd/yyyy hh:mm:ss a').format(this.orderDate);
     data['supplierFiscalCode'] = this.supplierFiscalCode;
     data['supplierName'] = this.supplierName;
+    data['productsCount'] = this.productsCount;
     return data;
   }
 

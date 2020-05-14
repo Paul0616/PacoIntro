@@ -45,6 +45,7 @@ TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 19);
  -----------------------*/
 const String userKey = 'user';
 const String currentLocationKey = 'currentLocation';
+const String orderCountKey = 'orderCount';
 
 /*----------------------
   ENUMS

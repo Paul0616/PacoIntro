@@ -55,7 +55,7 @@ class Repository extends PreferencesRepository implements DataSource {
   }
 
   @override
-  Future<ApiResponse<int>> getOrderCount({int orderNumber, String repository}) {
+  Future<ApiResponse<int>> getOrderCount({String orderNumber, String repository}) {
     // TODO: implement getOrderCount
     throw UnimplementedError();
   }

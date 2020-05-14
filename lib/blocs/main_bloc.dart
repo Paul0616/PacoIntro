@@ -2,14 +2,17 @@ import 'dart:async';
 
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:pacointro/models/last_input_product_model.dart';
 import 'package:pacointro/models/location_model.dart';
 import 'package:pacointro/models/order_model.dart';
 import 'package:pacointro/models/product_model.dart';
+import 'package:pacointro/models/progress_model.dart';
 import 'package:pacointro/models/sales_product_model.dart';
 import 'package:pacointro/models/stock_product_model.dart';
 import 'package:pacointro/pages/CheckProducts/details_page.dart';
 import 'package:pacointro/pages/CheckProducts/price_page.dart';
+import 'package:pacointro/pages/Reception/order_display_page.dart';
 import 'package:pacointro/repository/api_response.dart';
 import 'package:pacointro/repository/fake_repository.dart';
 import 'package:pacointro/utils/constants.dart';
@@ -27,6 +30,7 @@ class MainBloc implements BaseBloc {
   bool isManualSearchForProduct = false;
   String _manualSearchForProductString = '';
   String _orderNumber = '';
+  OrderModel _currentOrder;
 
   MainBloc.withRepository(this._repository) {
     _currentLocationController.stream
@@ -65,6 +69,22 @@ class MainBloc implements BaseBloc {
         setCurrentProduct(ApiResponse.error(response.message));
       }
     });
+    _orderController.stream.listen((event) {
+      if(event != null && event.status == Status.COMPLETED){
+        _currentOrder = event.data;
+        _getOrdersCount();
+        final navKey = NavKey.navKey;
+        navKey.currentState.pushNamed(OrderDisplayPage.route, arguments: event.data);
+      }
+      if(event != null && event.status == Status.ERROR)
+        _errorController.sink.add(event.message);
+    });
+    _ordersCountController.stream.listen((event) async {
+      if(event != null && event.status == Status.COMPLETED){
+        _currentOrder.productsCount = event.data;
+        //_repository.saveLocalCurrentOrder(order: _currentOrder);
+      }
+    });
   }
 
   /* *******************************************************
@@ -88,6 +108,10 @@ class MainBloc implements BaseBloc {
   var _startDateController = BehaviorSubject<DateTime>();
   var _endDateController = BehaviorSubject<DateTime>();
   var _orderController = BehaviorSubject<ApiResponse<OrderModel>>();
+  var _ordersCountController = BehaviorSubject<ApiResponse<int>>();
+  var _invoiceNumberController = PublishSubject<String>();
+  var _invoiceDateController = PublishSubject<DateTime>();
+  var _scanningProgressController = BehaviorSubject<ProgressModel>();
 
   /* *******************************************************
     OUTPUT
@@ -98,24 +122,6 @@ class MainBloc implements BaseBloc {
   Stream<ApiResponse<ProductModel>> get currentProductStream =>
       _currentProductController.stream;
 
-//  Stream<ApiResponse<ProductModel>> get currentProductStream =>
-//      _productsListController.stream.transform(
-//        StreamTransformer<ApiResponse<List<ProductModel>>,
-//                ApiResponse<ProductModel>>.fromHandlers(
-//            handleData: (response, sink) {
-//          switch (response.status) {
-//            case Status.LOADING:
-//              sink.add(ApiResponse.loading(response.message));
-//              break;
-//            case Status.COMPLETED:
-//              sink.add(ApiResponse.completed(response.data.first));
-//              break;
-//            case Status.ERROR:
-//              sink.add(ApiResponse.error(response.message));
-//              break;
-//          }
-//        }),
-//      );
 
   Stream<ApiResponse<List<ProductModel>>> get currentProductList =>
       _productsListController.stream;
@@ -142,9 +148,49 @@ class MainBloc implements BaseBloc {
 
   Stream<ApiResponse<OrderModel>> get order => _orderController.stream;
 
+  Stream<ApiResponse<int>>get ordersCount => _ordersCountController.stream;
+  Stream<String> get invoiceNumber => _invoiceNumberController.stream.transform(
+    StreamTransformer<String, String>.fromHandlers(
+      handleData: (number, sink) {
+        if (number.length > 0) {
+          sink.add(number);
+        } else {
+          sink.addError("Invoice number should not be empty");
+        }
+      },
+    ),
+  );
+  Stream<String> get invoiceDate => _invoiceDateController.stream.transform(
+    StreamTransformer<DateTime, String>.fromHandlers(
+      handleData: (date, sink) {
+        if (date != null) {
+          sink.add(DateFormat("dd.MM.yyyy").format(date));
+        } else {
+          sink.addError("Invoice date should not be empty");
+        }
+      },
+    ),
+  );
+
+  Stream<bool> get submitInvoiceInfo =>
+      Rx.combineLatest2(invoiceNumber, invoiceDate, (n, d) => true);
+
+  Stream<ProgressModel> get scanningProgress => _scanningProgressController.stream;
+
   /* *******************************************************
     METHODS
    ********************************************************/
+  Function(String) get invoiceNumberChanged => _invoiceNumberController.sink.add;
+  sinkInvoiceDate(DateTime date) => _invoiceDateController.sink.add(date);
+
+
+  updateScanningProgress(int scanned) async {
+    //OrderModel order = await _repository.getLocalCurrentOrder();
+   // if(scanned <= _currentOrder.productsCount && scanned >= 0){
+      _scanningProgressController.sink.add(ProgressModel(scanned, _currentOrder.productsCount));
+  //  }
+  }
+
   getCurrentLocation() async {
     _currentLocation = await _repository.getLocalLocation();
     if (_currentLocation != null)
@@ -183,8 +229,14 @@ class MainBloc implements BaseBloc {
 
   getOrder() async {
     _orderController.sink.add(ApiResponse.loading('loading'));
+
     _orderController.sink.add(await _repository.getOrderByNumber(
         orderNumber: _orderNumber, repository: _currentLocation.name));
+  }
+
+  _getOrdersCount() async {
+    _ordersCountController.sink.add(ApiResponse.loading('loading'));
+    _ordersCountController.sink.add(await _repository.getOrderCount(orderNumber: _orderNumber, repository: _currentLocation.name));
   }
 
   sinkStartDate(DateTime startDate) {
@@ -275,6 +327,10 @@ class MainBloc implements BaseBloc {
     _endDateController?.close();
     _loadOrderValidationController?.close();
     _orderController?.close();
+    _ordersCountController?.close();
+    _invoiceNumberController?.close();
+    _invoiceDateController?.close();
+    _scanningProgressController?.close();
   }
 }
 

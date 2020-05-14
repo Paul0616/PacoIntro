@@ -17,11 +17,12 @@ class ProductModel extends BaseModel {
   }
 
   factory ProductModel.fromMap(Map<String, dynamic> json) {
+   // double q = json["quantity"].toDouble();
     return ProductModel(
         id: json["code"],
         name: json["name"],
         price: json["price"],
-        quantity: json["quantity"],
+        quantity: json["quantity"].toDouble(),
         measureUnit: json["measureUnit"]);
 
   }

@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 class LocalBaseRepository{
 
-  Future<Map<String, dynamic>> getLocalObject({String key}) async {
+  Future<Map<String, dynamic>> getLocalObjectMap({String key}) async {
     final prefs = await SharedPreferences.getInstance();
     final object = prefs.getString(key);
     if(object == null)
@@ -12,7 +12,7 @@ class LocalBaseRepository{
   }
 
 
-  Future<bool> saveLocalObject({Map<String, dynamic> map, String key}) async {
+  Future<bool> saveLocalObjectMap({Map<String, dynamic> map, String key}) async {
     final prefs = await SharedPreferences.getInstance();
     return await prefs.setString(key, JsonEncoder().convert(map));
   }

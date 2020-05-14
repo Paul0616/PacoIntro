@@ -27,31 +27,6 @@ class _DetailsPageState extends State<DetailsPage> {
     super.didChangeDependencies();
   }
 
-//  Future<void> showAlert(
-//      BuildContext context, String title, String content, Function onPressed) {
-//    return showDialog<void>(
-//      barrierDismissible: false,
-//      context: context,
-//      builder: (BuildContext context) {
-//        return AlertDialog(
-//          title: Text(title ?? ''),
-//          content: Text(content ?? ''),
-//          actions: <Widget>[
-//            FlatButton(
-//              child: Text('OK'),
-//              onPressed: onPressed,
-//            ),
-//            FlatButton(
-//              child: Text('Renunță'),
-//              onPressed: () {
-//                Navigator.of(context).pop();
-//              },
-//            ),
-//          ],
-//        );
-//      },
-//    );
-//  }
 
   @override
   Widget build(BuildContext context) {
