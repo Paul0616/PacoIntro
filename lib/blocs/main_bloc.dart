@@ -4,6 +4,7 @@ import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/services.dart';
 import 'package:pacointro/models/last_input_product_model.dart';
 import 'package:pacointro/models/location_model.dart';
+import 'package:pacointro/models/order_model.dart';
 import 'package:pacointro/models/product_model.dart';
 import 'package:pacointro/models/sales_product_model.dart';
 import 'package:pacointro/models/stock_product_model.dart';
@@ -86,6 +87,7 @@ class MainBloc implements BaseBloc {
 
   var _startDateController = BehaviorSubject<DateTime>();
   var _endDateController = BehaviorSubject<DateTime>();
+  var _orderController = BehaviorSubject<ApiResponse<OrderModel>>();
 
   /* *******************************************************
     OUTPUT
@@ -138,6 +140,8 @@ class MainBloc implements BaseBloc {
 
   Stream<DateTime> get endDate => _endDateController.stream;
 
+  Stream<ApiResponse<OrderModel>> get order => _orderController.stream;
+
   /* *******************************************************
     METHODS
    ********************************************************/
@@ -175,6 +179,12 @@ class MainBloc implements BaseBloc {
         debit: _currentLocation.debit,
         startDate: startDate,
         endDate: endDate));
+  }
+
+  getOrder() async {
+    _orderController.sink.add(ApiResponse.loading('loading'));
+    _orderController.sink.add(await _repository.getOrderByNumber(
+        orderNumber: _orderNumber, repository: _currentLocation.name));
   }
 
   sinkStartDate(DateTime startDate) {
@@ -222,9 +232,10 @@ class MainBloc implements BaseBloc {
             (searchType == SearchType.BY_CODE ? 0 : 3));
   }
 
-  orderNumberValidation(String orderNumber){
+  orderNumberValidation(String orderNumber) {
     _orderNumber = orderNumber;
-    _loadOrderValidationController.sink.add(_orderNumber.length > 0 && int.tryParse(_orderNumber) != null);
+    _loadOrderValidationController.sink
+        .add(_orderNumber.length > 0 && int.tryParse(_orderNumber) != null);
   }
 
   sendSearchBarcodeForProductString(SearchType searchType) {
@@ -263,6 +274,7 @@ class MainBloc implements BaseBloc {
     _startDateController?.close();
     _endDateController?.close();
     _loadOrderValidationController?.close();
+    _orderController?.close();
   }
 }
 

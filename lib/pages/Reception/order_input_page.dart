@@ -3,6 +3,7 @@ import 'package:pacointro/blocs/main_bloc.dart';
 import 'package:pacointro/models/location_model.dart';
 
 import 'package:pacointro/pages/CheckProducts/check_products_page.dart';
+import 'package:pacointro/pages/Reception/order_display_page.dart';
 
 import 'package:pacointro/utils/constants.dart';
 import 'package:pacointro/utils/nav_key.dart';
@@ -101,6 +102,9 @@ class _OrderInputPageState extends State<OrderInputPage> {
                   onPressed: snapshot.hasData && snapshot.data
                       ? () {
                           FocusScope.of(context).requestFocus(FocusNode());
+                          _bloc.getOrder();
+                          final navKey = NavKey.navKey;
+                          navKey.currentState.pushNamed(OrderDisplayPage.route);
                         }
                       : null,
                   disabledColor: pacoAppBarColor.withOpacity(0.5),

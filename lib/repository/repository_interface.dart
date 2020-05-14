@@ -20,9 +20,8 @@ abstract class DataSource {
   Future<ApiResponse<SalesProductModel>> getSalesInPeriod(
       {String code, String debit, DateTime startDate, DateTime endDate});
   Future<ApiResponse<OrderModel>> getOrderByNumber(
-      {int orderNumber, String repository});
-  Future<ApiResponse<int>> getOrderCount(
-      {int orderNumber, String repository});
+      {String orderNumber, String repository});
+  Future<ApiResponse<int>> getOrderCount({int orderNumber, String repository});
   Future<ApiResponse<List<ProductModel>>> getOrderItems(
       {int orderNumber, String repository});
 }

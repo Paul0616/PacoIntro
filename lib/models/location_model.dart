@@ -19,7 +19,7 @@ class LocationModel extends BaseModel {
     return LocationModel(
         id: json["id"],
         name: json["name"],
-        fiscalCode: json["locations"],
+        fiscalCode: json["fiscalCode"],
         debit: json["debit"]);
   }
 }

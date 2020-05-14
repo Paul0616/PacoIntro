@@ -48,7 +48,8 @@ class Repository extends PreferencesRepository implements DataSource {
   }
 
   @override
-  Future<ApiResponse<OrderModel>> getOrderByNumber({int orderNumber, String repository}) async {
+  Future<ApiResponse<OrderModel>> getOrderByNumber(
+      {String orderNumber, String repository}) async {
     // TODO: implement getOrderByNumber
     throw UnimplementedError();
   }
@@ -60,10 +61,9 @@ class Repository extends PreferencesRepository implements DataSource {
   }
 
   @override
-  Future<ApiResponse<List<ProductModel>>> getOrderItems({int orderNumber, String repository}) {
+  Future<ApiResponse<List<ProductModel>>> getOrderItems(
+      {int orderNumber, String repository}) {
     // TODO: implement getOrderItems
     throw UnimplementedError();
   }
-
-
 }

@@ -7,15 +7,19 @@ class OrderModel {
   double supplierFiscalCode;
   String supplierName;
 
-
-  OrderModel({this.id, this.orderNumber, this.orderDate, this.supplierFiscalCode,
+  OrderModel(
+      {this.id,
+      this.orderNumber,
+      this.orderDate,
+      this.supplierFiscalCode,
       this.supplierName});
 
   Map<String, dynamic> toJson() {
     Map<String, dynamic> data = Map<String, dynamic>();
     data['id'] = this.id;
     data['orderNumber'] = this.orderNumber;
-    data['orderDate'] = DateFormat('MM/dd/yyyy hh:mm:ss a').format(this.orderDate);
+    data['orderDate'] =
+        DateFormat('MM/dd/yyyy hh:mm:ss a').format(this.orderDate);
     data['supplierFiscalCode'] = this.supplierFiscalCode;
     data['supplierName'] = this.supplierName;
     return data;
@@ -28,6 +32,7 @@ class OrderModel {
         supplierName: json["supplierName"],
         orderDate: DateFormat('MM/dd/yyyy hh:mm:ss a').parse(json["orderDate"]),
         supplierFiscalCode: json["supplierFiscalCode"]);
-
   }
+
+  String get orderDateString => DateFormat('dd.MM.yyyy').format(orderDate);
 }

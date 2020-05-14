@@ -96,7 +96,8 @@ class FakeRepository extends PreferencesRepository implements DataSource {
   }
 
   @override
-  Future<ApiResponse<OrderModel>> getOrderByNumber({int orderNumber, String repository}) async {
+  Future<ApiResponse<OrderModel>> getOrderByNumber(
+      {String orderNumber, String repository}) async {
     return await Future.delayed(Duration(milliseconds: 900), () {
       OrderModel orderModel = OrderModel.fromMap(JsonDecoder().convert(order));
       return ApiResponse.completed(orderModel);
@@ -104,13 +105,22 @@ class FakeRepository extends PreferencesRepository implements DataSource {
   }
 
   @override
-  Future<ApiResponse<int>> getOrderCount({int orderNumber, String repository}) {
-    // TODO: implement getOrderCount
-    throw UnimplementedError();
+  Future<ApiResponse<int>> getOrderCount(
+      {int orderNumber, String repository}) async {
+    return await Future.delayed(Duration(milliseconds: 1000), () {
+      List items = JsonDecoder().convert(orderItems);
+      List<ProductModel> foundedProducts = List<ProductModel>();
+      items.forEach((map) {
+        ProductModel product = ProductModel.fromMap(map);
+        foundedProducts.add(product);
+      });
+      return ApiResponse.completed(foundedProducts.length);
+    });
   }
 
   @override
-  Future<ApiResponse<List<ProductModel>>> getOrderItems({int orderNumber, String repository}) {
+  Future<ApiResponse<List<ProductModel>>> getOrderItems(
+      {int orderNumber, String repository}) {
     // TODO: implement getOrderItems
     throw UnimplementedError();
   }
