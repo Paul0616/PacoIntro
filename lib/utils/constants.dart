@@ -50,4 +50,4 @@ const String orderCountKey = 'orderCount';
 /*----------------------
   ENUMS
  -----------------------*/
-enum SearchType {BY_CODE, BY_NAME}
+enum SearchType {BY_CODE, BY_NAME, FROM_RECEPTION}

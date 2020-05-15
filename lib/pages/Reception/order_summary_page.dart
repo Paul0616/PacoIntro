@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:pacointro/blocs/main_bloc.dart';
 import 'package:pacointro/models/location_model.dart';
 import 'package:pacointro/models/progress_model.dart';
+import 'package:pacointro/pages/Reception/list_products.dart';
 import 'package:pacointro/utils/constants.dart';
+import 'package:pacointro/utils/nav_key.dart';
 import 'package:pacointro/widgets/top_bar.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:provider/provider.dart';
@@ -17,7 +19,7 @@ class OrderSummaryPage extends StatefulWidget {
 
 class _OrderSummaryPageState extends State<OrderSummaryPage> {
   MainBloc _bloc;
-  int currentScan = 0;
+  //int currentScan = 0;
 
   @override
   void didChangeDependencies() {
@@ -74,9 +76,13 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
               child: Container(
                 padding: EdgeInsets.all(8),
                 child: OutlineButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    final navKey = NavKey.navKey;
+                    navKey.currentState
+                        .pushNamed(ListProductsPage.route, arguments: false);
+                  },
                   child: Text(
-                    'Vezi produsele de pe comandă',
+                    'COMANDĂ vs. RECEPȚIE',
                     style: textStyleBold,
                     textAlign: TextAlign.center,
                   ),
@@ -90,7 +96,11 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
               child: Container(
                 padding: EdgeInsets.all(8),
                 child: OutlineButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    final navKey = NavKey.navKey;
+                    navKey.currentState
+                        .pushNamed(ListProductsPage.route, arguments: true);
+                  },
                   child: Text(
                     'Vezi produsele deja scanate',
                     style: textStyleBold,
@@ -116,7 +126,9 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
                 animationDuration: 1200,
                 lineWidth: 15.0,
                 percent: snapshot.hasData
-                    ? snapshot.data.ratio > 1 ? 1.0 : snapshot.data.ratio
+                    ? snapshot.data != null && snapshot.data.ratio > 1
+                        ? 1.0
+                        : snapshot.data.ratio
                     : 0.0,
                 center: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -124,7 +136,7 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
                     Text(
                       snapshot.hasData
                           ? "${snapshot.data.current}/${snapshot.data.max}"
-                          : "",
+                          : "0/0",
                       style: TextStyle(
                           fontWeight: FontWeight.bold, fontSize: 20.0),
                     ),
@@ -136,7 +148,9 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
                 ),
                 circularStrokeCap: CircularStrokeCap.butt,
                 backgroundColor: Colors.yellow,
-                progressColor: snapshot.data.ratio > 1 ? Colors.green : Colors.red,
+                progressColor: snapshot.data != null && snapshot.data.ratio > 1
+                    ? Colors.green
+                    : Colors.red,
               );
             }),
         SizedBox(
@@ -164,8 +178,9 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
           color: pacoAppBarColor,
           elevation: 4,
           onPressed: () {
-            currentScan++;
-            _bloc.updateScanningProgress(currentScan);
+            _bloc.scan(SearchType.FROM_RECEPTION);
+            //currentScan++;
+           // _bloc.updateScanningProgress(currentScan);
           },
         )
       ],

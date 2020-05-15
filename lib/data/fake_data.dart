@@ -1,5 +1,4 @@
-const String fakeUsers =
-    '[{"id": 1, "name": "paul", '
+const String fakeUsers = '[{"id": 1, "name": "paul", '
     '"locations": '
     '['
     '{"id": 1, "name":"GARA_MARKET", "fiscalCode": 8017008.09, "debit":"3719"}, '
@@ -25,17 +24,21 @@ const String products = '['
     '{"code": 12345670, "name":"PATE DE FICAT DELISAN 150g", "price":0.99, "measureUnit":"BUC"}'
     ']';
 
-const String stockAtDate = '{"code": 5942326400131, "name":"APA CARPATICA PLATA 2L", "stock":105.00, "stockDate":"2020-04-16", "measureUnit":"BUC"}';
+const String stockAtDate =
+    '{"code": 5942326400131, "name":"APA CARPATICA PLATA 2L", "stock":105.00, "stockDate":"2020-04-16", "measureUnit":"BUC"}';
 
-const String lastInputDate = '{"code": 5942326400131, "name":"APA CARPATICA PLATA 2L", "lastInputDate":"2020-04-14"}';
+const String lastInputDate =
+    '{"code": 5942326400131, "name":"APA CARPATICA PLATA 2L", "lastInputDate":"2020-04-14"}';
 
-const String salesBetweenDates = '{"code": 5942326400131, "name":"APA CARPATICA PLATA 2L", "sales":58.00, "startIntervalStockDate":"2020-03-01", "endIntervalStockDate":"2020-03-31", "measureUnit":"BUC"}';
+const String salesBetweenDates =
+    '{"code": 5942326400131, "name":"APA CARPATICA PLATA 2L", "sales":58.00, "startIntervalStockDate":"2020-03-01", "endIntervalStockDate":"2020-03-31", "measureUnit":"BUC"}';
 
-const String order = '{"id":28707, "orderNumber":11123, "orderDate": "4/16/2020 1:33:32 PM", "supplierFiscalCode": 11885854.2, "supplierName": "PROGRES DISTRIBUTIE SRL - BAUTURI"}';
+const String order =
+    '{"id":28707, "orderNumber":11123, "orderDate": "4/16/2020 1:33:32 PM", "supplierFiscalCode": 11885854.2, "supplierName": "PROGRES DISTRIBUTIE SRL - BAUTURI"}';
 
 const String orderItems = '['
     '{"code": 5942016300611, "name":"BERE STEJAR DOZA 0.5L", "quantity":24, "measureUnit":"BUC"},'
-    '{"code": 5942016302349, "name":"BERE URSUS 0.33L", "quantity":40, "measureUnit":"BUC"},'
+    '{"code": 5942016001112, "name":"BERE URSUS 0.33L", "quantity":40, "measureUnit":"BUC"},'
     '{"code": 5942016301403, "name":"BERE URSUS 1L", "quantity":36, "measureUnit":"BUC"},'
     '{"code": 5942016300017, "name":"BERE URSUS PREMIUM 0.5L DOZA", "quantity":24, "measureUnit":"BUC"},'
     '{"code": 5942016302349, "name":"CIUCAS 1L", "quantity":36, "measureUnit":"BUC"},'

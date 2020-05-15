@@ -159,7 +159,7 @@ class _CheckProductsPageState extends State<CheckProductsPage> {
             height: 40,
             child: RaisedButton.icon(
               onPressed: () {
-                _bloc.scan();
+                _bloc.scan(SearchType.BY_CODE);
               },
               icon: Icon(Icons.scanner),
               label: Text("Scanare produs",

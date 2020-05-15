@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pacointro/blocs/login_bloc.dart';
 import 'package:pacointro/pages/CheckProducts/check_products_page.dart';
 import 'package:pacointro/pages/CheckProducts/details_page.dart';
+import 'package:pacointro/pages/Reception/list_products.dart';
 import 'package:pacointro/pages/Reception/order_display_page.dart';
 import 'package:pacointro/pages/Reception/order_input_page.dart';
 import 'package:pacointro/pages/Reception/order_summary_page.dart';
@@ -59,6 +60,7 @@ class MyApp extends StatelessWidget {
         OrderInputPage.route: (BuildContext context) => OrderInputPage(),
         OrderDisplayPage.route: (BuildContext context) => OrderDisplayPage(),
         OrderSummaryPage.route: (BuildContext context) => OrderSummaryPage(),
+        ListProductsPage.route: (BuildContext context) => ListProductsPage(),
       },
     );
   }

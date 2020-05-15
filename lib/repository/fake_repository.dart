@@ -122,8 +122,15 @@ class FakeRepository extends PreferencesRepository implements DataSource {
 
   @override
   Future<ApiResponse<List<ProductModel>>> getOrderItems(
-      {int orderNumber, String repository}) {
-    // TODO: implement getOrderItems
-    throw UnimplementedError();
+      {int orderNumber, String repository}) async {
+    return await Future.delayed(Duration(milliseconds: 1200), () {
+      List items = JsonDecoder().convert(orderItems);
+      List<ProductModel> foundedProducts = List<ProductModel>();
+      items.forEach((map) {
+        ProductModel product = ProductModel.fromMap(map);
+        foundedProducts.add(product);
+      });
+      return ApiResponse.completed(foundedProducts);
+    });
   }
 }
