@@ -26,19 +26,18 @@ Map<int, Color> colorPacoRed = {
 };
 
 MaterialColor pacoRedMaterialColor =
-MaterialColor(pacoAppBarColor.value, colorPacoRed);
+    MaterialColor(pacoAppBarColor.value, colorPacoRed);
 
 /*----------------------
   TEXT STYLES
  -----------------------*/
-TextStyle textStyle =
-TextStyle(color: textGray, fontWeight: FontWeight.w300);
+TextStyle textStyle = TextStyle(color: textGray, fontWeight: FontWeight.w300);
 
 TextStyle textStyleBold =
-TextStyle(color: textGray, fontWeight: FontWeight.w600);
+    TextStyle(color: textGray, fontWeight: FontWeight.w600);
 
 TextStyle textStyleWhite =
-TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 19);
+    TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 19);
 
 /*----------------------
   PREFERENCES KEYS
@@ -50,4 +49,4 @@ const String orderCountKey = 'orderCount';
 /*----------------------
   ENUMS
  -----------------------*/
-enum SearchType {BY_CODE, BY_NAME, FROM_RECEPTION}
+enum SearchType { BY_CODE, BY_NAME, FROM_RECEPTION }

@@ -180,7 +180,7 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
           onPressed: () {
             _bloc.scan(SearchType.FROM_RECEPTION);
             //currentScan++;
-           // _bloc.updateScanningProgress(currentScan);
+            // _bloc.updateScanningProgress(currentScan);
           },
         )
       ],

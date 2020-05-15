@@ -41,8 +41,7 @@ class MainBloc implements BaseBloc {
       if (response.status == Status.COMPLETED) {
         print("Barcode: ${response.data}");
         _currentBarcode = response.data.barcode;
-        if(response.data.searchType == SearchType.FROM_RECEPTION){
-
+        if (response.data.searchType == SearchType.FROM_RECEPTION) {
         } else {
           _getProductNameAndPrice(
               _currentBarcode, response.data.searchType == SearchType.BY_NAME);
@@ -213,7 +212,7 @@ class MainBloc implements BaseBloc {
   sinkInvoiceDate(DateTime date) => _invoiceDateController.sink.add(date);
 
   updateScanningProgress(int scanned) async {
-   _barcodeController.sink.add(ApiResponse.error(''));
+    _barcodeController.sink.add(ApiResponse.error(''));
 //    await DBProvider.db.insertProduct(
 //        ProductModel(
 //            id: 5942016302349,
@@ -223,7 +222,6 @@ class MainBloc implements BaseBloc {
 //        false);
 //    _scanningProgressController.sink
 //        .add(ProgressModel(scanned, _currentOrder.productsCount));
-
   }
 
   getCurrentLocation() async {
