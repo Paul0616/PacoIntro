@@ -1,9 +1,12 @@
+import 'package:pacointro/database/database.dart';
 import 'package:pacointro/models/base_model.dart';
 
 class ProductModel extends BaseModel {
   double price;
   String measureUnit;
   double quantity;
+  bool belongsToOrder;
+  ProductType productType;
   int createdAt = DateTime.now().millisecondsSinceEpoch;
 
   ProductModel(
@@ -11,6 +14,8 @@ class ProductModel extends BaseModel {
       this.price,
       this.measureUnit,
       this.quantity,
+      this.belongsToOrder,
+      this.productType,
       this.createdAt,
       String name})
       : super(id: id, name: name);
@@ -23,13 +28,15 @@ class ProductModel extends BaseModel {
     return data;
   }
 
-  Map<String, dynamic> toDatabaseMap(bool isInOrder) {
+  Map<String, dynamic> toDatabaseMap(
+      {ProductType productType}) {
     Map<String, dynamic> data = Map<String, dynamic>();
     data['code'] = this.id;
     data['name'] = this.name;
     data['quantity'] = this.quantity;
     data['measureUnit'] = this.measureUnit;
-    data['isInOrder'] = isInOrder ? 1 : 0;
+    data['productType'] = productType == ProductType.ORDER ? 1 : 0;
+    data['belongsToOrder'] = this.belongsToOrder ? 1 : 0;
     data['createdAt'] = this.createdAt;
     return data;
   }
@@ -40,8 +47,10 @@ class ProductModel extends BaseModel {
         id: json["code"],
         name: json["name"],
         price: json["price"],
-        quantity: json["quantity"].toDouble(),
+        quantity: (json["quantity"] ?? 0).toDouble(),
         measureUnit: json["measureUnit"],
+        belongsToOrder: json["belongsToOrder"] == 1,
+        productType: json['productType'] == 1 ? ProductType.ORDER : ProductType.RECEPTION,
         createdAt: json['createdAt']);
   }
 }

@@ -80,11 +80,13 @@ class _OrderInputPageState extends State<OrderInputPage> {
             case Status.ERROR:
               StreamSubscription<String> subscriptionError;
               subscriptionError = _bloc.errorOccur.listen((message) {
-                if (message.isNotEmpty)
+                print(message);
+                if (message.isNotEmpty) {
                   Scaffold.of(context).showSnackBar(SnackBar(
                     content: Text(message),
                   ));
-                _bloc.deleteError();
+                  _bloc.deleteError();
+                }
                 subscriptionError.cancel();
               });
           }

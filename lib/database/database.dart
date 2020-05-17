@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:pacointro/models/product_model.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -23,7 +24,7 @@ class DBProvider {
     String path = join(documentsDirectory.path, "paco.db");
     return await openDatabase(
       path,
-      version: 1,
+      version: 4,
       onOpen: (db) {},
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
@@ -37,7 +38,8 @@ class DBProvider {
         "name TEXT,"
         "measureUnit TEXT,"
         "quantity REAL DEFAULT 0,"
-        "isInOrder BIT DEFAULT 0,"
+        "productType BIT,"
+        "belongsToOrder BIT,"
         "createdAt INTEGER"
         ")");
   }
@@ -52,70 +54,89 @@ class DBProvider {
   Future close() async => _database.close();
 
   //PRODUCTS---------------------------------------
-  Future<int> insertProduct(ProductModel product, bool isInOrder) async {
+  Future<int> insertProduct(
+      ProductModel product, ProductType productType) async {
     final db = await database;
-    var raw = await db.insert(tableProducts, product.toDatabaseMap(isInOrder),
+    var raw = await db.insert(
+        tableProducts, product.toDatabaseMap(productType: productType),
         conflictAlgorithm: ConflictAlgorithm.replace);
     return raw;
   }
 
   Future<int> insertBulkProduct(
-      List<ProductModel> products, bool isInOrder) async {
+      List<ProductModel> products, ProductType productType) async {
     final db = await database;
     int count = 0;
     for (ProductModel product in products) {
-//      if(await checkProduct(code: product.id, isInOrder: true))
+//      if(await checkProduct(code: product.id, productType: true))
 //        await deleteProductsByOrderType()
-      int deleted = await deleteProduct(code: product.id, isInOrder: true);
-      var raw = await db.insert(tableProducts, product.toDatabaseMap(isInOrder),
+      int deleted = await deleteProduct(code: product.id, productType: ProductType.ORDER);
+      product.belongsToOrder = true;
+      var raw = await db.insert(
+          tableProducts, product.toDatabaseMap(productType: productType),
           conflictAlgorithm: ConflictAlgorithm.replace);
       if (raw > 0) count++;
     }
     return count;
   }
 
-  Future<int> getCountProductsByOrderType({bool isInOrder}) async {
+  Future<int> getCountProductsByOrderType({ProductType productType}) async {
     final db = await database;
     var res = await db.query(tableProducts,
-        where: "isInOrder = ? ", whereArgs: [(isInOrder ? 1 : 0)]);
+        where: "productType = ? ", whereArgs: [(productType == ProductType.ORDER ? 1 : 0)]);
     return res.length;
   }
 
-  Future<List<ProductModel>> getProductsByOrderType({bool isInOrder}) async {
+  Future<List<ProductModel>> getProductsByOrderType({ProductType productType}) async {
     final db = await database;
     var res = await db.query(tableProducts,
-        where: "isInOrder = ? ", whereArgs: [(isInOrder ? 1 : 0)]);
+        where: "productType = ? ", whereArgs: [(productType == ProductType.ORDER ? 1 : 0)]);
     List<ProductModel> list = res.isNotEmpty
         ? res.map((product) => ProductModel.fromMap(product)).toList()
         : [];
     return list;
   }
 
-  Future<bool> checkProduct({int code, bool isInOrder}) async {
+  Future<List<ProductModel>> getProductsByBarcode(
+      {int code, ProductType productType}) async {
     final db = await database;
     var res = await db.query(tableProducts,
-        where: "code = ? AND isInOrder = ?",
-        whereArgs: [code, (isInOrder ? 1 : 0)]);
+        where: "code = ? AND productType = ?",
+        whereArgs: [code, (productType == ProductType.ORDER ? 1 : 0)]);
+    List<ProductModel> list = res.isNotEmpty
+        ? res.map((product) => ProductModel.fromMap(product)).toList()
+        : [];
+    return list;
+  }
+
+  Future<bool> checkProduct({int code, ProductType productType}) async {
+    final db = await database;
+    var res = await db.query(tableProducts,
+        where: "code = ? AND productType = ?",
+        whereArgs: [code, (productType == ProductType.ORDER ? 1 : 0)]);
     return res.isNotEmpty;
   }
 
-  Future<int> deleteProduct({int code, bool isInOrder}) async {
+  Future<int> deleteProduct({int code, ProductType productType}) async {
     final db = await database;
     return await db.delete(tableProducts,
-        where: "isInOrder = ? AND code = ?",
-        whereArgs: [(isInOrder ? 1 : 0), code]);
+        where: "productType = ? AND code = ?",
+        whereArgs: [(productType == ProductType.ORDER ? 1 : 0), code]);
   }
 
-  Future<int> deleteProductsByOrderType({bool isInOrder}) async {
+  Future<int> deleteProductsByOrderType({ProductType productType}) async {
     final db = await database;
     return await db.delete(tableProducts,
-        where: "isInOrder = ?", whereArgs: [(isInOrder ? 1 : 0)]);
+        where: "productType = ?", whereArgs: [(productType == ProductType.ORDER ? 1 : 0)]);
   }
 
   updateScannedQuantity({ProductModel product}) async {
     final db = await database;
-    var res = await db.update(tableProducts, product.toDatabaseMap(false),
-        where: "id = ?", whereArgs: [product.id]);
+    var res = await db.update(
+        tableProducts, product.toDatabaseMap(productType: ProductType.RECEPTION),
+        where: "code = ? AND productType = ?", whereArgs: [product.id, 0]);
     return res;
   }
 }
+
+enum ProductType {ORDER, RECEPTION}

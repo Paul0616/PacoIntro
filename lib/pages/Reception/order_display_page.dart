@@ -121,9 +121,9 @@ class _OrderDisplayPageState extends State<OrderDisplayPage> {
                                   width: 20,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2,
-                                valueColor:
-                                    AlwaysStoppedAnimation(pacoLightGray),
-                              )),
+                                    valueColor:
+                                        AlwaysStoppedAnimation(pacoLightGray),
+                                  )),
                             );
                             break;
                           case Status.COMPLETED:
@@ -131,11 +131,12 @@ class _OrderDisplayPageState extends State<OrderDisplayPage> {
                             StreamSubscription<String> subscriptionError;
                             subscriptionError =
                                 _bloc.errorOccur.listen((message) {
-                              if (message.isNotEmpty)
+                              if (message.isNotEmpty) {
                                 Scaffold.of(context).showSnackBar(SnackBar(
                                   content: Text(message),
                                 ));
-                              _bloc.deleteError();
+                                _bloc.deleteError();
+                              }
                               subscriptionError.cancel();
                             });
                         }
@@ -202,7 +203,7 @@ class _OrderDisplayPageState extends State<OrderDisplayPage> {
           height: 8,
         ),
         TextFormField(
-          autofocus: true,
+          //autofocus: true,
           onChanged: _bloc.invoiceNumberChanged,
           textInputAction: TextInputAction.done,
           keyboardType: TextInputType.number,
@@ -227,9 +228,7 @@ class _OrderDisplayPageState extends State<OrderDisplayPage> {
           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
             color: pacoLightGray,
-            borderRadius: BorderRadius.all(
-                Radius.circular(25.0)
-                ),
+            borderRadius: BorderRadius.all(Radius.circular(25.0)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -238,23 +237,21 @@ class _OrderDisplayPageState extends State<OrderDisplayPage> {
                 children: <Widget>[
                   Expanded(
                     child: StreamBuilder<String>(
-                      stream: _bloc.invoiceDate,
-                      builder: (context, snapshot) {
-
-                        return Text(
-                          snapshot.hasData ? snapshot.data :'Data facturii:',
-                          style: textStyle.copyWith(
-                            fontSize: 16,
-                          ),
-                        );
-                      }
-                    ),
+                        stream: _bloc.invoiceDate,
+                        builder: (context, snapshot) {
+                          return Text(
+                            snapshot.hasData ? snapshot.data : 'Data facturii:',
+                            style: textStyle.copyWith(
+                              fontSize: 16,
+                            ),
+                          );
+                        }),
                   ),
                   GestureDetector(
-                    onTap: () async{
+                    onTap: () async {
                       print('tap');
                       _bloc.sinkInvoiceDate(await getDate());
-                      },
+                    },
                     child: CircleAvatar(
                       radius: 12,
                       child: Icon(
