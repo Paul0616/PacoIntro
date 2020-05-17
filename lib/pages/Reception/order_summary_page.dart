@@ -45,11 +45,10 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
             showAlert(context, 'Confirmare',
                 'Produsul nu există în Contliv. Vrei să-l recepționezi totuși?',
                 () {
-                  Navigator.of(context).pop();
+              Navigator.of(context).pop();
               final navKey = NavKey.navKey;
               navKey.currentState
                   .pushNamed(InputQuantityPage.route, arguments: result.data);
-
             });
           else if (result.data.name == null)
             showAlert(context, 'Confirmare',
@@ -230,7 +229,22 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
             //currentScan++;
             // _bloc.updateScanningProgress(currentScan);
           },
-        )
+        ),
+        SizedBox(
+          height: 50,
+        ),
+        FlatButton(
+          shape: RoundedRectangleBorder(
+            borderRadius: new BorderRadius.circular(18.0),
+            // side: BorderSide(color: pacoAppBarColor),
+          ),
+          onPressed: () {},
+          disabledColor: pacoAppBarColor.withOpacity(0.5),
+          disabledTextColor: pacoRedDisabledColor,
+          color: pacoAppBarColor,
+          textColor: Colors.white,
+          child: Text('Finalizează recepție'),
+        ),
       ],
     );
   }

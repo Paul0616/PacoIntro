@@ -161,9 +161,14 @@ class _CheckProductsPageState extends State<CheckProductsPage> {
               onPressed: () {
                 _bloc.scan(SearchType.BY_CODE);
               },
-              icon: Icon(Icons.scanner),
+              shape: StadiumBorder(),
+              color: pacoAppBarColor,
+              icon: Icon(
+                Icons.scanner,
+                color: pacoLightGray,
+              ),
               label: Text("Scanare produs",
-                  style: textStyle.copyWith(color: Colors.black87)),
+                  style: textStyleBold.copyWith(color: pacoLightGray)),
             ),
           ),
           SizedBox(
@@ -180,9 +185,14 @@ class _CheckProductsPageState extends State<CheckProductsPage> {
                 navKey.currentState.pushNamed(ManualSearchingPage.route,
                     arguments: SearchType.BY_CODE);
               },
-              icon: Icon(Icons.search),
+              shape: StadiumBorder(),
+              color: Colors.orangeAccent,
+              icon: Icon(
+                Icons.search,
+                color: pacoLightGray,
+              ),
               label: Text("Cautare manuala produs dupa cod",
-                  style: textStyle.copyWith(color: Colors.black87)),
+                  style: textStyleBold.copyWith(color: pacoLightGray)),
             ),
           ),
           SizedBox(
@@ -199,9 +209,14 @@ class _CheckProductsPageState extends State<CheckProductsPage> {
                 navKey.currentState.pushNamed(ManualSearchingPage.route,
                     arguments: SearchType.BY_NAME);
               },
-              icon: Icon(Icons.search),
+              shape: StadiumBorder(),
+              color: Colors.orangeAccent,
+              icon: Icon(
+                Icons.search,
+                color: pacoLightGray,
+              ),
               label: Text("Cautare manuala produs dupa nume",
-                  style: textStyle.copyWith(color: Colors.black87)),
+                  style: textStyleBold.copyWith(color: pacoLightGray)),
             ),
           ),
         ],

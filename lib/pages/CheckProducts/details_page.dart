@@ -27,7 +27,6 @@ class _DetailsPageState extends State<DetailsPage> {
     super.didChangeDependencies();
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -74,7 +73,14 @@ class _DetailsPageState extends State<DetailsPage> {
                               ),
                             ),
                             MaterialButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                showAlert(context, 'Confirmare',
+                                    'Produsul va fi trimis la coș cu eticheta \"DENUMIRE INCORECTĂ\". Vrei să faci asta?',
+                                    () {
+                                  print('TAP');
+                                  Navigator.of(context).pop();
+                                });
+                              },
                               color: Colors.white,
                               elevation: 4,
                               child: Text('LA COS'),
@@ -167,7 +173,14 @@ class _DetailsPageState extends State<DetailsPage> {
                                       ),
                                     ),
                                     MaterialButton(
-                                      onPressed: () {},
+                                      onPressed: () {
+                                        showAlert(context, 'Confirmare',
+                                            'Produsul va fi trimis la coș cu eticheta \"DATA ULTIMEI INTRARI INCORECTĂ\". Vrei să faci asta?',
+                                            () {
+                                          print('TAP');
+                                          Navigator.of(context).pop();
+                                        });
+                                      },
                                       color: Colors.white,
                                       elevation: 4,
                                       child: Text('LA COS'),
@@ -217,60 +230,93 @@ class _DetailsPageState extends State<DetailsPage> {
                                             MainAxisAlignment.spaceBetween,
                                         children: <Widget>[
                                           StreamBuilder<DateTime>(
-                                            stream: _bloc.startDate,
-                                            builder: (context, snapshotStartDate) {
-                                              return GestureDetector(
-                                                onTap: () async {
-                                                  _bloc.sinkStartDate(await getDate(initialDate: snapshotStartDate.data??DateTime.now()));
-                                                },
-                                                child: Container(
-                                                  padding: EdgeInsets.all(8),
-                                                  decoration: BoxDecoration(border: Border.all(color: pacoRedDisabledColor, width: 1.0)),
-                                                  child: Text(
-                                                    DateFormat('dd.MM.yyyy').format(
-                                                        snapshotStartDate.data??DateTime.now()),
-                                                    style: textStyle.copyWith(
-                                                        fontWeight: FontWeight.w700,
-                                                        fontSize: 18,
-                                                        color: pacoAppBarColor),
+                                              stream: _bloc.startDate,
+                                              builder:
+                                                  (context, snapshotStartDate) {
+                                                return GestureDetector(
+                                                  onTap: () async {
+                                                    _bloc.sinkStartDate(
+                                                        await getDate(
+                                                            initialDate:
+                                                                snapshotStartDate
+                                                                        .data ??
+                                                                    DateTime
+                                                                        .now()));
+                                                  },
+                                                  child: Container(
+                                                    padding: EdgeInsets.all(8),
+                                                    decoration: BoxDecoration(
+                                                        border: Border.all(
+                                                            color:
+                                                                pacoRedDisabledColor,
+                                                            width: 1.0)),
+                                                    child: Text(
+                                                      DateFormat('dd.MM.yyyy')
+                                                          .format(
+                                                              snapshotStartDate
+                                                                      .data ??
+                                                                  DateTime
+                                                                      .now()),
+                                                      style: textStyle.copyWith(
+                                                          fontWeight:
+                                                              FontWeight.w700,
+                                                          fontSize: 18,
+                                                          color:
+                                                              pacoAppBarColor),
+                                                    ),
                                                   ),
-                                                ),
-                                              );
-                                            }
-                                          ),
-
+                                                );
+                                              }),
                                           StreamBuilder<DateTime>(
-                                            stream: _bloc.endDate,
-                                            builder: (context, snapshotEndDate) {
-                                              return GestureDetector(
-                                                onTap:() async{
-                                                  _bloc.sinkEndDate(await getDate(initialDate: snapshotEndDate.data??DateTime.now()));
-                                                },
-                                                child: Container(
-                                                  padding: EdgeInsets.all(8),
-                                                  decoration: BoxDecoration(border: Border.all(color: pacoRedDisabledColor, width: 1.0)),
-                                                  child: Text(
-                                                    DateFormat('dd.MM.yyyy').format(
-                                                        snapshotEndDate.data??DateTime.now()),
-                                                    style: textStyle.copyWith(
-                                                        fontWeight: FontWeight.w700,
-                                                        fontSize: 18,
-                                                        color: pacoAppBarColor),
+                                              stream: _bloc.endDate,
+                                              builder:
+                                                  (context, snapshotEndDate) {
+                                                return GestureDetector(
+                                                  onTap: () async {
+                                                    _bloc.sinkEndDate(
+                                                        await getDate(
+                                                            initialDate:
+                                                                snapshotEndDate
+                                                                        .data ??
+                                                                    DateTime
+                                                                        .now()));
+                                                  },
+                                                  child: Container(
+                                                    padding: EdgeInsets.all(8),
+                                                    decoration: BoxDecoration(
+                                                        border: Border.all(
+                                                            color:
+                                                                pacoRedDisabledColor,
+                                                            width: 1.0)),
+                                                    child: Text(
+                                                      DateFormat('dd.MM.yyyy')
+                                                          .format(
+                                                              snapshotEndDate
+                                                                      .data ??
+                                                                  DateTime
+                                                                      .now()),
+                                                      style: textStyle.copyWith(
+                                                          fontWeight:
+                                                              FontWeight.w700,
+                                                          fontSize: 18,
+                                                          color:
+                                                              pacoAppBarColor),
+                                                    ),
                                                   ),
-                                                ),
-                                              );
-                                            }
-                                          ),
-
+                                                );
+                                              }),
                                           MaterialButton(
-                                            onPressed: (){
+                                            onPressed: () {
                                               print('refresh');
                                               _bloc.refreshSales();
                                             },
                                             child: CircleAvatar(
                                               radius: 20,
                                               backgroundColor: pacoAppBarColor,
-                                              child: Icon(Icons.refresh, color: pacoLightGray,),
+                                              child: Icon(
+                                                Icons.refresh,
+                                                color: pacoLightGray,
+                                              ),
                                             ),
                                           ),
                                         ]),
@@ -316,7 +362,14 @@ class _DetailsPageState extends State<DetailsPage> {
                                           ),
                                         ),
                                         MaterialButton(
-                                          onPressed: () {},
+                                          onPressed: () {
+                                            showAlert(context, 'Confirmare',
+                                                'Produsul va fi trimis la coș cu eticheta \"VÂNZARE ÎN PERIOADĂ INCORECTĂ\". Vrei să faci asta?',
+                                                () {
+                                              print('TAP');
+                                              Navigator.of(context).pop();
+                                            });
+                                          },
                                           color: Colors.white,
                                           elevation: 4,
                                           child: Text('LA COS'),
@@ -391,12 +444,45 @@ class _DetailsPageState extends State<DetailsPage> {
           ),
         ),
         MaterialButton(
-          onPressed: () {},
+          onPressed: () {
+            showAlert(context, 'Confirmare',
+                'Produsul va fi trimis la coș cu eticheta \"STOC INCORECT\". Vrei să faci asta?',
+                () {
+              print('TAP');
+              Navigator.of(context).pop();
+            });
+          },
           color: Colors.white,
           elevation: 4,
           child: Text('LA COS'),
         ),
       ],
+    );
+  }
+
+  Future<void> showAlert(
+      BuildContext context, String title, String content, Function onPressed) {
+    return showDialog<void>(
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title ?? ''),
+          content: Text(content ?? ''),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('OK'),
+              onPressed: onPressed,
+            ),
+            FlatButton(
+              child: Text('Renunță'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 
