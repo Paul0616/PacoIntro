@@ -39,6 +39,7 @@ class MainBloc implements BaseBloc {
     //*********************************
     _currentLocationController.stream
         .listen((location) => print(location.name));
+    //*********************************
     _barcodeController.stream.listen((response) {
       if (response.status == Status.COMPLETED) {
         //print("Barcode: ${response.data}");

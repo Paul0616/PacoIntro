@@ -52,7 +52,7 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
             });
           else if (result.data.name == null)
             showAlert(context, 'Confirmare',
-                'Produsul scanat nu se regăsește pe comnadă. Vrei să-l caut în ContLiv?',
+                'Produsul scanat nu se regăsește pe comandă. Vrei să-l caut în ContLiv?',
                 () {
               _bloc.getProductFromApi(result.data.id.toString());
               Navigator.of(context).pop();
@@ -62,6 +62,10 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
             navKey.currentState
                 .pushNamed(InputQuantityPage.route, arguments: result.data);
           }
+        } else {
+          final navKey = NavKey.navKey;
+          navKey.currentState
+              .pushNamed(InputQuantityPage.route, arguments: result.data);
         }
       }
     });
