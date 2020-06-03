@@ -178,7 +178,9 @@ class _ListProductsPageState extends State<ListProductsPage> {
               ),
               isReceivedItems
                   ? MaterialButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        _bloc.deleteProduct(product);
+                      },
                       padding: EdgeInsets.all(8),
                       minWidth: 0,
                       child: Icon(

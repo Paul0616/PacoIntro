@@ -288,6 +288,12 @@ class MainBloc implements BaseBloc {
       _currentLocationController.sink.add(_currentLocation);
   }
 
+  deleteProduct(BalanceItemModel product) async {
+    await DBProvider.db.deleteProduct(code: product.barcode, productType: ProductType.RECEPTION);
+    getScannedProducts();
+    _getOrdersCount();
+  }
+
   _getProductNameAndPrice(String barcode, bool searchByName) async {
     _productsListController.sink.add(await _repository.getProduct(
         code: barcode,
