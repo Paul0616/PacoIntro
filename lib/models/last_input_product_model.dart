@@ -8,9 +8,9 @@ class LastInputProductModel extends BaseModel {
 
   factory LastInputProductModel.fromMap(Map<String, dynamic> json) {
     return LastInputProductModel(
-      id: json["code"],
-      name: json["name"],
-      lastInputDate: DateTime.tryParse(json['lastInputDate']),
+      id: (json["COD"] is int) ? json["COD"] : int.parse(json["COD"]),
+      name: json["DENUMIRE"],
+      lastInputDate: DateTime.tryParse(json['LASTINPUTDATE']),
     );
   }
 }

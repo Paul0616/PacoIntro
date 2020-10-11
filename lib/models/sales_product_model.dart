@@ -17,12 +17,15 @@ class SalesProductModel extends BaseModel {
 
   factory SalesProductModel.fromMap(Map<String, dynamic> json) {
     return SalesProductModel(
-        id: json["code"],
-        name: json["name"],
-        sales: json["sales"],
-        measureUnit: json["measureUnit"],
-        startIntervalStockDate:
-            DateTime.tryParse(json['startIntervalStockDate']),
-        endIntervalStockDate: DateTime.tryParse(json['endIntervalStockDate']));
+        id: json["COD"],
+        name: json["DENUMIRE"],
+        sales: json["CANTITATE"].toDouble(),
+        measureUnit: json["UM"],
+        startIntervalStockDate: json['startIntervalStockDate'] != null
+            ? DateTime.tryParse(json['startIntervalStockDate'])
+            : null,
+        endIntervalStockDate: json['endIntervalStockDate'] != null
+            ? DateTime.tryParse(json['endIntervalStockDate'])
+            : null);
   }
 }

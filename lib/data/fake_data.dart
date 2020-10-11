@@ -1,28 +1,29 @@
-const String fakeUsers = '[{"id": 1, "name": "paul", '
-    '"locations": '
+const String fakeUser1 = '{"ID": 1, "NUME UTILIZATOR": "paul", '
+    '"LOCATII": '
     '['
-    '{"id": 1, "name":"GARA_MARKET", "fiscalCode": 8017008.09, "debit":"3719"}, '
-    '{"id": 2, "name":"PACO_DEPOZIT", "fiscalCode": 8017008.10, "debit":"37110"}, '
-    '{"id": 3, "name":"BAHNE_MARKET", "fiscalCode": 8017008.05, "debit":"3715"}, '
-    '{"id": 4, "name":"CETRAL_MARKET", "fiscalCode": 8017008.06, "debit":"3716"}, '
-    '{"id": 5, "name":"STEJARI2_MARKET", "fiscalCode": 8017008.08, "debit":"3718"}, '
-    '{"id": 6, "name":"SUD_MARKET", "fiscalCode": 8017008.07, "debit":"3717"}, '
-    '{"id": 7, "name":"UNIRII_MARKET", "fiscalCode": 8017008.03, "debit":"3713"}, '
-    '{"id": 8, "name":"PACO_MARKET", "fiscalCode": 8017008.99, "debit":"3710"}, '
-    '{"id": 12, "name":"CUZA_MARKET", "fiscalCode": 8017008.11, "debit":"37111"}, '
-    '{"id": 13, "name":"VIDRA_MARKET", "fiscalCode": 8017008.13, "debit":"37113"}, '
-    '{"id": 14, "name":"JARISTEA_MARKET", "fiscalCode": 8017008.12, "debit":"37112"} '
-    ']},'
-    '{"id": 1, "name": "tinel", '
-    '"locations": '
-    '[{"id": 1, "name":"PETRESTI_MARKET", "fiscalCode": 8017008.17, "debit":"37117"}]}]';
+    '{"ID": 1, "NUME GESTIUNE":"GARA_MARKET", "COD FISCAL": 8017008.09, "DEBIT":"3719"}, '
+    '{"ID": 2, "NUME GESTIUNE":"PACO_DEPOZIT", "COD FISCAL": 8017008.10, "DEBIT":"37110"}, '
+    '{"ID": 3, "NUME GESTIUNE":"BAHNE_MARKET", "COD FISCAL": 8017008.05, "DEBIT":"3715"}, '
+    '{"ID": 4, "NUME GESTIUNE":"CETRAL_MARKET", "COD FISCAL": 8017008.06, "DEBIT":"3716"}, '
+    '{"ID": 5, "NUME GESTIUNE":"STEJARI2_MARKET", "COD FISCAL": 8017008.08, "DEBIT":"3718"}, '
+    '{"ID": 6, "NUME GESTIUNE":"SUD_MARKET", "COD FISCAL": 8017008.07, "DEBIT":"3717"}, '
+    '{"ID": 7, "NUME GESTIUNE":"UNIRII_MARKET", "COD FISCAL": 8017008.03, "DEBIT":"3713"}, '
+    '{"ID": 8, "NUME GESTIUNE":"PACO_MARKET", "COD FISCAL": 8017008.99, "DEBIT":"3710"}, '
+    '{"ID": 12, "NUME GESTIUNE":"CUZA_MARKET", "COD FISCAL": 8017008.11, "DEBIT":"37111"}, '
+    '{"ID": 13, "NUME GESTIUNE":"VIDRA_MARKET", "COD FISCAL": 8017008.13, "DEBIT":"37113"}, '
+    '{"ID": 14, "NUME GESTIUNE":"JARISTEA_MARKET", "COD FISCAL": 8017008.12, "DEBIT":"37112"} '
+    ']}';
+const String fakeUser2 = '{"ID": 1, "NUME UTILIZATOR": "tinel", '
+    '"LOCATII": '
+    '[{"ID": 1, "NUME GESTIUNE":"PETRESTI_MARKET", "COD FISCAL": 8017008.17, "DEBIT":"37117"}]}';
 
-const String products = '['
-    '{"code": 5942326400131, "name":"APA CARPATICA PLATA 2L", "price":2.99, "measureUnit":"BUC"},'
-    '{"code": 9002859037566, "name":"PRALINE CIOC.ASORTATA 180G MF", "price":5.99, "measureUnit":"BUC"},'
-    '{"code": 1, "name":"PORTOCALE", "price":3.49, "measureUnit":"KG"},'
-    '{"code": 12345670, "name":"PATE DE FICAT DELISAN 150g", "price":0.99, "measureUnit":"BUC"}'
-    ']';
+const String products =
+    '{"current_page":1, "last_page": 1, "next_page_url": null, "data":['
+    '{"COD": 5942326400131, "DENUMIRE":"APA CARPATICA PLATA 2L", "PRET":2.99, "UM":"BUC"},'
+    '{"COD": 9002859037566, "DENUMIRE":"PRALINE CIOC.ASORTATA 180G MF", "PRET":5.99, "UM":"BUC"},'
+    '{"COD": 1, "DENUMIRE":"PORTOCALE", "PRET":3.49, "UM":"KG"},'
+    '{"COD": 12345670, "DENUMIRE":"PATE DE FICAT DELISAN 150g", "PRET":0.99, "UM":"BUC"}'
+    ']}';
 
 const String stockAtDate =
     '{"code": 5942326400131, "name":"APA CARPATICA PLATA 2L", "stock":105.00, "stockDate":"2020-04-16", "measureUnit":"BUC"}';

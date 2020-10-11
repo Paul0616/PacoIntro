@@ -24,7 +24,7 @@ class DBProvider {
     String path = join(documentsDirectory.path, "paco.db");
     return await openDatabase(
       path,
-      version: 4,
+      version: 6,
       onOpen: (db) {},
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
@@ -33,7 +33,7 @@ class DBProvider {
 
   _onCreate(Database db, int version) async {
     await db.execute("CREATE TABLE $tableProducts ("
-        "id TEXT PRIMARY KEY,"
+        "id INTEGER PRIMARY KEY AUTOINCREMENT,"
         "code INTEGER,"
         "name TEXT,"
         "measureUnit TEXT,"
@@ -70,8 +70,9 @@ class DBProvider {
     for (ProductModel product in products) {
 //      if(await checkProduct(code: product.id, productType: true))
 //        await deleteProductsByOrderType()
-      int deleted = await deleteProduct(code: product.id, productType: ProductType.ORDER);
+      //int deleted = await deleteProduct(code: product.id, productType: ProductType.ORDER);
       product.belongsToOrder = true;
+      product.createdAt = DateTime.now().millisecondsSinceEpoch;
       var raw = await db.insert(
           tableProducts, product.toDatabaseMap(productType: productType),
           conflictAlgorithm: ConflictAlgorithm.replace);
@@ -83,16 +84,20 @@ class DBProvider {
   Future<int> getCountProductsByOrderType({ProductType productType}) async {
     final db = await database;
     var res = await db.query(tableProducts,
-        where: "productType = ? ", whereArgs: [(productType == ProductType.ORDER ? 1 : 0)]);
+        where: "productType = ? ",
+        whereArgs: [(productType == ProductType.ORDER ? 1 : 0)]);
     return res.length;
   }
 
-  Future<List<ProductModel>> getProductsByOrderType({ProductType productType}) async {
+  Future<List<ProductModel>> getProductsByOrderType(
+      {ProductType productType}) async {
     final db = await database;
     var res = await db.query(tableProducts,
-        where: "productType = ? ", whereArgs: [(productType == ProductType.ORDER ? 1 : 0)]);
+        where: "productType = ? ",
+        whereArgs: [(productType == ProductType.ORDER ? 1 : 0)],
+        orderBy: "name");
     List<ProductModel> list = res.isNotEmpty
-        ? res.map((product) => ProductModel.fromMap(product)).toList()
+        ? res.map((product) => ProductModel.fromDatabase(product)).toList()
         : [];
     return list;
   }
@@ -104,7 +109,7 @@ class DBProvider {
         where: "code = ? AND productType = ?",
         whereArgs: [code, (productType == ProductType.ORDER ? 1 : 0)]);
     List<ProductModel> list = res.isNotEmpty
-        ? res.map((product) => ProductModel.fromMap(product)).toList()
+        ? res.map((product) => ProductModel.fromDatabase(product)).toList()
         : [];
     return list;
   }
@@ -127,16 +132,22 @@ class DBProvider {
   Future<int> deleteProductsByOrderType({ProductType productType}) async {
     final db = await database;
     return await db.delete(tableProducts,
-        where: "productType = ?", whereArgs: [(productType == ProductType.ORDER ? 1 : 0)]);
+        where: "productType = ?",
+        whereArgs: [(productType == ProductType.ORDER ? 1 : 0)]);
+  }
+
+  Future<int> deleteAllFromTable() async {
+    final db = await database;
+    return await db.rawDelete("DELETE FROM $tableProducts");
   }
 
   updateScannedQuantity({ProductModel product}) async {
     final db = await database;
-    var res = await db.update(
-        tableProducts, product.toDatabaseMap(productType: ProductType.RECEPTION),
+    var res = await db.update(tableProducts,
+        product.toDatabaseMap(productType: ProductType.RECEPTION),
         where: "code = ? AND productType = ?", whereArgs: [product.id, 0]);
     return res;
   }
 }
 
-enum ProductType {ORDER, RECEPTION}
+enum ProductType { ORDER, RECEPTION }

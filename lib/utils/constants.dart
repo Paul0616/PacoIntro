@@ -43,6 +43,8 @@ TextStyle textStyleWhite =
   PREFERENCES KEYS
  -----------------------*/
 const String userKey = 'user';
+const String passwordKey = 'password';
+const String tokenKey = 'apiKey';
 const String currentLocationKey = 'currentLocation';
 const String orderCountKey = 'orderCount';
 
@@ -50,3 +52,62 @@ const String orderCountKey = 'orderCount';
   ENUMS
  -----------------------*/
 enum SearchType { BY_CODE, BY_NAME, FROM_RECEPTION }
+enum ProductStatus {
+  WRONG_PRICE,
+  WRONG_NAME,
+  WRONG_STOCK,
+  WRONG_INPUT_DATE,
+  WRONG_SALE_IN_PERIOD
+}
+enum CallId {
+  TOKEN_CALL,
+  CHECK_USER_CALL,
+  GET_PRODUCTS_CALL,
+  PRODUCT_WITH_ISSUE_CALL,
+  GET_DETAILS_CALL,
+  GET_LAST_INPUT_CALL,
+  GET_SALE_IN_PERIOD_CALL,
+  GET_ORDER_BY_NUMBER
+}
+
+int productStatus(ProductStatus productStatus) =>
+    ProductStatus.values
+        .asMap()
+        .entries
+        .where((element) => element.value == productStatus)
+        .first
+        .key +
+    1;
+
+Future<void> dialogAlert(BuildContext context, String title, Widget child,
+    {Function onPressedPositive, Function onPressedNegative}) {
+  return showDialog<void>(
+    barrierDismissible: false,
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text(title ?? ''),
+        content: child,
+        actions: <Widget>[
+          onPressedNegative != null
+              ? RaisedButton(
+                  shape:
+                      StadiumBorder(side: BorderSide(color: pacoAppBarColor)),
+                  color: Colors.white,
+                  textColor: Colors.white,
+                  child: Text('Renunță'),
+                  onPressed: onPressedNegative,
+                )
+              : Container(),
+          RaisedButton(
+            shape: StadiumBorder(side: BorderSide(color: pacoAppBarColor)),
+            color: Colors.white,
+            textColor: pacoAppBarColor,
+            child: Text("OK"),
+            onPressed: onPressedPositive,
+          ),
+        ],
+      );
+    },
+  );
+}

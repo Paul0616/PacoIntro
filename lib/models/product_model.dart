@@ -28,8 +28,7 @@ class ProductModel extends BaseModel {
     return data;
   }
 
-  Map<String, dynamic> toDatabaseMap(
-      {ProductType productType}) {
+  Map<String, dynamic> toDatabaseMap({ProductType productType}) {
     Map<String, dynamic> data = Map<String, dynamic>();
     data['code'] = this.id;
     data['name'] = this.name;
@@ -41,16 +40,30 @@ class ProductModel extends BaseModel {
     return data;
   }
 
+  factory ProductModel.fromDatabase(Map<String, dynamic> json) {
+    return ProductModel(
+      id: json["code"],
+      name: json["name"],
+      price: (json["price"] ?? 0).toDouble(),
+      quantity: json["quantity"] ?? 0,
+      measureUnit: json["measureUnit"],
+      belongsToOrder: json["belongsToOrder"] == 1,
+      productType:
+          json['productType'] == 1 ? ProductType.ORDER : ProductType.RECEPTION,
+    );
+  }
+
   factory ProductModel.fromMap(Map<String, dynamic> json) {
     // double q = json["quantity"].toDouble();
     return ProductModel(
-        id: json["code"],
-        name: json["name"],
-        price: json["price"],
-        quantity: (json["quantity"] ?? 0).toDouble(),
-        measureUnit: json["measureUnit"],
-        belongsToOrder: json["belongsToOrder"] == 1,
-        productType: json['productType'] == 1 ? ProductType.ORDER : ProductType.RECEPTION,
-        createdAt: json['createdAt']);
+      id: json["COD"],
+      name: json["DENUMIRE"],
+      price: (json["PRET"] ?? 0).toDouble(),
+      quantity: json["CANTITATE"] ?? 0,
+      measureUnit: json["UM"],
+      belongsToOrder: json["belongsToOrder"] == 1,
+      productType:
+          json['productType'] == 1 ? ProductType.ORDER : ProductType.RECEPTION,
+    );
   }
 }

@@ -15,7 +15,7 @@ import 'package:pacointro/models/stock_product_model.dart';
 import 'package:pacointro/pages/CheckProducts/details_page.dart';
 import 'package:pacointro/pages/CheckProducts/price_page.dart';
 import 'package:pacointro/pages/Reception/order_display_page.dart';
-import 'package:pacointro/repository/api_response.dart';
+import 'package:pacointro/repository/api_response1.dart';
 import 'package:pacointro/repository/fake_repository.dart';
 import 'package:pacointro/utils/constants.dart';
 import 'package:pacointro/utils/nav_key.dart';
@@ -62,22 +62,22 @@ class MainBloc implements BaseBloc {
           if (response.data.length > 1)
             print('multiple products');
           else {
-            setCurrentProduct(ApiResponse.completed(response.data.first));
+            setCurrentProduct(ApiResponse1.completed(response.data.first));
             navKey.currentState.popAndPushNamed(PricePage.route);
           }
         } else {
-          setCurrentProduct(ApiResponse.completed(response.data.first));
+          setCurrentProduct(ApiResponse1.completed(response.data.first));
           navKey.currentState.pushNamed(PricePage.route);
         }
       }
       if (response != null && response.status == Status.ERROR) {
         print('--------------ERROR ${response.message}');
-        setCurrentProduct(ApiResponse.error(response.message));
+        setCurrentProduct(ApiResponse1.error(response.message));
         _errorController.sink.add(response.message);
       }
       if (response != null && response.status == Status.LOADING) {
         print('--------------LOADING ${response.message}');
-        setCurrentProduct(ApiResponse.error(response.message));
+        setCurrentProduct(ApiResponse1.error(response.message));
       }
     });
     //*********************************
@@ -127,31 +127,32 @@ class MainBloc implements BaseBloc {
    ********************************************************/
   var _currentLocationController = PublishSubject<LocationModel>();
 
-  var _barcodeController = BehaviorSubject<ApiResponse<BarcodeSearch>>();
+  var _barcodeController = BehaviorSubject<ApiResponse1<BarcodeSearch>>();
   var _productsListController =
-      BehaviorSubject<ApiResponse<List<ProductModel>>>();
-  var _currentProductController = BehaviorSubject<ApiResponse<ProductModel>>();
+      BehaviorSubject<ApiResponse1<List<ProductModel>>>();
+  var _currentProductController = BehaviorSubject<ApiResponse1<ProductModel>>();
   var _stockAndDateController =
-      BehaviorSubject<ApiResponse<StockProductModel>>();
+      BehaviorSubject<ApiResponse1<StockProductModel>>();
   var _lastInputController =
-      BehaviorSubject<ApiResponse<LastInputProductModel>>();
-  var _salesController = BehaviorSubject<ApiResponse<SalesProductModel>>();
+      BehaviorSubject<ApiResponse1<LastInputProductModel>>();
+  var _salesController = BehaviorSubject<ApiResponse1<SalesProductModel>>();
   var _errorController = BehaviorSubject<String>();
   var _searchEnableForProductController = PublishSubject<bool>();
   var _loadOrderValidationController = PublishSubject<bool>();
 
   var _startDateController = BehaviorSubject<DateTime>();
   var _endDateController = BehaviorSubject<DateTime>();
-  var _orderController = BehaviorSubject<ApiResponse<OrderModel>>();
-  var _ordersCountController = BehaviorSubject<ApiResponse<int>>();
+  var _orderController = BehaviorSubject<ApiResponse1<OrderModel>>();
+  var _ordersCountController = BehaviorSubject<ApiResponse1<int>>();
   var _invoiceNumberController = PublishSubject<String>();
   var _invoiceDateController = PublishSubject<DateTime>();
   var _scanningProgressController = BehaviorSubject<ProgressModel>();
-  var _orderItemsController = PublishSubject<ApiResponse<List<ProductModel>>>();
+  var _orderItemsController =
+      PublishSubject<ApiResponse1<List<ProductModel>>>();
   var _balanceItemsController =
-      BehaviorSubject<ApiResponse<List<BalanceItemModel>>>();
+      BehaviorSubject<ApiResponse1<List<BalanceItemModel>>>();
   var _receivedItemsController =
-      BehaviorSubject<ApiResponse<List<BalanceItemModel>>>();
+      BehaviorSubject<ApiResponse1<List<BalanceItemModel>>>();
   var _quantityReceivedController = PublishSubject<String>();
 
   /* *******************************************************
@@ -160,21 +161,21 @@ class MainBloc implements BaseBloc {
   Stream<LocationModel> get currentLocationStream =>
       _currentLocationController.stream;
 
-  Stream<ApiResponse<ProductModel>> get currentProductStream =>
+  Stream<ApiResponse1<ProductModel>> get currentProductStream =>
       _currentProductController.stream;
 
-  Stream<ApiResponse<List<ProductModel>>> get currentProductList =>
+  Stream<ApiResponse1<List<ProductModel>>> get currentProductList =>
       _productsListController.stream;
 
   Stream<String> get errorOccur => _errorController.stream;
 
-  Stream<ApiResponse<StockProductModel>> get currentStockStream =>
+  Stream<ApiResponse1<StockProductModel>> get currentStockStream =>
       _stockAndDateController.stream;
 
-  Stream<ApiResponse<LastInputProductModel>> get currentLastInputStream =>
+  Stream<ApiResponse1<LastInputProductModel>> get currentLastInputStream =>
       _lastInputController.stream;
 
-  Stream<ApiResponse<SalesProductModel>> get currentSalesStream =>
+  Stream<ApiResponse1<SalesProductModel>> get currentSalesStream =>
       _salesController.stream;
 
   Stream<bool> get enableSearchProduct =>
@@ -186,9 +187,9 @@ class MainBloc implements BaseBloc {
 
   Stream<DateTime> get endDate => _endDateController.stream;
 
-  Stream<ApiResponse<OrderModel>> get order => _orderController.stream;
+  Stream<ApiResponse1<OrderModel>> get order => _orderController.stream;
 
-  Stream<ApiResponse<int>> get ordersCount => _ordersCountController.stream;
+  Stream<ApiResponse1<int>> get ordersCount => _ordersCountController.stream;
 
   Stream<String> get invoiceNumber => _invoiceNumberController.stream.transform(
         StreamTransformer<String, String>.fromHandlers(
@@ -229,10 +230,10 @@ class MainBloc implements BaseBloc {
   Stream<ProgressModel> get scanningProgress =>
       _scanningProgressController.stream;
 
-  Stream<ApiResponse<List<BalanceItemModel>>> get balancedItems =>
+  Stream<ApiResponse1<List<BalanceItemModel>>> get balancedItems =>
       _balanceItemsController.stream;
 
-  Stream<ApiResponse<List<BalanceItemModel>>> get receivedItems =>
+  Stream<ApiResponse1<List<BalanceItemModel>>> get receivedItems =>
       _receivedItemsController.stream;
 
   /* *******************************************************
@@ -279,7 +280,7 @@ class MainBloc implements BaseBloc {
       product = products.first;
     }
 
-    _currentProductController.sink.add(ApiResponse.completed(product));
+    _currentProductController.sink.add(ApiResponse1.completed(product));
   }
 
   getCurrentLocation() async {
@@ -289,78 +290,78 @@ class MainBloc implements BaseBloc {
   }
 
   deleteProduct(BalanceItemModel product) async {
-    await DBProvider.db.deleteProduct(code: product.barcode, productType: ProductType.RECEPTION);
+    await DBProvider.db.deleteProduct(
+        code: product.barcode, productType: ProductType.RECEPTION);
     getScannedProducts();
     _getOrdersCount();
   }
 
   _getProductNameAndPrice(String barcode, bool searchByName) async {
-    _productsListController.sink.add(await _repository.getProduct(
-        code: barcode,
-        debit: _currentLocation.debit,
-        searchByName: searchByName));
+    // _productsListController.sink.add(await _repository.getProduct(
+    //     code: barcode,
+    //     debit: _currentLocation.debit,
+    //     searchByName: searchByName));
   }
 
   getProductFromApi(String barcode) async {
-    _currentProductController.sink.add(ApiResponse.loading("loading"));
-    var result = await _repository.getProduct(
-        code: barcode, debit: _currentLocation.debit, searchByName: false);
-    if (result.status == Status.ERROR) {
-      _currentProductController.sink.add(ApiResponse.completed(ProductModel(
-          id: int.tryParse(barcode),
-          belongsToOrder: false,
-          measureUnit: 'BUC',
-          productType: ProductType.ORDER,
-          name: 'Produs inexistent în Contliv')));
-      return;
-    }
-    if (result.status == Status.COMPLETED) {
-      ProductModel product = result.data.first;
-      product.belongsToOrder = false;
-      product.productType = ProductType.ORDER;
-      _currentProductController.sink
-          .add(ApiResponse.completed(product));
-    }
+    // _currentProductController.sink.add(ApiResponse1.loading("loading"));
+    // var result = await _repository.getProduct(
+    //     code: barcode, debit: _currentLocation.debit, searchByName: false);
+    // if (result.status == Status.ERROR) {
+    //   _currentProductController.sink.add(ApiResponse1.completed(ProductModel(
+    //       id: int.tryParse(barcode),
+    //       belongsToOrder: false,
+    //       measureUnit: 'BUC',
+    //       productType: ProductType.ORDER,
+    //       name: 'Produs inexistent în Contliv')));
+    //   return;
+    // }
+    // if (result.status == Status.COMPLETED) {
+    //   ProductModel product = result.data.first;
+    //   product.belongsToOrder = false;
+    //   product.productType = ProductType.ORDER;
+    //   _currentProductController.sink.add(ApiResponse1.completed(product));
+    // }
   }
 
   _getStockAndDate(String barcode) async {
-    _stockAndDateController.sink.add(ApiResponse.loading("loading"));
-    _stockAndDateController.sink.add(await _repository.getStockAndDate(
-        code: barcode, debit: _currentLocation.debit));
+    _stockAndDateController.sink.add(ApiResponse1.loading("loading"));
+    // _stockAndDateController.sink.add(await _repository.getStockAndDate(
+    //     code: barcode, debit: _currentLocation.debit));
   }
 
   _getLastInput(String barcode) async {
-    _lastInputController.sink.add(ApiResponse.loading('loading'));
-    _lastInputController.sink.add(await _repository.getLastInputDate(
-        code: barcode, debit: _currentLocation.debit));
+    _lastInputController.sink.add(ApiResponse1.loading('loading'));
+    // _lastInputController.sink.add(await _repository.getLastInputDate(
+    //     code: barcode, debit: _currentLocation.debit));
   }
 
   _getSales(String barcode, DateTime startDate, DateTime endDate) async {
-    _salesController.sink.add(ApiResponse.loading('loading'));
+    _salesController.sink.add(ApiResponse1.loading('loading'));
     _startDateController.sink.add(startDate);
     _endDateController.sink.add(endDate);
-    _salesController.sink.add(await _repository.getSalesInPeriod(
-        code: barcode,
-        debit: _currentLocation.debit,
-        startDate: startDate,
-        endDate: endDate));
+    // _salesController.sink.add(await _repository.getSalesInPeriod(
+    //     code: barcode,
+    //     debit: _currentLocation.debit,
+    //     startDate: startDate,
+    //     endDate: endDate));
   }
 
   getOrder() async {
-    _orderController.sink.add(ApiResponse.loading('loading'));
+    _orderController.sink.add(ApiResponse1.loading('loading'));
 
-    _orderController.sink.add(await _repository.getOrderByNumber(
-        orderNumber: _orderNumber, repository: _currentLocation.name));
+    // _orderController.sink.add(await _repository.getOrderByNumber(
+    //     orderNumber: _orderNumber, repository: _currentLocation.name));
   }
 
   _getOrdersCount() async {
-    _ordersCountController.sink.add(ApiResponse.loading('loading'));
+    _ordersCountController.sink.add(ApiResponse1.loading('loading'));
     _ordersCountController.sink.add(await _repository.getOrderCount(
         orderNumber: _orderNumber, repository: _currentLocation.name));
   }
 
   getScannedProducts() async {
-    _receivedItemsController.sink.add(ApiResponse.loading("loading"));
+    _receivedItemsController.sink.add(ApiResponse1.loading("loading"));
     List<ProductModel> products = await DBProvider.db
         .getProductsByOrderType(productType: ProductType.RECEPTION);
     List<BalanceItemModel> balanceItems = List<BalanceItemModel>();
@@ -372,7 +373,7 @@ class MainBloc implements BaseBloc {
           orderedQuantity: 0,
           receivedQuantity: product.quantity));
     }
-    _receivedItemsController.sink.add(ApiResponse.completed(balanceItems));
+    _receivedItemsController.sink.add(ApiResponse1.completed(balanceItems));
   }
 
   _makeBalance(List<ProductModel> orderedProducts, bool isReceivedOnly) async {
@@ -403,34 +404,34 @@ class MainBloc implements BaseBloc {
             orderedQuantity: orderProduct.quantity,
             receivedQuantity: 0));
     }
-    _balanceItemsController.sink.add(ApiResponse.completed(balanceItems));
+    _balanceItemsController.sink.add(ApiResponse1.completed(balanceItems));
   }
 
   _getOrderProductsAndSaveItLocally() async {
-    ApiResponse<List<ProductModel>> productsResult =
-        await _repository.getOrderItems(
-            orderNumber: int.tryParse(_orderNumber),
-            repository: _currentLocation.name);
-    if (productsResult.status == Status.COMPLETED) {
-      await DBProvider.db
-          .insertBulkProduct(productsResult.data, ProductType.ORDER);
-      List<ProductModel> orderedProducts = await DBProvider.db
-          .getProductsByOrderType(productType: ProductType.ORDER);
-
-      _orderItemsController.sink.add(ApiResponse.completed(orderedProducts));
-      return;
-    }
-    _orderItemsController.sink.add(productsResult);
+    // ApiResponse1<List<ProductModel>> productsResult =
+    // await _repository.getOrderItems(
+    //     orderNumber: int.tryParse(_orderNumber),
+    //     repository: _currentLocation.name);
+    // if (productsResult.status == Status.COMPLETED) {
+    //   await DBProvider.db
+    //       .insertBulkProduct(productsResult.data, ProductType.ORDER);
+    //   List<ProductModel> orderedProducts = await DBProvider.db
+    //       .getProductsByOrderType(productType: ProductType.ORDER);
+    //
+    //   _orderItemsController.sink.add(ApiResponse1.completed(orderedProducts));
+    //   return;
+    // }
+    // _orderItemsController.sink.add(productsResult);
   }
 
   getAndSaveOrderProducts() async {
-    _orderItemsController.sink.add(ApiResponse.loading("loading items"));
-    _balanceItemsController.sink.add(ApiResponse.loading("loading items"));
+    _orderItemsController.sink.add(ApiResponse1.loading("loading items"));
+    _balanceItemsController.sink.add(ApiResponse1.loading("loading items"));
 
     List<ProductModel> orderedProducts = await DBProvider.db
         .getProductsByOrderType(productType: ProductType.ORDER);
     if (orderedProducts.isNotEmpty) {
-      _orderItemsController.sink.add(ApiResponse.completed(orderedProducts));
+      _orderItemsController.sink.add(ApiResponse1.completed(orderedProducts));
       await _getOrderProductsAndSaveItLocally();
     }
   }
@@ -461,14 +462,14 @@ class MainBloc implements BaseBloc {
     try {
       ScanResult barcode = await BarcodeScanner.scan();
       if (barcode.type == ResultType.Barcode)
-        _barcodeController.sink.add(ApiResponse.completed(
+        _barcodeController.sink.add(ApiResponse1.completed(
             BarcodeSearch(barcode.rawContent, searchType)));
     } on PlatformException catch (e) {
       if (e.code == BarcodeScanner.cameraAccessDenied) {
-        _barcodeController.sink.add(ApiResponse.error(
+        _barcodeController.sink.add(ApiResponse1.error(
             'Trebuie sa accepti permisiunile pentru folosirea camerei!'));
       } else {
-        _barcodeController.sink.add(ApiResponse.error('Unknown error: $e'));
+        _barcodeController.sink.add(ApiResponse1.error('Unknown error: $e'));
       }
     }
   }
@@ -487,11 +488,11 @@ class MainBloc implements BaseBloc {
   }
 
   sendSearchBarcodeForProductString(SearchType searchType) {
-    _barcodeController.sink.add(ApiResponse.completed(
+    _barcodeController.sink.add(ApiResponse1.completed(
         BarcodeSearch(_manualSearchForProductString, searchType)));
   }
 
-  setCurrentProduct(ApiResponse<ProductModel> response) {
+  setCurrentProduct(ApiResponse1<ProductModel> response) {
     _currentProductController.sink.add(response);
   }
 

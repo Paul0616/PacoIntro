@@ -6,9 +6,8 @@ class CredentialModel {
 
   Map<String, dynamic> toJson() {
     Map<String, dynamic> data = Map<String, dynamic>();
-    data['userName'] = this.userName;
+    data['user'] = this.userName;
     data['password'] = this.password;
     return data;
   }
-
 }

@@ -13,7 +13,8 @@ class OrderModel {
       this.orderNumber,
       this.orderDate,
       this.supplierFiscalCode,
-      this.supplierName});
+      this.supplierName,
+      this.productsCount});
 
   Map<String, dynamic> toJson() {
     Map<String, dynamic> data = Map<String, dynamic>();
@@ -29,11 +30,12 @@ class OrderModel {
 
   factory OrderModel.fromMap(Map<String, dynamic> json) {
     return OrderModel(
-        id: json["id"],
-        orderNumber: json["orderNumber"],
-        supplierName: json["supplierName"],
-        orderDate: DateFormat('MM/dd/yyyy hh:mm:ss a').parse(json["orderDate"]),
-        supplierFiscalCode: json["supplierFiscalCode"]);
+        id: json["ID"],
+        orderNumber: json["NUMARCOMANDA"],
+        supplierName: json["FURNIZOR"],
+        orderDate: DateFormat('yyyy-MM-dd HH:mm:ss').parse(json["DATA"]),
+        supplierFiscalCode: json["COD_FISCAL"].toDouble(),
+        productsCount: json["TOTAL_PRODUSE"]);
   }
 
   String get orderDateString => DateFormat('dd.MM.yyyy').format(orderDate);

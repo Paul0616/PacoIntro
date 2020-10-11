@@ -9,17 +9,17 @@ class UserModel extends BaseModel {
   @override
   Map<String, dynamic> toJson() {
     Map<String, dynamic> data = super.toJson();
-    data['locations'] = this.locations;
+    data['LOCATII'] = this.locations;
     return data;
   }
 
   factory UserModel.fromMap(Map<String, dynamic> json) {
-    var iterableLocations = json["locations"];
+    var iterableLocations = json["LOCATII"];
     List<Map<String, dynamic>> locationsMap =
         List<Map<String, dynamic>>.from(iterableLocations);
     return UserModel(
-        id: json["id"],
-        name: json["name"],
+        id: json["ID"],
+        name: json["NUME UTILIZATOR"],
         locations:
             locationsMap.map((map) => LocationModel.fromMap(map)).toList());
   }

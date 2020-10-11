@@ -39,6 +39,7 @@ class SearchFieldWidget extends StatelessWidget {
                 child: TextField(
                   onChanged: onChanged,
                   textInputAction: TextInputAction.done,
+                  textCapitalization: TextCapitalization.characters,
                   autocorrect: false,
                   autofocus: true,
                   keyboardType: keyboardShouldBeNumeric

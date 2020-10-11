@@ -11,11 +11,11 @@ class StockProductModel extends BaseModel {
 
   factory StockProductModel.fromMap(Map<String, dynamic> json) {
     return StockProductModel(
-      id: json["code"],
-      name: json["name"],
-      stock: json["stock"],
-      measureUnit: json["measureUnit"],
-      stockDate: DateTime.tryParse(json['stockDate']),
+      id: json["COD"],
+      name: json["DENUMIRE"],
+      stock: json["CANTITATE"].toDouble(),
+      measureUnit: json["UM"],
+      stockDate: DateTime.tryParse(json['DATA_STOC']),
     );
   }
 }

@@ -1,15 +1,18 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:pacointro/blocs/main_bloc.dart';
-import 'package:pacointro/models/location_model.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:pacointro/blocs/home_bloc.dart';
+import 'package:pacointro/blocs/home_event.dart';
+import 'package:pacointro/blocs/home_state.dart';
+import 'package:pacointro/blocs/order_input_bloc.dart';
+import 'package:pacointro/blocs/order_input_event.dart';
+import 'package:pacointro/blocs/order_input_state.dart';
 import 'package:pacointro/models/order_model.dart';
 import 'package:pacointro/pages/Reception/order_summary_page.dart';
-import 'package:pacointro/repository/api_response.dart';
 import 'package:pacointro/utils/constants.dart';
 import 'package:pacointro/utils/nav_key.dart';
 import 'package:pacointro/widgets/top_bar.dart';
-import 'package:provider/provider.dart';
 
 class OrderDisplayPage extends StatefulWidget {
   static String route = '/OrderDisplayPage';
@@ -19,12 +22,10 @@ class OrderDisplayPage extends StatefulWidget {
 }
 
 class _OrderDisplayPageState extends State<OrderDisplayPage> {
-  MainBloc _bloc;
+  final OrderInputBloc _bloc = OrderInputBloc();
 
   @override
   void didChangeDependencies() {
-    _bloc = Provider.of<MainBloc>(context);
-    _bloc.getCurrentLocation();
     super.didChangeDependencies();
   }
 
@@ -33,40 +34,54 @@ class _OrderDisplayPageState extends State<OrderDisplayPage> {
     final OrderModel orderModel = ModalRoute.of(context).settings.arguments;
     print('Order ID: ${orderModel.id}');
     return Scaffold(
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: <Widget>[
-          TopBar(
-            withBackNavigation: true,
+      body: MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (_) => HomeBloc(),
           ),
-          StreamBuilder<LocationModel>(
-              stream: _bloc.currentLocationStream,
-              builder: (context, snapshot) {
-                return snapshot.hasData && snapshot.data != null
-                    ? Text('Magazin: ${snapshot.data.name}',
-                        style: textStyle.copyWith(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 18,
-                            color: pacoAppBarColor))
-                    : Container();
-              }),
-          Expanded(
-            child: SingleChildScrollView(
-              child: Container(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: _buildOrderWidget(orderModel),
+          BlocProvider(
+            create: (_) => _bloc,
+          )
+        ],
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            TopBar(
+              withBackNavigation: true,
+            ),
+            BlocBuilder<HomeBloc, HomeState>(builder: (context, state) {
+              var currentLocationName = '';
+              if (state is EmptyState) {
+                BlocProvider.of<HomeBloc>(context)
+                    .add(InitCurrentLocationEvent());
+              }
+              if (state is LocationInitiatedState) {
+                currentLocationName = state.location.name;
+              }
+              return Text('Magazin: $currentLocationName',
+                  style: textStyle.copyWith(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 18,
+                      color: pacoAppBarColor));
+            }),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Container(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: _buildOrderWidget(context, orderModel),
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
       // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 
-  Widget _buildOrderWidget(OrderModel order) {
+  Widget _buildOrderWidget(BuildContext context, OrderModel order) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -109,56 +124,20 @@ class _OrderDisplayPageState extends State<OrderDisplayPage> {
                     bottomRight: Radius.circular(25),
                   ),
                 ),
-                child: StreamBuilder<ApiResponse<int>>(
-                    stream: _bloc.ordersCount,
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData) {
-                        switch (snapshot.data.status) {
-                          case Status.LOADING:
-                            return Center(
-                              child: SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor:
-                                        AlwaysStoppedAnimation(pacoLightGray),
-                                  )),
-                            );
-                            break;
-                          case Status.COMPLETED:
-                          case Status.ERROR:
-                            StreamSubscription<String> subscriptionError;
-                            subscriptionError =
-                                _bloc.errorOccur.listen((message) {
-                              if (message.isNotEmpty) {
-                                Scaffold.of(context).showSnackBar(SnackBar(
-                                  content: Text(message),
-                                ));
-                                _bloc.deleteError();
-                              }
-                              subscriptionError.cancel();
-                            });
-                        }
-                      }
-                      return Column(
-                        children: <Widget>[
-                          Text(
-                            snapshot.hasData &&
-                                    snapshot.data.status == Status.COMPLETED
-                                ? snapshot.data.data.toString()
-                                : '0',
-                            style: textStyleBold.copyWith(
-                                fontSize: 16, color: pacoLightGray),
-                          ),
-                          Text(
-                            'produse',
-                            style: textStyle.copyWith(
-                                fontSize: 10, color: pacoLightGray),
-                          ),
-                        ],
-                      );
-                    }),
+                child: Column(
+                  children: <Widget>[
+                    Text(
+                      order != null ? order.productsCount.toString() : '0',
+                      style: textStyleBold.copyWith(
+                          fontSize: 16, color: pacoLightGray),
+                    ),
+                    Text(
+                      'produse',
+                      style: textStyle.copyWith(
+                          fontSize: 10, color: pacoLightGray),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -202,9 +181,11 @@ class _OrderDisplayPageState extends State<OrderDisplayPage> {
         SizedBox(
           height: 8,
         ),
-        TextFormField(
+        TextField(
           //autofocus: true,
-          onChanged: _bloc.invoiceNumberChanged,
+          onChanged: (text) {
+            _bloc.add(InvoiceNumberChangeEvent(text));
+          },
           textInputAction: TextInputAction.done,
           keyboardType: TextInputType.number,
           obscureText: false,
@@ -236,21 +217,25 @@ class _OrderDisplayPageState extends State<OrderDisplayPage> {
               Row(
                 children: <Widget>[
                   Expanded(
-                    child: StreamBuilder<String>(
-                        stream: _bloc.invoiceDate,
-                        builder: (context, snapshot) {
-                          return Text(
-                            snapshot.hasData ? snapshot.data : 'Data facturii:',
-                            style: textStyle.copyWith(
-                              fontSize: 16,
-                            ),
-                          );
-                        }),
+                    child: BlocBuilder<OrderInputBloc, OrderInputState>(
+                        builder: (context, state) {
+                      String invoiceDateString = 'Data facturii:';
+                      if (state is ValidationInvoiceState) {
+                        if (state.invoice.invoiceDate != null)
+                          invoiceDateString = state.invoice.invoiceDateString;
+                      }
+                      return Text(
+                        invoiceDateString,
+                        style: textStyle.copyWith(
+                          fontSize: 16,
+                        ),
+                      );
+                    }),
                   ),
                   GestureDetector(
                     onTap: () async {
-                      print('tap');
-                      _bloc.sinkInvoiceDate(await getDate());
+                      var date = await getDate();
+                      _bloc.add(InvoiceDateChangeEvent(date));
                     },
                     child: CircleAvatar(
                       radius: 12,
@@ -267,28 +252,31 @@ class _OrderDisplayPageState extends State<OrderDisplayPage> {
         ),
         Padding(
           padding: EdgeInsets.symmetric(vertical: 8.0),
-          child: StreamBuilder<bool>(
-              stream: _bloc.submitInvoiceInfo,
-              builder: (context, snapshot) {
-                return FlatButton(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: new BorderRadius.circular(18.0),
-                    // side: BorderSide(color: pacoAppBarColor),
-                  ),
-                  onPressed: snapshot.hasData && snapshot.data
-                      ? () {
-                          FocusScope.of(context).requestFocus(FocusNode());
-                          final navKey = NavKey.navKey;
-                          navKey.currentState.pushNamed(OrderSummaryPage.route);
-                        }
-                      : null,
-                  disabledColor: pacoAppBarColor.withOpacity(0.5),
-                  disabledTextColor: pacoRedDisabledColor,
-                  color: pacoAppBarColor,
-                  textColor: Colors.white,
-                  child: Text('Începe recepție'),
-                );
-              }),
+          child: BlocBuilder<OrderInputBloc, OrderInputState>(
+              builder: (context, state) {
+            bool isValid = false;
+            if (state is ValidationInvoiceState) {
+              isValid = state.invoice.isValid;
+            }
+            return FlatButton(
+              shape: RoundedRectangleBorder(
+                borderRadius: new BorderRadius.circular(18.0),
+                // side: BorderSide(color: pacoAppBarColor),
+              ),
+              onPressed: isValid
+                  ? () {
+                      FocusScope.of(context).requestFocus(FocusNode());
+                      final navKey = NavKey.navKey;
+                      navKey.currentState.pushNamed(OrderSummaryPage.route);
+                    }
+                  : null,
+              disabledColor: pacoAppBarColor.withOpacity(0.5),
+              disabledTextColor: pacoRedDisabledColor,
+              color: pacoAppBarColor,
+              textColor: Colors.white,
+              child: Text('Începe recepție'),
+            );
+          }),
         ),
       ],
     );

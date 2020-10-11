@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mccounting_text/mccounting_text.dart';
-import 'package:pacointro/blocs/main_bloc.dart';
+import 'package:pacointro/blocs/api_call_bloc.dart';
+import 'package:pacointro/blocs/api_call_event.dart';
+import 'package:pacointro/blocs/api_call_state.dart';
+import 'package:pacointro/blocs/detail_bloc.dart';
+import 'package:pacointro/blocs/detail_event.dart';
+import 'package:pacointro/blocs/detail_state.dart';
 import 'package:pacointro/models/last_input_product_model.dart';
 import 'package:pacointro/models/product_model.dart';
 import 'package:pacointro/models/sales_product_model.dart';
 import 'package:pacointro/models/stock_product_model.dart';
-import 'package:pacointro/repository/api_response.dart';
 import 'package:pacointro/utils/constants.dart';
 import 'package:pacointro/widgets/top_bar.dart';
-import 'package:provider/provider.dart';
+
 import 'package:intl/intl.dart';
 
 class DetailsPage extends StatefulWidget {
@@ -19,413 +24,286 @@ class DetailsPage extends StatefulWidget {
 }
 
 class _DetailsPageState extends State<DetailsPage> {
-  MainBloc _bloc;
+  ProductModel _currentProduct;
+
+  //final Repository _repository = Repository(httpClient: http.Client());
+
+  // StockProductModel _stockProductModel;
+
+  // LastInputProductModel _lastInputProductModel;
 
   @override
   void didChangeDependencies() {
-    _bloc = Provider.of<MainBloc>(context);
+    // _bloc = Provider.of<MainBloc>(context);
     super.didChangeDependencies();
   }
 
   @override
   Widget build(BuildContext context) {
+    _currentProduct = ModalRoute.of(context).settings.arguments;
+
     return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            TopBar(
-              withBackNavigation: true,
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: ListView(
-//                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: <Widget>[
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: <Widget>[
-                        Row(
-                          children: <Widget>[
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: <Widget>[
-                                  Text(
-                                    'DENUMIRE PRODUS',
-                                    style: textStyle,
-                                  ),
-                                  StreamBuilder<ApiResponse<ProductModel>>(
-                                      stream: _bloc.currentProductStream,
-                                      builder: (context, snapshot) {
-                                        return snapshot.hasData &&
-                                                snapshot.data != null
-                                            ? Text('${snapshot.data.data.name}',
-                                                textAlign: TextAlign.start,
-                                                style: textStyle.copyWith(
-                                                    fontWeight: FontWeight.w700,
-                                                    fontSize: 24,
-                                                    color: pacoAppBarColor))
-                                            : Container();
-                                      }),
-                                ],
-                              ),
-                            ),
-                            MaterialButton(
-                              onPressed: () {
-                                showAlert(context, 'Confirmare',
-                                    'Produsul va fi trimis la coș cu eticheta \"DENUMIRE INCORECTĂ\". Vrei să faci asta?',
-                                    () {
-                                  print('TAP');
-                                  Navigator.of(context).pop();
-                                });
-                              },
-                              color: Colors.white,
-                              elevation: 4,
-                              child: Text('LA COS'),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      child: Divider(
-                        thickness: 1,
-                      ),
-                    ),
-                    StreamBuilder<ApiResponse<StockProductModel>>(
-                        stream: _bloc.currentStockStream,
-                        builder: (context, snapshot) {
-                          if (snapshot.hasData) {
-                            switch (snapshot.data.status) {
-                              case Status.LOADING:
-                                return Row(
-                                  children: <Widget>[
-                                    Container(
-                                      width: 30,
-                                      height: 30,
-                                      child: CircularProgressIndicator(),
-                                    ),
-                                  ],
-                                );
-                                break;
-                              case Status.COMPLETED:
-                                return _buildStockProduct(snapshot.data.data);
-                                break;
-                              case Status.ERROR:
-                                return Text(snapshot.data.message,
-                                    style: textStyle.copyWith(
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 16,
-                                      color: pacoRedDisabledColor,
-                                    ));
-                                break;
-                            }
-                          }
-                          return Container();
-                        }),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      child: Divider(
-                        thickness: 1,
-                      ),
-                    ),
-                    StreamBuilder<ApiResponse<LastInputProductModel>>(
-                        stream: _bloc.currentLastInputStream,
-                        builder: (context, snapshot) {
-                          if (snapshot.hasData) {
-                            switch (snapshot.data.status) {
-                              case Status.LOADING:
-                                return Row(
-                                  children: <Widget>[
-                                    Container(
-                                      width: 30,
-                                      height: 30,
-                                      child: CircularProgressIndicator(),
-                                    ),
-                                  ],
-                                );
-                                break;
-                              case Status.COMPLETED:
-                                return Row(
-                                  children: <Widget>[
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: <Widget>[
-                                          Text(
-                                            'ULTIMA INTRARE',
-                                            style: textStyle,
-                                          ),
-                                          Text(
-                                            DateFormat('dd.MM.yyyy').format(
-                                                snapshot
-                                                    .data.data.lastInputDate),
-                                            style: textStyle.copyWith(
-                                                fontWeight: FontWeight.w700,
-                                                fontSize: 28,
-                                                color: pacoAppBarColor),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    MaterialButton(
-                                      onPressed: () {
-                                        showAlert(context, 'Confirmare',
-                                            'Produsul va fi trimis la coș cu eticheta \"DATA ULTIMEI INTRARI INCORECTĂ\". Vrei să faci asta?',
-                                            () {
-                                          print('TAP');
-                                          Navigator.of(context).pop();
-                                        });
-                                      },
-                                      color: Colors.white,
-                                      elevation: 4,
-                                      child: Text('LA COS'),
-                                    ),
-                                  ],
-                                );
-                                break;
-                              case Status.ERROR:
-                                return Text(snapshot.data.message,
-                                    style: textStyle.copyWith(
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 16,
-                                      color: pacoRedDisabledColor,
-                                    ));
-                                break;
-                            }
-                          }
-                          return Container();
-                        }),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      child: Divider(
-                        thickness: 1,
-                      ),
-                    ),
-                    StreamBuilder<ApiResponse<SalesProductModel>>(
-                        stream: _bloc.currentSalesStream,
-                        builder: (context, snapshot) {
-                          if (snapshot.hasData) {
-                            switch (snapshot.data.status) {
-                              case Status.LOADING:
-                                return Row(
-                                  children: <Widget>[
-                                    Container(
-                                      width: 30,
-                                      height: 30,
-                                      child: CircularProgressIndicator(),
-                                    ),
-                                  ],
-                                );
-                                break;
-                              case Status.COMPLETED:
-                                return Column(
-                                  children: <Widget>[
-                                    Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: <Widget>[
-                                          StreamBuilder<DateTime>(
-                                              stream: _bloc.startDate,
-                                              builder:
-                                                  (context, snapshotStartDate) {
-                                                return GestureDetector(
-                                                  onTap: () async {
-                                                    _bloc.sinkStartDate(
-                                                        await getDate(
-                                                            initialDate:
-                                                                snapshotStartDate
-                                                                        .data ??
-                                                                    DateTime
-                                                                        .now()));
-                                                  },
-                                                  child: Container(
-                                                    padding: EdgeInsets.all(8),
-                                                    decoration: BoxDecoration(
-                                                        border: Border.all(
-                                                            color:
-                                                                pacoRedDisabledColor,
-                                                            width: 1.0)),
-                                                    child: Text(
-                                                      DateFormat('dd.MM.yyyy')
-                                                          .format(
-                                                              snapshotStartDate
-                                                                      .data ??
-                                                                  DateTime
-                                                                      .now()),
-                                                      style: textStyle.copyWith(
-                                                          fontWeight:
-                                                              FontWeight.w700,
-                                                          fontSize: 18,
-                                                          color:
-                                                              pacoAppBarColor),
-                                                    ),
-                                                  ),
-                                                );
-                                              }),
-                                          StreamBuilder<DateTime>(
-                                              stream: _bloc.endDate,
-                                              builder:
-                                                  (context, snapshotEndDate) {
-                                                return GestureDetector(
-                                                  onTap: () async {
-                                                    _bloc.sinkEndDate(
-                                                        await getDate(
-                                                            initialDate:
-                                                                snapshotEndDate
-                                                                        .data ??
-                                                                    DateTime
-                                                                        .now()));
-                                                  },
-                                                  child: Container(
-                                                    padding: EdgeInsets.all(8),
-                                                    decoration: BoxDecoration(
-                                                        border: Border.all(
-                                                            color:
-                                                                pacoRedDisabledColor,
-                                                            width: 1.0)),
-                                                    child: Text(
-                                                      DateFormat('dd.MM.yyyy')
-                                                          .format(
-                                                              snapshotEndDate
-                                                                      .data ??
-                                                                  DateTime
-                                                                      .now()),
-                                                      style: textStyle.copyWith(
-                                                          fontWeight:
-                                                              FontWeight.w700,
-                                                          fontSize: 18,
-                                                          color:
-                                                              pacoAppBarColor),
-                                                    ),
-                                                  ),
-                                                );
-                                              }),
-                                          MaterialButton(
-                                            onPressed: () {
-                                              print('refresh');
-                                              _bloc.refreshSales();
-                                            },
-                                            child: CircleAvatar(
-                                              radius: 20,
-                                              backgroundColor: pacoAppBarColor,
-                                              child: Icon(
-                                                Icons.refresh,
-                                                color: pacoLightGray,
-                                              ),
-                                            ),
-                                          ),
-                                        ]),
-                                    SizedBox(
-                                      height: 16,
-                                    ),
-                                    Row(
-                                      children: <Widget>[
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: <Widget>[
-                                              Text(
-                                                'VÂNZĂRI ÎN PERIOADĂ',
-                                                style: textStyle,
-                                              ),
-                                              Row(
-                                                children: <Widget>[
-                                                  McCountingText(
-                                                    begin: 0,
-                                                    end: snapshot
-                                                            .data.data.sales ??
-                                                        0,
-                                                    //snapshot.data.data.price,
-                                                    precision: 2,
-                                                    style: textStyle.copyWith(
-                                                        fontWeight:
-                                                            FontWeight.w700,
-                                                        fontSize: 28,
-                                                        color: pacoAppBarColor),
-                                                    duration:
-                                                        Duration(seconds: 1),
-                                                    curve: Curves.decelerate,
-                                                  ),
-                                                  Text(
-                                                    " ${snapshot.data.data.measureUnit}",
-                                                    style: textStyle,
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        MaterialButton(
-                                          onPressed: () {
-                                            showAlert(context, 'Confirmare',
-                                                'Produsul va fi trimis la coș cu eticheta \"VÂNZARE ÎN PERIOADĂ INCORECTĂ\". Vrei să faci asta?',
-                                                () {
-                                              print('TAP');
-                                              Navigator.of(context).pop();
-                                            });
-                                          },
-                                          color: Colors.white,
-                                          elevation: 4,
-                                          child: Text('LA COS'),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                );
-                                break;
-                              case Status.ERROR:
-                                return Text(snapshot.data.message,
-                                    style: textStyle.copyWith(
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 16,
-                                      color: pacoRedDisabledColor,
-                                    ));
-                                break;
-                            }
-                          }
-                          return Container();
-                        }),
-                  ],
-                ),
+      body: MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (_) => DetailBloc(),
+          ),
+          BlocProvider(
+            create: (_) => ApiCallBloc(),
+          ),
+          BlocProvider(
+            create: (_) => ApiCallBloc1(),
+          ),
+          BlocProvider(
+            create: (_) => ApiCallBloc2(),
+          ),
+          BlocProvider(
+            create: (_) => ApiCallBloc3(),
+          ),
+        ],
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              TopBar(
+                withBackNavigation: true,
               ),
-            ),
-          ],
+              BlocListener<ApiCallBloc, ApiCallState>(
+                listener: (context, state) {
+                  _onApiListener(context, state, true);
+                },
+                child: BlocBuilder<ApiCallBloc, ApiCallState>(
+                    builder: (context, apiState) {
+                  if (apiState is ApiCallEmptyState) {
+                    BlocProvider.of<ApiCallBloc1>(context)
+                        .add(GetProductDetailsEvent(_currentProduct.id));
+                    BlocProvider.of<ApiCallBloc2>(context)
+                        .add(LastInputEvent(_currentProduct.id));
+                    BlocProvider.of<ApiCallBloc3>(context).add(
+                        GetSalesInPeriodEvent(
+                            code: _currentProduct.id,
+                            startDate: DateTime.now(),
+                            endDate: DateTime.now()));
+                  }
+                  if (apiState is ApiCallLoadingState) {
+                    return Expanded(
+                      child: Center(
+                        child: Container(
+                          width: 40,
+                          height: 40,
+                          child: CircularProgressIndicator(),
+                        ),
+                      ),
+                    );
+                  }
+                  return Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: ListView(
+                        children: <Widget>[
+                          _buildProductName(context),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            child: Divider(
+                              thickness: 1,
+                            ),
+                          ),
+                          _buildStockProduct(context),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            child: Divider(
+                              thickness: 1,
+                            ),
+                          ),
+                          _buildLastInputDate(context),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            child: Divider(
+                              thickness: 1,
+                            ),
+                          ),
+                          _buildSalesInPeriod(context),
+                        ],
+                      ),
+                    ),
+                  );
+                }),
+              ),
+            ],
+          ),
         ),
       ),
       // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 
-  Widget _buildStockProduct(StockProductModel stockProduct) {
+  Widget _buildProgress() {
     return Row(
       children: <Widget>[
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              Text(
-                'STOC la data: ${DateFormat('dd.MM.yyyy').format(stockProduct.stockDate)}',
-                style: textStyle,
-              ),
-              Row(
+        Container(
+          width: 30,
+          height: 30,
+          child: CircularProgressIndicator(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildProductName(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        Row(
+          children: <Widget>[
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
-                  stockProduct.stock != null
-                      ? McCountingText(
-                          begin: 0,
-                          end: stockProduct.stock ?? 0,
-                          precision: 2,
+                  Text(
+                    'DENUMIRE PRODUS',
+                    style: textStyle,
+                  ),
+                  Text('${_currentProduct.name}',
+                      textAlign: TextAlign.start,
+                      style: textStyle.copyWith(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 24,
+                          color: pacoAppBarColor)),
+                ],
+              ),
+            ),
+            MaterialButton(
+              onPressed: () {
+                dialogAlert(
+                    context,
+                    'Confirmare',
+                    Text(
+                        'Produsul va fi trimis la coș cu eticheta \"DENUMIRE INCORECTĂ\". Vrei să faci asta?'),
+                    onPressedPositive: () {
+                  BlocProvider.of<ApiCallBloc>(context).add(
+                      PutProductWithIssueEvent(_currentProduct.id,
+                          productStatus(ProductStatus.WRONG_NAME)));
+                  Navigator.of(context).pop();
+                });
+              },
+              color: Colors.white,
+              elevation: 4,
+              child: Text('LA COS'),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStockProduct(BuildContext context) {
+    return BlocListener<ApiCallBloc1, ApiCallState>(
+      listener: (context, state) {
+        _onApiListener(context, state, false);
+      },
+      child: BlocBuilder<ApiCallBloc1, ApiCallState>(builder: (context, state) {
+        StockProductModel stockProduct;
+        if (state is ApiCallLoadingState) {
+          return _buildProgress();
+        }
+        if (state is ApiCallLoadedState) {
+          stockProduct = state.response;
+        }
+        return Row(
+          children: <Widget>[
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  Text(
+                    'STOC la data: ${DateFormat('dd.MM.yyyy').format(stockProduct != null ? stockProduct.stockDate : DateTime.now())}',
+                    style: textStyle,
+                  ),
+                  Row(
+                    children: <Widget>[
+                      stockProduct != null
+                          ? McCountingText(
+                              begin: 0,
+                              end: stockProduct.stock ?? 0,
+                              precision: 2,
+                              style: textStyle.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 28,
+                                  color: pacoAppBarColor),
+                              duration: Duration(seconds: 1),
+                              curve: Curves.decelerate,
+                            )
+                          : Text(
+                              '-',
+                              style: textStyle.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 28,
+                                  color: pacoAppBarColor),
+                            ),
+                      Text(
+                        " ${stockProduct != null ? stockProduct.measureUnit : ''}",
+                        style: textStyle,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            MaterialButton(
+              onPressed: () {
+                dialogAlert(
+                    context,
+                    'Confirmare',
+                    Text(
+                        'Produsul va fi trimis la coș cu eticheta \"STOC INCORECT\". Vrei să faci asta?'),
+                    onPressedPositive: () {
+                  BlocProvider.of<ApiCallBloc>(context).add(
+                      PutProductWithIssueEvent(_currentProduct.id,
+                          productStatus(ProductStatus.WRONG_STOCK)));
+                  Navigator.of(context).pop();
+                });
+              },
+              color: Colors.white,
+              elevation: 4,
+              child: Text('LA COS'),
+            ),
+          ],
+        );
+      }),
+    );
+  }
+
+  Widget _buildLastInputDate(BuildContext context) {
+    return BlocListener<ApiCallBloc2, ApiCallState>(
+      listener: (context, state) {
+        _onApiListener(context, state, false);
+      },
+      child: BlocBuilder<ApiCallBloc2, ApiCallState>(builder: (context, state) {
+        LastInputProductModel lastInputProductModel;
+        if (state is ApiCallLoadingState) {
+          return _buildProgress();
+        }
+        if (state is ApiCallLoadedState) {
+          lastInputProductModel = state.response;
+        }
+        return Row(
+          children: <Widget>[
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    'ULTIMA INTRARE',
+                    style: textStyle,
+                  ),
+                  lastInputProductModel != null
+                      ? Text(
+                          DateFormat('dd.MM.yyyy')
+                              .format(lastInputProductModel.lastInputDate),
                           style: textStyle.copyWith(
                               fontWeight: FontWeight.w700,
                               fontSize: 28,
                               color: pacoAppBarColor),
-                          duration: Duration(seconds: 1),
-                          curve: Curves.decelerate,
                         )
                       : Text(
                           '-',
@@ -434,55 +312,212 @@ class _DetailsPageState extends State<DetailsPage> {
                               fontSize: 28,
                               color: pacoAppBarColor),
                         ),
-                  Text(
-                    " ${stockProduct.measureUnit}",
-                    style: textStyle,
-                  ),
                 ],
               ),
-            ],
-          ),
-        ),
-        MaterialButton(
-          onPressed: () {
-            showAlert(context, 'Confirmare',
-                'Produsul va fi trimis la coș cu eticheta \"STOC INCORECT\". Vrei să faci asta?',
-                () {
-              print('TAP');
-              Navigator.of(context).pop();
-            });
-          },
-          color: Colors.white,
-          elevation: 4,
-          child: Text('LA COS'),
-        ),
-      ],
-    );
-  }
-
-  Future<void> showAlert(
-      BuildContext context, String title, String content, Function onPressed) {
-    return showDialog<void>(
-      barrierDismissible: false,
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(title ?? ''),
-          content: Text(content ?? ''),
-          actions: <Widget>[
-            FlatButton(
-              child: Text('OK'),
-              onPressed: onPressed,
             ),
-            FlatButton(
-              child: Text('Renunță'),
+            MaterialButton(
               onPressed: () {
-                Navigator.of(context).pop();
+                dialogAlert(
+                    context,
+                    'Confirmare',
+                    Text(
+                        'Produsul va fi trimis la coș cu eticheta \"DATA ULTIMEI INTRARI INCORECTĂ\". Vrei să faci asta?'),
+                    onPressedPositive: () {
+                  BlocProvider.of<ApiCallBloc>(context).add(
+                      PutProductWithIssueEvent(_currentProduct.id,
+                          productStatus(ProductStatus.WRONG_INPUT_DATE)));
+                  Navigator.of(context).pop();
+                });
               },
+              color: Colors.white,
+              elevation: 4,
+              child: Text('LA COS'),
             ),
           ],
         );
-      },
+      }),
+    );
+  }
+
+  Widget _buildSalesInPeriod(BuildContext context) {
+    return Column(
+      children: <Widget>[
+        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: <
+            Widget>[
+          BlocBuilder<DetailBloc, DetailState>(builder: (context, state) {
+            DateTime startDate;
+            if (state is EmptyState) {
+              startDate = state.date;
+            }
+            if (state is RefreshStartDateState) {
+              startDate = state.startDate;
+            }
+            return GestureDetector(
+              onTap: () async {
+                BlocProvider.of<DetailBloc>(context).add(ChangeStartDateEvent(
+                    await getDate(initialDate: startDate ?? DateTime.now())));
+              },
+              child: Container(
+                padding: EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                    border:
+                        Border.all(color: pacoRedDisabledColor, width: 1.0)),
+                child: Text(
+                  DateFormat('dd.MM.yyyy').format(startDate ?? DateTime.now()),
+                  style: textStyle.copyWith(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 18,
+                      color: pacoAppBarColor),
+                ),
+              ),
+            );
+          }),
+          BlocBuilder<DetailBloc, DetailState>(builder: (context, state) {
+            DateTime endDate;
+            if (state is EmptyState) {
+              endDate = state.date;
+            }
+            if (state is RefreshEndDateState) {
+              endDate = state.endDate;
+            }
+            return GestureDetector(
+              onTap: () async {
+                BlocProvider.of<DetailBloc>(context).add(ChangeEndDateEvent(
+                    await getDate(initialDate: endDate ?? DateTime.now())));
+              },
+              child: Container(
+                padding: EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                    border:
+                        Border.all(color: pacoRedDisabledColor, width: 1.0)),
+                child: Text(
+                  DateFormat('dd.MM.yyyy').format(endDate ?? DateTime.now()),
+                  style: textStyle.copyWith(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 18,
+                      color: pacoAppBarColor),
+                ),
+              ),
+            );
+          }),
+          BlocBuilder<ApiCallBloc3, ApiCallState>(builder: (context, state) {
+            bool refreshButtonActive;
+            print(refreshButtonActive);
+            if (state is ApiCallLoadingState) {
+              refreshButtonActive = false;
+              print(refreshButtonActive);
+            }
+            if (state is ApiCallLoadedState) {
+              refreshButtonActive = true;
+              print(refreshButtonActive);
+            }
+            return MaterialButton(
+              onPressed: refreshButtonActive ?? true
+                  ? () {
+                      print('refresh');
+                      BlocProvider.of<ApiCallBloc3>(context).add(
+                          GetSalesInPeriodEvent(
+                              code: _currentProduct.id,
+                              startDate: BlocProvider.of<DetailBloc>(context)
+                                  .startDate,
+                              endDate: BlocProvider.of<DetailBloc>(context)
+                                  .endDate));
+                    }
+                  : null,
+              child: CircleAvatar(
+                radius: 20,
+                backgroundColor:
+                    refreshButtonActive ?? true ? pacoAppBarColor : Colors.grey,
+                child: Icon(
+                  Icons.refresh,
+                  color: pacoLightGray,
+                ),
+              ),
+            );
+          }),
+        ]),
+        SizedBox(
+          height: 16,
+        ),
+        BlocListener<ApiCallBloc3, ApiCallState>(
+          listener: (context, state) {
+            _onApiListener(context, state, false);
+          },
+          child: BlocBuilder<ApiCallBloc3, ApiCallState>(
+              builder: (context, state) {
+            SalesProductModel salesProductModel;
+            if (state is ApiCallLoadingState) {
+              return _buildProgress();
+            }
+            if (state is ApiCallLoadedState) {
+              salesProductModel = state.response;
+            }
+            return Row(
+              children: <Widget>[
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        'VÂNZĂRI ÎN PERIOADĂ',
+                        style: textStyle,
+                      ),
+                      Row(
+                        children: <Widget>[
+                          salesProductModel != null
+                              ? McCountingText(
+                                  begin: 0,
+                                  end: salesProductModel.sales ?? 0,
+                                  //snapshot.data.data.price,
+                                  precision: 2,
+                                  style: textStyle.copyWith(
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 28,
+                                      color: pacoAppBarColor),
+                                  duration: Duration(seconds: 1),
+                                  curve: Curves.decelerate,
+                                )
+                              : Text(
+                                  '-',
+                                  style: textStyle.copyWith(
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 28,
+                                      color: pacoAppBarColor),
+                                ),
+                          Text(
+                            " ${salesProductModel != null ? salesProductModel.measureUnit : ''}",
+                            style: textStyle,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                MaterialButton(
+                  onPressed: () {
+                    dialogAlert(
+                        context,
+                        'Confirmare',
+                        Text(
+                            'Produsul va fi trimis la coș cu eticheta \"VÂNZARE ÎN PERIOADĂ INCORECTĂ\". Vrei să faci asta?'),
+                        onPressedPositive: () {
+                      BlocProvider.of<ApiCallBloc>(context).add(
+                          PutProductWithIssueEvent(
+                              _currentProduct.id,
+                              productStatus(
+                                  ProductStatus.WRONG_SALE_IN_PERIOD)));
+                      Navigator.of(context).pop();
+                    });
+                  },
+                  color: Colors.white,
+                  elevation: 4,
+                  child: Text('LA COS'),
+                ),
+              ],
+            );
+          }),
+        ),
+      ],
     );
   }
 
@@ -490,7 +525,7 @@ class _DetailsPageState extends State<DetailsPage> {
     return showDatePicker(
       context: context,
       initialDate: initialDate,
-      firstDate: DateTime.now().subtract(Duration(days: 90)),
+      firstDate: DateTime.now().subtract(Duration(days: 365)),
       //  DateTime(DateTime.now().year),
       lastDate: DateTime.now(),
       builder: (BuildContext context, Widget child) {
@@ -500,5 +535,30 @@ class _DetailsPageState extends State<DetailsPage> {
         );
       },
     );
+  }
+
+  _onApiListener(BuildContext context, ApiCallState state, bool isApiCallBloc) {
+    if (state is ApiCallErrorState) {
+      if (state.message.isNotEmpty) {
+        Scaffold.of(context).showSnackBar(SnackBar(
+          content: Text(state.message),
+        ));
+      }
+    }
+    if (state is ApiCallLoadedState && isApiCallBloc) {
+      if (state.response['message'] == 'Produs adaugat cu succes') {
+        dialogAlert(
+          context,
+          'SUCCES',
+          Text(
+            "Solicitarea a fost trimisa pe server.",
+            style: TextStyle(color: Colors.green),
+          ),
+          onPressedPositive: () {
+            Navigator.of(context).pop();
+          },
+        );
+      }
+    }
   }
 }

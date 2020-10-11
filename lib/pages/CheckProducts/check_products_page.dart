@@ -1,16 +1,19 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:pacointro/blocs/main_bloc.dart';
-import 'package:pacointro/models/location_model.dart';
-import 'package:pacointro/models/product_model.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:pacointro/blocs/api_call_bloc.dart';
+import 'package:pacointro/blocs/api_call_event.dart';
+import 'package:pacointro/blocs/api_call_state.dart';
+import 'package:pacointro/blocs/home_bloc.dart';
+import 'package:pacointro/blocs/home_event.dart';
+import 'package:pacointro/blocs/home_state.dart';
+import 'package:pacointro/models/paginated_model.dart';
+
 import 'package:pacointro/pages/CheckProducts/manual_search_page.dart';
-import 'package:pacointro/repository/api_response.dart';
+import 'package:pacointro/pages/CheckProducts/price_page.dart';
+
 import 'package:pacointro/utils/constants.dart';
 import 'package:pacointro/utils/nav_key.dart';
-import 'package:pacointro/widgets/menu_button_widget.dart';
 import 'package:pacointro/widgets/top_bar.dart';
-import 'package:provider/provider.dart';
 
 class CheckProductsPage extends StatefulWidget {
   static String route = '/CheckProductsPage';
@@ -20,12 +23,12 @@ class CheckProductsPage extends StatefulWidget {
 }
 
 class _CheckProductsPageState extends State<CheckProductsPage> {
-  MainBloc _bloc;
+  //final Repository _repository = Repository(httpClient: http.Client());
 
   @override
   void didChangeDependencies() {
-    _bloc = Provider.of<MainBloc>(context);
-    _bloc.getCurrentLocation();
+    // _bloc = Provider.of<MainBloc>(context);
+    // _bloc.getCurrentLocation();
     super.didChangeDependencies();
   }
 
@@ -33,122 +36,144 @@ class _CheckProductsPageState extends State<CheckProductsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            TopBar(
-              withBackNavigation: true,
+        child: MultiBlocProvider(
+          providers: [
+            BlocProvider(
+              create: (_) => HomeBloc(),
             ),
-            StreamBuilder<LocationModel>(
-                stream: _bloc.currentLocationStream,
-                builder: (context, snapshot) {
-                  return snapshot.hasData && snapshot.data != null
-                      ? Text('Magazin: ${snapshot.data.name}',
-                          style: textStyle.copyWith(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 18,
-                              color: pacoAppBarColor))
-                      : Container();
+            BlocProvider(
+              create: (_) => ApiCallBloc(),
+            )
+          ],
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              TopBar(
+                withBackNavigation: true,
+              ),
+              BlocListener<HomeBloc, HomeState>(
+                listener: _onErrorScanListener,
+                child:
+                    BlocBuilder<HomeBloc, HomeState>(builder: (context, state) {
+                  var currentLocationName = '';
+                  if (state is EmptyState) {
+                    BlocProvider.of<HomeBloc>(context)
+                        .add(InitCurrentLocationEvent());
+                  }
+                  if (state is LocationInitiatedState) {
+                    currentLocationName = state.location.name;
+                  }
+                  return Text('Magazin: $currentLocationName',
+                      style: textStyle.copyWith(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 18,
+                          color: pacoAppBarColor));
                 }),
-            StreamBuilder<ApiResponse<List<ProductModel>>>(
-                stream: _bloc.currentProductList,
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    switch (snapshot.data.status) {
-                      case Status.LOADING:
-                        return Container(
-                          padding: EdgeInsets.all(8),
-                          child: SizedBox(
-                            width: 40,
-                            height: 40,
-                            child: CircularProgressIndicator(),
-                          ),
-                        );
-                        break;
-                      case Status.COMPLETED:
-                        break;
-                      case Status.ERROR:
-                        StreamSubscription<String> subscriptionError;
-                        subscriptionError = _bloc.errorOccur.listen((message) {
-                          if (message.isNotEmpty)
-                            Scaffold.of(context).showSnackBar(SnackBar(
-                              content: Text(message),
-                            ));
-                          _bloc.deleteError();
-                          subscriptionError.cancel();
-                        });
-                        break;
-                    }
+              ),
+              BlocListener<ApiCallBloc, ApiCallState>(
+                listener: _onApiListener,
+                child: BlocBuilder<ApiCallBloc, ApiCallState>(
+                    builder: (context, state) {
+                  if (state is ApiCallLoadingState) {
+                    return Expanded(
+                      child: Center(
+                        child: Container(
+                          width: 40,
+                          height: 40,
+                          child: CircularProgressIndicator(),
+                        ),
+                      ),
+                    );
                   }
                   return Expanded(
-//                    child: MediaQuery.of(context).orientation ==
-//                        Orientation.portrait
-//                        ?
-                      child: buildColumnButtons()
-//                        : buildRowButtons(),
-                      );
+                    child: MediaQuery.of(context).orientation ==
+                            Orientation.portrait
+                        ? buildColumnButtons(context)
+                        : buildRowButtons(context),
+                  );
                 }),
-          ],
+              ),
+            ],
+          ),
         ),
-      ),
-      // This trailing comma makes auto-formatting nicer for build methods.
+      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 
-  Padding buildRowButtons() {
+  Padding buildRowButtons(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 32.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          MenuButtonWidget(
-            image: Image(
-              color: Colors.white,
-              image: AssetImage('images/check.png'),
-              fit: BoxFit.cover,
-            ),
-            text: Text(
-              'Verificare Produs',
-              style: textStyle.copyWith(color: Colors.black87),
-            ),
-            onTap: () {},
-          ),
+      padding: const EdgeInsets.all(32.0),
+      child: Column(
+        children: [
           Container(
-            child: Center(
-              child: RaisedButton.icon(
-                onPressed: () {
-                  _bloc.isManualSearchForProduct = true;
-                  _bloc.resetManualSearchString();
-                  _bloc.resetsFoundProducts();
-                  final navKey = NavKey.navKey;
-                  navKey.currentState.pushNamed(ManualSearchingPage.route);
-                },
-                icon: Icon(Icons.search),
-                label: Text("Cautare manuala produs"),
+            height: 60,
+            child: RaisedButton.icon(
+              onPressed: () {
+                BlocProvider.of<HomeBloc>(context).add(ScanBarcodeEvent());
+              },
+              shape: StadiumBorder(),
+              color: pacoAppBarColor,
+              icon: Icon(
+                Icons.scanner,
+                color: pacoLightGray,
               ),
+              label: Text("Scanare produs",
+                  style: textStyleBold.copyWith(color: pacoLightGray)),
             ),
           ),
           SizedBox(
-            width: 50,
+            height: 50,
           ),
-          MenuButtonWidget(
-            image: Image(
-              color: Colors.white,
-              image: AssetImage('images/box.png'),
-              fit: BoxFit.cover,
-            ),
-            text: Text(
-              'Recepție Marfă',
-              style: textStyle.copyWith(color: Colors.black87),
-            ),
-            onTap: () {},
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Container(
+                height: 60,
+                child: RaisedButton.icon(
+                  onPressed: () {
+                    final navKey = NavKey.navKey;
+                    navKey.currentState.pushNamed(ManualSearchingPage.route,
+                        arguments: SearchType.BY_CODE);
+                  },
+                  shape: StadiumBorder(),
+                  color: Colors.orangeAccent,
+                  icon: Icon(
+                    Icons.search,
+                    color: pacoLightGray,
+                  ),
+                  label: Text("Cautare manuala produs dupa cod",
+                      style: textStyleBold.copyWith(color: pacoLightGray)),
+                ),
+              ),
+              SizedBox(
+                width: 50,
+              ),
+              Container(
+                height: 60,
+                child: RaisedButton.icon(
+                  onPressed: () {
+                    final navKey = NavKey.navKey;
+                    navKey.currentState.pushNamed(ManualSearchingPage.route,
+                        arguments: SearchType.BY_NAME);
+                  },
+                  shape: StadiumBorder(),
+                  color: Colors.orangeAccent,
+                  icon: Icon(
+                    Icons.search,
+                    color: pacoLightGray,
+                  ),
+                  label: Text("Cautare manuala produs dupa nume",
+                      style: textStyleBold.copyWith(color: pacoLightGray)),
+                ),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  Widget buildColumnButtons() {
+  Widget buildColumnButtons(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(32.0),
       child: Column(
@@ -159,7 +184,7 @@ class _CheckProductsPageState extends State<CheckProductsPage> {
             height: 40,
             child: RaisedButton.icon(
               onPressed: () {
-                _bloc.scan(SearchType.BY_CODE);
+                BlocProvider.of<HomeBloc>(context).add(ScanBarcodeEvent());
               },
               shape: StadiumBorder(),
               color: pacoAppBarColor,
@@ -178,9 +203,6 @@ class _CheckProductsPageState extends State<CheckProductsPage> {
             height: 40,
             child: RaisedButton.icon(
               onPressed: () {
-                _bloc.isManualSearchForProduct = true;
-                _bloc.resetManualSearchString();
-                _bloc.resetsFoundProducts();
                 final navKey = NavKey.navKey;
                 navKey.currentState.pushNamed(ManualSearchingPage.route,
                     arguments: SearchType.BY_CODE);
@@ -202,9 +224,6 @@ class _CheckProductsPageState extends State<CheckProductsPage> {
             height: 40,
             child: RaisedButton.icon(
               onPressed: () {
-                _bloc.isManualSearchForProduct = true;
-                _bloc.resetManualSearchString();
-                _bloc.resetsFoundProducts();
                 final navKey = NavKey.navKey;
                 navKey.currentState.pushNamed(ManualSearchingPage.route,
                     arguments: SearchType.BY_NAME);
@@ -222,5 +241,34 @@ class _CheckProductsPageState extends State<CheckProductsPage> {
         ],
       ),
     );
+  }
+
+  _onErrorScanListener(BuildContext context, HomeState state) {
+    if (state is ScanningErrorState) {
+      if (state.message.isNotEmpty) {
+        Scaffold.of(context).showSnackBar(SnackBar(
+          content: Text(state.message),
+        ));
+      }
+    }
+    if (state is ScanningSuccessfullyState) {
+      BlocProvider.of<ApiCallBloc>(context)
+          .add(GetProductsEvent(SearchType.BY_CODE, state.barcode, 1));
+    }
+  }
+
+  _onApiListener(BuildContext context, ApiCallState state) {
+    if (state is ApiCallErrorState) {
+      if (state.message.isNotEmpty) {
+        Scaffold.of(context).showSnackBar(SnackBar(
+          content: Text(state.message),
+        ));
+      }
+    }
+    if (state is ApiCallLoadedState) {
+      final navKey = NavKey.navKey;
+      navKey.currentState.pushNamed(PricePage.route,
+          arguments: (state.response as PaginatedModel).products.first);
+    }
   }
 }

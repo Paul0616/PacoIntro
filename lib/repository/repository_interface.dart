@@ -1,27 +1,28 @@
 import 'package:pacointro/models/credentials_model.dart';
-import 'package:pacointro/models/last_input_product_model.dart';
-import 'package:pacointro/models/order_model.dart';
-import 'package:pacointro/models/product_model.dart';
-import 'package:pacointro/models/sales_product_model.dart';
-import 'package:pacointro/models/stock_product_model.dart';
-import 'package:pacointro/models/user_model.dart';
 
-import 'api_response.dart';
+import 'package:pacointro/models/product_model.dart';
+
+import 'package:pacointro/utils/constants.dart';
+
+import 'api_response1.dart';
 
 abstract class DataSource {
   void dispose();
-  Future<ApiResponse<UserModel>> checkUsers(CredentialModel credentials);
-  Future<ApiResponse<List<ProductModel>>> getProduct(
-      {String code, String debit});
-  Future<ApiResponse<StockProductModel>> getStockAndDate(
-      {String code, String debit});
-  Future<ApiResponse<LastInputProductModel>> getLastInputDate(
-      {String code, String debit});
-  Future<ApiResponse<SalesProductModel>> getSalesInPeriod(
-      {String code, String debit, DateTime startDate, DateTime endDate});
-  Future<ApiResponse<OrderModel>> getOrderByNumber(
+  Future<Map<String, dynamic>> getToken(CredentialModel credentials);
+  Future<Map<String, dynamic>> checkUser();
+  Future<Map<String, dynamic>> getProduct(
+      {String code, String debit, SearchType searchType, int page});
+  Future<Map<String, dynamic>> putIssue(
+      {int code, String debit, int status, int userId});
+  Future<Map<String, dynamic>> getProductDetails({int code, String debit});
+  Future<Map<String, dynamic>> getSalesInPeriod(
+      {int code, String debit, String startDate, String endDate});
+  Future<Map<String, dynamic>> getLastInputDate({int code, String debit});
+  Future<Map<String, dynamic>> getOrderByNumber(
       {String orderNumber, String repository});
-  Future<ApiResponse<int>> getOrderCount({String orderNumber, String repository});
-  Future<ApiResponse<List<ProductModel>>> getOrderItems(
-      {int orderNumber, String repository});
+
+  Future<ApiResponse1<int>> getOrderCount(
+      {String orderNumber, String repository});
+  Future<Map<String, dynamic>> getOrderItems(
+      {String orderNumber, String repository});
 }

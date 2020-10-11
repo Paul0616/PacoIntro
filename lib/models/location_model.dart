@@ -10,16 +10,18 @@ class LocationModel extends BaseModel {
   @override
   Map<String, dynamic> toJson() {
     Map<String, dynamic> data = super.toJson();
-    data['fiscalCode'] = this.fiscalCode;
-    data['debit'] = this.debit;
+    data['ID'] = this.id;
+    data['NUME GESTIUNE'] = this.name;
+    data['COD FISCAL'] = this.fiscalCode;
+    data['DEBIT'] = this.debit;
     return data;
   }
 
   factory LocationModel.fromMap(Map<String, dynamic> json) {
     return LocationModel(
-        id: json["id"],
-        name: json["name"],
-        fiscalCode: json["fiscalCode"],
-        debit: json["debit"]);
+        id: json["ID"],
+        name: json["NUME GESTIUNE"],
+        fiscalCode: json["COD FISCAL"],
+        debit: json["DEBIT"].toString());
   }
 }

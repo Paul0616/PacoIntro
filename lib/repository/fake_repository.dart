@@ -1,113 +1,53 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:pacointro/data/fake_data.dart';
 import 'package:pacointro/models/credentials_model.dart';
-import 'package:pacointro/models/last_input_product_model.dart';
-import 'package:pacointro/models/order_model.dart';
 import 'package:pacointro/models/product_model.dart';
-import 'package:pacointro/models/sales_product_model.dart';
-import 'package:pacointro/models/stock_product_model.dart';
-import 'package:pacointro/models/user_model.dart';
-import 'package:pacointro/repository/api_response.dart';
+import 'package:pacointro/models/token_response_model.dart';
+import 'package:pacointro/repository/api_response1.dart';
 import 'package:pacointro/repository/preferences_repository.dart';
 import 'package:pacointro/repository/repository_interface.dart';
+import 'package:pacointro/utils/constants.dart';
+
+import 'repository.dart';
 
 class FakeRepository extends PreferencesRepository implements DataSource {
   @override
   void dispose() {}
 
   @override
-  Future<ApiResponse<UserModel>> checkUsers(CredentialModel credentials) async {
-    return await Future.delayed(Duration(seconds: 1), () {
-      List userList = JsonDecoder().convert(fakeUsers);
-      UserModel foundedUser;
-      userList.forEach((map) {
-        UserModel user = UserModel.fromMap(map);
-        if (credentials.userName == user.name) {
-          foundedUser = user;
-        }
-      });
-      return foundedUser == null
-          ? ApiResponse.error('User sau parola greșite.')
-          : ApiResponse.completed(foundedUser);
+  Future<Map<String, dynamic>> checkUser() async {
+    Map<String, dynamic> response;
+    await Future.delayed(Duration(milliseconds: 200), () async {
+      TokenResponseModel tokenResponse = await getLocalToken();
+      switch (tokenResponse.apiKey) {
+        case "apiKeyPaul===":
+          response = JsonDecoder().convert(fakeUser1);
+          break;
+        case "apiKeyTinel===":
+          response = JsonDecoder().convert(fakeUser2);
+          break;
+        default:
+          throw ApiException('User not found');
+      }
     });
+    return response;
   }
 
-  @override
-  Future<ApiResponse<List<ProductModel>>> getProduct(
-      {String code, String debit, bool searchByName = false}) async {
-    return await Future.delayed(Duration(milliseconds: 800), () {
-      List productList = JsonDecoder().convert(products);
-      List<ProductModel> foundedProducts = List<ProductModel>();
-      productList.forEach((map) {
-        ProductModel product = ProductModel.fromMap(map);
-        if (searchByName) {
-          if (product.name.toUpperCase().contains(code.toUpperCase()))
-            foundedProducts.add(product);
-        } else {
-          int _code = int.tryParse(code);
-          if (_code != null && _code == product.id)
-            foundedProducts.add(product);
-        }
-      });
-      return foundedProducts.isEmpty
-          ? ApiResponse.error('N-am găsit nici un produs.')
-          : ApiResponse.completed(foundedProducts);
-    });
-  }
+  // @override
+  // Future<ApiResponse1<OrderModel>> getOrderByNumber(
+  //     {String orderNumber, String repository}) async {
+  //   return await Future.delayed(Duration(milliseconds: 900), () {
+  //     OrderModel orderModel = OrderModel.fromMap(JsonDecoder().convert(order));
+  //     if (orderModel.orderNumber.toString() != orderNumber)
+  //       return ApiResponse1.error('Numar comandă negasit în gestiunea curentă');
+  //     return ApiResponse1.completed(orderModel);
+  //   });
+  // }
 
   @override
-  Future<ApiResponse<StockProductModel>> getStockAndDate(
-      {String code, String debit}) async {
-    return await Future.delayed(Duration(milliseconds: 1000), () {
-      StockProductModel stock =
-          StockProductModel.fromMap(JsonDecoder().convert(stockAtDate));
-      print("--------->STOCK ${stock.stockDate.toIso8601String()}");
-      //return ApiResponse.error("Stock error");
-      return ApiResponse.completed(stock);
-    });
-  }
-
-  @override
-  Future<ApiResponse<LastInputProductModel>> getLastInputDate(
-      {String code, String debit}) async {
-    return await Future.delayed(Duration(milliseconds: 800), () {
-      LastInputProductModel lastInput =
-          LastInputProductModel.fromMap(JsonDecoder().convert(lastInputDate));
-      print(
-          "--------->LAST INPUT ${lastInput.lastInputDate.toIso8601String()}");
-      //return ApiResponse.error("Last input error");
-      return ApiResponse.completed(lastInput);
-    });
-  }
-
-  @override
-  Future<ApiResponse<SalesProductModel>> getSalesInPeriod(
-      {String code, String debit, DateTime startDate, DateTime endDate}) async {
-    return await Future.delayed(Duration(milliseconds: 1100), () {
-      SalesProductModel sales =
-          SalesProductModel.fromMap(JsonDecoder().convert(salesBetweenDates));
-      sales.startIntervalStockDate = startDate;
-      sales.endIntervalStockDate = endDate;
-      print("--------->SALES ${sales.sales.toString()}");
-      //return ApiResponse.error("Sales in period error");
-      return ApiResponse.completed(sales);
-    });
-  }
-
-  @override
-  Future<ApiResponse<OrderModel>> getOrderByNumber(
-      {String orderNumber, String repository}) async {
-    return await Future.delayed(Duration(milliseconds: 900), () {
-      OrderModel orderModel = OrderModel.fromMap(JsonDecoder().convert(order));
-      if (orderModel.orderNumber.toString() != orderNumber)
-        return ApiResponse.error('Numar comandă negasit în gestiunea curentă');
-      return ApiResponse.completed(orderModel);
-    });
-  }
-
-  @override
-  Future<ApiResponse<int>> getOrderCount(
+  Future<ApiResponse1<int>> getOrderCount(
       {String orderNumber, String repository}) async {
     return await Future.delayed(Duration(milliseconds: 1000), () {
       List items = JsonDecoder().convert(orderItems);
@@ -116,21 +56,126 @@ class FakeRepository extends PreferencesRepository implements DataSource {
         ProductModel product = ProductModel.fromMap(map);
         foundedProducts.add(product);
       });
-      return ApiResponse.completed(foundedProducts.length);
+      return ApiResponse1.completed(foundedProducts.length);
+    });
+  }
+
+  // @override
+  // Future<ApiResponse1<List<ProductModel>>> getOrderItems(
+  //     {int orderNumber, String repository}) async {
+  //   return await Future.delayed(Duration(milliseconds: 1200), () {
+  //     List items = JsonDecoder().convert(orderItems);
+  //     List<ProductModel> foundedProducts = List<ProductModel>();
+  //     items.forEach((map) {
+  //       ProductModel product = ProductModel.fromMap(map);
+  //       foundedProducts.add(product);
+  //     });
+  //     return ApiResponse1.completed(foundedProducts);
+  //   });
+  // }
+
+  @override
+  Future<Map<String, dynamic>> getToken(CredentialModel credentials) async {
+    await Future.delayed(Duration(milliseconds: 100), () {
+      if (credentials.userName != 'paul' && credentials.userName != 'tinel') {
+        throw ApiException('User not found');
+      }
+    });
+    return credentials.userName == 'paul'
+        ? {"message": "success", "apikey": "apiKeyPaul==="}
+        : {"message": "success", "apikey": "apiKeyTinel==="};
+  }
+
+  @override
+  Future<Map<String, dynamic>> getProduct(
+      {String code, String debit, SearchType searchType, int page}) async {
+    Map<String, dynamic> response;
+    await Future.delayed(Duration(milliseconds: 300), () {
+      if (searchType == SearchType.BY_NAME) {
+        response = JsonDecoder().convert(products);
+      } else {
+        var allProducts = JsonDecoder().convert(products)['data'];
+        var filtratedProducts = allProducts
+            .where((element) => element['COD'].toString() == code)
+            .toList();
+        response = {
+          "current_page": 1,
+          "last_page": 1,
+          "next_page_url": null,
+          "data": filtratedProducts
+        };
+      }
+    });
+    return response;
+  }
+
+  @override
+  Future<Map<String, dynamic>> putIssue(
+      {int code, String debit, int status, int userId}) async {
+    return await Future.delayed(Duration(milliseconds: 800), () {
+      return {"isSucces": true};
     });
   }
 
   @override
-  Future<ApiResponse<List<ProductModel>>> getOrderItems(
-      {int orderNumber, String repository}) async {
-    return await Future.delayed(Duration(milliseconds: 1200), () {
-      List items = JsonDecoder().convert(orderItems);
-      List<ProductModel> foundedProducts = List<ProductModel>();
-      items.forEach((map) {
-        ProductModel product = ProductModel.fromMap(map);
-        foundedProducts.add(product);
-      });
-      return ApiResponse.completed(foundedProducts);
+  Future<Map<String, dynamic>> getProductDetails(
+      {int code, String debit}) async {
+    Map<String, dynamic> response;
+    await Future.delayed(Duration(milliseconds: 800), () {
+      var allProducts = JsonDecoder().convert(products)['data'];
+      var selectedProduct =
+          allProducts.where((element) => element['COD'] == code).toList().first;
+      response = selectedProduct;
+      response['CANTITATE'] = Random().nextInt(130) + 20;
+      response['DATA_STOC'] = DateTime.now().toLocal().toIso8601String();
     });
+    return response;
+  }
+
+  @override
+  Future<Map<String, dynamic>> getSalesInPeriod(
+      {int code, String debit, String startDate, String endDate}) async {
+    Map<String, dynamic> response;
+    await Future.delayed(Duration(milliseconds: 500), () {
+      var allProducts = JsonDecoder().convert(products)['data'];
+      var selectedProduct =
+          allProducts.where((element) => element['COD'] == code).toList().first;
+      response = selectedProduct;
+      response['CANTITATE'] = Random().nextInt(70);
+      response['DATASTOC'] = DateTime.now().toLocal().toIso8601String();
+    });
+    return response;
+  }
+
+  @override
+  Future<Map<String, dynamic>> getLastInputDate(
+      {int code, String debit}) async {
+    Map<String, dynamic> response;
+    await Future.delayed(Duration(milliseconds: 400), () {
+      var allProducts = JsonDecoder().convert(products)['data'];
+      var selectedProduct =
+          allProducts.where((element) => element['COD'] == code).toList().first;
+      response = selectedProduct;
+
+      response['LASTINPUTDATE'] = DateTime.now()
+          .toLocal()
+          .subtract(Duration(days: Random().nextInt(90)))
+          .toIso8601String();
+    });
+    return response;
+  }
+
+  @override
+  Future<Map<String, dynamic>> getOrderItems(
+      {String orderNumber, String repository}) {
+    // TODO: implement getOrderItems
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Map<String, dynamic>> getOrderByNumber(
+      {String orderNumber, String repository}) {
+    // TODO: implement getOrderByNumber
+    throw UnimplementedError();
   }
 }

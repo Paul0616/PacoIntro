@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:pacointro/blocs/main_bloc.dart';
-import 'package:pacointro/models/location_model.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:pacointro/blocs/home_bloc.dart';
+import 'package:pacointro/blocs/home_event.dart';
+import 'package:pacointro/blocs/home_state.dart';
 
 import 'package:pacointro/pages/CheckProducts/check_products_page.dart';
+import 'package:pacointro/pages/Reception/order_display_page.dart';
 
 import 'package:pacointro/utils/constants.dart';
 import 'package:pacointro/utils/nav_key.dart';
 import 'package:pacointro/widgets/menu_button_widget.dart';
 import 'package:pacointro/widgets/top_bar.dart';
-import 'package:provider/provider.dart';
 
 import 'Reception/order_input_page.dart';
 
@@ -20,42 +22,50 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  MainBloc _bloc;
+  // MainBloc _bloc;
 
   @override
   void didChangeDependencies() {
-    _bloc = Provider.of<MainBloc>(context);
-    _bloc.getCurrentLocation();
+    // _bloc = Provider.of<MainBloc>(context);
+    // _bloc.getCurrentLocation();
     super.didChangeDependencies();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            TopBar(
-              withBackNavigation: true,
-            ),
-            StreamBuilder<LocationModel>(
-                stream: _bloc.currentLocationStream,
-                builder: (context, snapshot) {
-                  return snapshot.hasData && snapshot.data != null
-                      ? Text('Magazin: ${snapshot.data.name}',
-                          style: textStyle.copyWith(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 18,
-                              color: pacoAppBarColor))
-                      : Container();
-                }),
-            Expanded(
-              child: MediaQuery.of(context).orientation == Orientation.portrait
-                  ? buildColumnButtons()
-                  : buildRowButtons(),
-            ),
-          ],
+      body: BlocProvider(
+        create: (_) => HomeBloc(),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              TopBar(
+                withBackNavigation: true,
+              ),
+              BlocBuilder<HomeBloc, HomeState>(builder: (context, state) {
+                var currentLocationName = '';
+                if (state is EmptyState) {
+                  BlocProvider.of<HomeBloc>(context)
+                      .add(InitCurrentLocationEvent());
+                }
+                if (state is LocationInitiatedState) {
+                  currentLocationName = state.location.name;
+                }
+                return Text('Magazin: $currentLocationName',
+                    style: textStyle.copyWith(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 18,
+                        color: pacoAppBarColor));
+              }),
+              Expanded(
+                child:
+                    MediaQuery.of(context).orientation == Orientation.portrait
+                        ? buildColumnButtons()
+                        : buildRowButtons(),
+              ),
+            ],
+          ),
         ),
       ),
       // This trailing comma makes auto-formatting nicer for build methods.

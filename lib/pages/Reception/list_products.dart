@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:pacointro/blocs/list_products_bloc.dart';
+import 'package:pacointro/blocs/list_products_event.dart';
+import 'package:pacointro/blocs/list_products_state.dart';
 import 'package:pacointro/blocs/main_bloc.dart';
 import 'package:pacointro/models/balance_item.dart';
-import 'package:pacointro/models/product_model.dart';
-import 'package:pacointro/repository/api_response.dart';
+import 'package:pacointro/repository/api_response1.dart';
 import 'package:pacointro/utils/constants.dart';
 import 'package:pacointro/widgets/top_bar.dart';
 import 'package:provider/provider.dart';
@@ -17,79 +20,106 @@ class ListProductsPage extends StatefulWidget {
 }
 
 class _ListProductsPageState extends State<ListProductsPage> {
-  MainBloc _bloc;
+  // MainBloc _bloc;
 
   @override
   Widget build(BuildContext context) {
     final bool isReceivedOnly = ModalRoute.of(context).settings.arguments;
 
-    isReceivedOnly
-        ? _bloc.getScannedProducts()
-        : _bloc.getAndSaveOrderProducts();
+    // isReceivedOnly
+    //     ? _bloc.getScannedProducts()
+    //     : _bloc.getAndSaveOrderProducts();
 
     return Scaffold(
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: <Widget>[
-          TopBar(
-            withBackNavigation: true,
-          ),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                Expanded(
-                  child: Container(
-                    //margin: EdgeInsets.symmetric(horizontal: 16),
-                    // padding: EdgeInsets.symmetric(horizontal: 8),
-                    child: StreamBuilder<ApiResponse<List<BalanceItemModel>>>(
-                        stream: isReceivedOnly
-                            ? _bloc.receivedItems
-                            : _bloc.balancedItems,
-                        builder: (context, snapshot) {
-                          if (snapshot.hasData) {
-                            switch (snapshot.data.status) {
-                              //======================
-                              case Status.LOADING:
-                                return Center(
-                                  child: CircularProgressIndicator(),
-                                );
-                                break;
-                              //======================
-                              case Status.COMPLETED:
-                                if (snapshot.data.data.isEmpty)
-                                  return _noProducts();
-                                return _buildProductsList(
-                                    snapshot.data.data, isReceivedOnly);
-                                break;
-                              //======================
-                              case Status.ERROR:
-//                            StreamSubscription<String> subscription;
-//                            subscription = _bloc.errorController.listen((message) {
-//                              Scaffold.of(context).showSnackBar(SnackBar(
-//                                content: Text(message),
-//                              ));
-//                              _bloc.errorController.sink.add('');
-//                              subscription.cancel();
-//                            });
-                                return Center(
-                                  child: Text(
-                                    snapshot.data.message,
-                                    style: textStyle,
-                                  ),
-                                );
-                                break;
-                            }
-                          }
-
-                          return Container();
-                        }),
-                  ),
-                ),
-              ],
-            ),
+      body: MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (_) => ListProductsBloc(),
           ),
         ],
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            TopBar(
+              withBackNavigation: true,
+            ),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Expanded(
+                    child: Container(
+                      //margin: EdgeInsets.symmetric(horizontal: 16),
+                      // padding: EdgeInsets.symmetric(horizontal: 8),
+                      child: BlocBuilder<ListProductsBloc, ListProductsState>(
+                          // stream: isReceivedOnly
+                          //     ? _bloc.receivedItems
+                          //     : _bloc.balancedItems,
+                          builder: (context, state) {
+                        if (state is EmptyListState) {
+                          if (isReceivedOnly)
+                            BlocProvider.of<ListProductsBloc>(context)
+                                .add(GetScannedProductsEvent());
+                          else
+                            BlocProvider.of<ListProductsBloc>(context)
+                                .add(MakeBalanceEvent());
+                        }
+                        if (state is LoadingBalanceState) {
+                          return Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
+                        if (state is BalanceLoadedState) {
+                          if (state.items.isEmpty)
+                            return _noProducts(isReceivedOnly);
+                          print(state.items.length);
+                          return _buildProductsList(
+                              state.items, isReceivedOnly);
+                        }
+//                       if (snapshot.hasData) {
+//                         switch (snapshot.data.status) {
+//                           //======================
+//                           case Status.LOADING:
+//                             return Center(
+//                               child: CircularProgressIndicator(),
+//                             );
+//                             break;
+//                           //======================
+//                           case Status.COMPLETED:
+//                             if (snapshot.data.data.isEmpty)
+//                               return _noProducts();
+//                             return _buildProductsList(
+//                                 snapshot.data.data, isReceivedOnly);
+//                             break;
+//                           //======================
+//                           case Status.ERROR:
+// //                            StreamSubscription<String> subscription;
+// //                            subscription = _bloc.errorController.listen((message) {
+// //                              Scaffold.of(context).showSnackBar(SnackBar(
+// //                                content: Text(message),
+// //                              ));
+// //                              _bloc.errorController.sink.add('');
+// //                              subscription.cancel();
+// //                            });
+//                             return Center(
+//                               child: Text(
+//                                 snapshot.data.message,
+//                                 style: textStyle,
+//                               ),
+//                             );
+//                             break;
+//                         }
+//                       }
+
+                        return Container();
+                      }),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -179,7 +209,7 @@ class _ListProductsPageState extends State<ListProductsPage> {
               isReceivedItems
                   ? MaterialButton(
                       onPressed: () {
-                        _bloc.deleteProduct(product);
+                        //_bloc.deleteProduct(product);
                       },
                       padding: EdgeInsets.all(8),
                       minWidth: 0,
@@ -196,10 +226,12 @@ class _ListProductsPageState extends State<ListProductsPage> {
     );
   }
 
-  Widget _noProducts() {
+  Widget _noProducts(bool isReceivedOnly) {
     return Center(
       child: Text(
-        'Nu am gasit nici un produs in comanda',
+        isReceivedOnly
+            ? 'Nu a fost scanat nici un produs'
+            : 'Nu am găsit nici un produs în comandă',
         style: textStyle,
       ),
     );
@@ -212,7 +244,7 @@ class _ListProductsPageState extends State<ListProductsPage> {
 
   @override
   void didChangeDependencies() {
-    _bloc = Provider.of<MainBloc>(context);
+    // _bloc = Provider.of<MainBloc>(context);
     super.didChangeDependencies();
   }
 }

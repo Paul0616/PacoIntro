@@ -1,10 +1,20 @@
 import 'package:pacointro/models/location_model.dart';
-import 'package:pacointro/models/order_model.dart';
+import 'package:pacointro/models/token_response_model.dart';
 import 'package:pacointro/models/user_model.dart';
 import 'package:pacointro/repository/local_base_repository.dart';
 import 'package:pacointro/utils/constants.dart';
 
 class PreferencesRepository extends LocalBaseRepository {
+  Future<TokenResponseModel> getLocalToken() async {
+    var map = await super.getLocalObjectMap(key: tokenKey);
+    if (map == null) return null;
+    return TokenResponseModel.fromMap(map);
+  }
+
+  Future<bool> saveLocalToken({TokenResponseModel token}) async {
+    return await super.saveLocalObjectMap(map: token.toJson(), key: tokenKey);
+  }
+
   Future<UserModel> getLocalUser() async {
     var map = await super.getLocalObjectMap(key: userKey);
     if (map == null) return null;
@@ -13,6 +23,16 @@ class PreferencesRepository extends LocalBaseRepository {
 
   Future<bool> saveLocalUser({UserModel user}) async {
     return await super.saveLocalObjectMap(map: user.toJson(), key: userKey);
+  }
+
+  Future<bool> savePassword(String password) async {
+    final prefs = await super.prefs;
+    return await prefs.setString(passwordKey, password);
+  }
+
+  Future<String> getPassword() async {
+    final prefs = await super.prefs;
+    return prefs.getString(passwordKey);
   }
 
   Future<LocationModel> getLocalLocation() async {
