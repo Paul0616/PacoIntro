@@ -94,7 +94,7 @@ Future<void> dialogAlert(BuildContext context, String title, Widget child,
                   shape:
                       StadiumBorder(side: BorderSide(color: pacoAppBarColor)),
                   color: Colors.white,
-                  textColor: Colors.white,
+                  textColor: pacoAppBarColor,
                   child: Text('Renunță'),
                   onPressed: onPressedNegative,
                 )

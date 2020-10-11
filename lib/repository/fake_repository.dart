@@ -5,7 +5,6 @@ import 'package:pacointro/data/fake_data.dart';
 import 'package:pacointro/models/credentials_model.dart';
 import 'package:pacointro/models/product_model.dart';
 import 'package:pacointro/models/token_response_model.dart';
-import 'package:pacointro/repository/api_response1.dart';
 import 'package:pacointro/repository/preferences_repository.dart';
 import 'package:pacointro/repository/repository_interface.dart';
 import 'package:pacointro/utils/constants.dart';
@@ -35,19 +34,8 @@ class FakeRepository extends PreferencesRepository implements DataSource {
     return response;
   }
 
-  // @override
-  // Future<ApiResponse1<OrderModel>> getOrderByNumber(
-  //     {String orderNumber, String repository}) async {
-  //   return await Future.delayed(Duration(milliseconds: 900), () {
-  //     OrderModel orderModel = OrderModel.fromMap(JsonDecoder().convert(order));
-  //     if (orderModel.orderNumber.toString() != orderNumber)
-  //       return ApiResponse1.error('Numar comandă negasit în gestiunea curentă');
-  //     return ApiResponse1.completed(orderModel);
-  //   });
-  // }
-
   @override
-  Future<ApiResponse1<int>> getOrderCount(
+  Future<int> getOrderCount(
       {String orderNumber, String repository}) async {
     return await Future.delayed(Duration(milliseconds: 1000), () {
       List items = JsonDecoder().convert(orderItems);
@@ -56,23 +44,9 @@ class FakeRepository extends PreferencesRepository implements DataSource {
         ProductModel product = ProductModel.fromMap(map);
         foundedProducts.add(product);
       });
-      return ApiResponse1.completed(foundedProducts.length);
+      return foundedProducts.length;
     });
   }
-
-  // @override
-  // Future<ApiResponse1<List<ProductModel>>> getOrderItems(
-  //     {int orderNumber, String repository}) async {
-  //   return await Future.delayed(Duration(milliseconds: 1200), () {
-  //     List items = JsonDecoder().convert(orderItems);
-  //     List<ProductModel> foundedProducts = List<ProductModel>();
-  //     items.forEach((map) {
-  //       ProductModel product = ProductModel.fromMap(map);
-  //       foundedProducts.add(product);
-  //     });
-  //     return ApiResponse1.completed(foundedProducts);
-  //   });
-  // }
 
   @override
   Future<Map<String, dynamic>> getToken(CredentialModel credentials) async {

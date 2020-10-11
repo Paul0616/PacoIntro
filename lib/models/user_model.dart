@@ -4,7 +4,7 @@ import 'package:pacointro/models/location_model.dart';
 class UserModel extends BaseModel {
   List<LocationModel> locations;
 
-  UserModel({int id, String name, this.locations}) : super(id: id, name: name);
+  UserModel({int id, String name, this.locations}) : super(code: id, name: name);
 
   @override
   Map<String, dynamic> toJson() {

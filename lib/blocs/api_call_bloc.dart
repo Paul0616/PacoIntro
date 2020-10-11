@@ -74,9 +74,11 @@ class ApiCallBloc extends Bloc<ApiCallEvent, ApiCallState> {
             searchType: event.searchType,
             page: event.page);
         PaginatedModel paginatedModel = PaginatedModel.fromJson(response);
-        if (paginatedModel.products.isEmpty)
+        if (paginatedModel.products.isEmpty) {
           yield ApiCallErrorState(
               message: 'Nu am găsit nume/cod \'${event.code}\'');
+          return;
+        }
         yield ApiCallLoadedState(
             response: paginatedModel, callId: CallId.GET_PRODUCTS_CALL);
       } catch (e) {
@@ -153,7 +155,7 @@ class ApiCallBloc extends Bloc<ApiCallEvent, ApiCallState> {
             code: event.code,
             debit: currentLocation.debit,
             status: event.status,
-            userId: localUser.id);
+            userId: localUser.code);
         yield ApiCallLoadedState(
             response: response, callId: CallId.PRODUCT_WITH_ISSUE_CALL);
       } catch (e) {

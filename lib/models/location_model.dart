@@ -5,12 +5,12 @@ class LocationModel extends BaseModel {
   String debit;
 
   LocationModel({int id, this.fiscalCode, this.debit, String name})
-      : super(id: id, name: name);
+      : super(code: id, name: name);
 
   @override
   Map<String, dynamic> toJson() {
     Map<String, dynamic> data = super.toJson();
-    data['ID'] = this.id;
+    data['ID'] = this.code;
     data['NUME GESTIUNE'] = this.name;
     data['COD FISCAL'] = this.fiscalCode;
     data['DEBIT'] = this.debit;

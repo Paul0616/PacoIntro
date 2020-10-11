@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -13,13 +11,11 @@ import 'package:pacointro/blocs/order_summary_bloc.dart';
 import 'package:pacointro/blocs/order_summary_event.dart';
 import 'package:pacointro/blocs/order_summary_state.dart';
 import 'package:pacointro/database/database.dart';
-import 'package:pacointro/models/location_model.dart';
 import 'package:pacointro/models/paginated_model.dart';
 import 'package:pacointro/models/product_model.dart';
 import 'package:pacointro/models/progress_model.dart';
 import 'package:pacointro/pages/Reception/input_quantity_page.dart';
 import 'package:pacointro/pages/Reception/list_products.dart';
-import 'package:pacointro/repository/api_response1.dart';
 import 'package:pacointro/utils/constants.dart';
 import 'package:pacointro/utils/nav_key.dart';
 import 'package:pacointro/widgets/top_bar.dart';
@@ -33,55 +29,15 @@ class OrderSummaryPage extends StatefulWidget {
 }
 
 class _OrderSummaryPageState extends State<OrderSummaryPage> {
-  // MainBloc _bloc;
-  // StreamSubscription<ApiResponse1<ProductModel>> subscription;
+
   HomeBloc _homeBloc = HomeBloc();
   ApiCallBloc _apiCallBloc = ApiCallBloc();
   OrderSummaryBloc _orderSummaryBloc = OrderSummaryBloc();
 
-  //int currentScan = 0;
 
-  @override
-  void didChangeDependencies() {
-    // _bloc = Provider.of<MainBloc>(context);
-    // _bloc.getCurrentLocation();
-    // _bloc.setCurrentProduct(null);
-    super.didChangeDependencies();
-  }
 
   @override
   Widget build(BuildContext context) {
-    // subscription = _bloc.currentProductStream.listen((result) {
-    //   if (result != null && result.status == Status.COMPLETED) {
-    //     if (!result.data.belongsToOrder) {
-    //       if (result.data.name == 'Produs inexistent în Contliv')
-    //         showAlert(context, 'Confirmare',
-    //             'Produsul nu există în Contliv. Vrei să-l recepționezi totuși?',
-    //             () {
-    //           Navigator.of(context).pop();
-    //           final navKey = NavKey.navKey;
-    //           navKey.currentState
-    //               .pushNamed(InputQuantityPage.route, arguments: result.data);
-    //         });
-    //       else if (result.data.name == null)
-    //         showAlert(context, 'Confirmare',
-    //             'Produsul scanat nu se regăsește pe comandă. Vrei să-l caut în ContLiv?',
-    //             () {
-    //           _bloc.getProductFromApi(result.data.id.toString());
-    //           Navigator.of(context).pop();
-    //         });
-    //       else {
-    //         final navKey = NavKey.navKey;
-    //         navKey.currentState
-    //             .pushNamed(InputQuantityPage.route, arguments: result.data);
-    //       }
-    //     } else {
-    //       final navKey = NavKey.navKey;
-    //       navKey.currentState
-    //           .pushNamed(InputQuantityPage.route, arguments: result.data);
-    //     }
-    //   }
-    // });
     return Scaffold(
       body: MultiBlocProvider(
         providers: [
@@ -122,12 +78,10 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
               }),
             ),
             Expanded(
-              child: SingleChildScrollView(
-                child: Container(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: _buildBody(context),
-                  ),
+              child: Container(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: _buildBody(context),
                 ),
               ),
             ),
@@ -192,57 +146,57 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
                 ),
               ],
             ),
-            SizedBox(
-              height: 50,
+            // SizedBox(
+            //   height: 50,
+            // ),
+            Expanded(
+              child: BlocBuilder<ApiCallBloc, ApiCallState>(builder: (context, state) {
+                if (state is ApiCallLoadingState) {
+                  return Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+                return BlocBuilder<OrderSummaryBloc, OrderSummaryState>(
+                    builder: (context, state) {
+                      ProgressModel progress = ProgressModel(0,0);
+                      if(state is UpdateProgressState){
+                        progress = state.progressModel;
+                      }
+                      return CircularPercentIndicator(
+                        radius: 130.0,
+                        animation: true,
+                        animationDuration: 1200,
+                        lineWidth: 15.0,
+                        percent: progress.ratio > 1 ? 1.0 : progress.ratio,
+                        center: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Text(
+                              progress.max != 0
+                                  ? "${progress.current}/${progress.max}"
+                                  : "0/0",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 20.0),
+                            ),
+                            Text(
+                              "produse",
+                              style: textStyle,
+                            ),
+                          ],
+                        ),
+                        circularStrokeCap: CircularStrokeCap.butt,
+                        backgroundColor: Colors.yellow,
+                        progressColor:
+                            progress.ratio > 1
+                                ? Colors.green
+                                : Colors.red,
+                      );
+                    });
+              }),
             ),
-            BlocBuilder<ApiCallBloc, ApiCallState>(builder: (context, state) {
-              if (state is ApiCallLoadingState) {
-                return Center(
-                  child: CircularProgressIndicator(),
-                );
-              }
-              return Container();
-              // return BlocBuilder<ProgressModel>(
-              //     stream: _bloc.scanningProgress,
-              //     builder: (context, snapshot) {
-              //       return CircularPercentIndicator(
-              //         radius: 130.0,
-              //         animation: true,
-              //         animationDuration: 1200,
-              //         lineWidth: 15.0,
-              //         percent: snapshot.hasData
-              //             ? snapshot.data != null && snapshot.data.ratio > 1
-              //                 ? 1.0
-              //                 : snapshot.data.ratio
-              //             : 0.0,
-              //         center: Column(
-              //           mainAxisAlignment: MainAxisAlignment.center,
-              //           children: <Widget>[
-              //             Text(
-              //               snapshot.hasData
-              //                   ? "${snapshot.data.current}/${snapshot.data.max}"
-              //                   : "0/0",
-              //               style: TextStyle(
-              //                   fontWeight: FontWeight.bold, fontSize: 20.0),
-              //             ),
-              //             Text(
-              //               "produse",
-              //               style: textStyle,
-              //             ),
-              //           ],
-              //         ),
-              //         circularStrokeCap: CircularStrokeCap.butt,
-              //         backgroundColor: Colors.yellow,
-              //         progressColor:
-              //             snapshot.data != null && snapshot.data.ratio > 1
-              //                 ? Colors.green
-              //                 : Colors.red,
-              //       );
-              //     });
-            }),
-            SizedBox(
-              height: 50,
-            ),
+            // SizedBox(
+            //   height: 50,
+            // ),
             RaisedButton(
               padding: EdgeInsets.all(8),
               child: Column(
@@ -265,12 +219,11 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
               color: pacoAppBarColor,
               elevation: 4,
               onPressed: () {
-                // _bloc.scan(SearchType.FROM_RECEPTION);
                 _homeBloc.add(ScanBarcodeEvent());
               },
             ),
             SizedBox(
-              height: 50,
+              height: 20,
             ),
             FlatButton(
               shape: RoundedRectangleBorder(
@@ -290,37 +243,6 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
     );
   }
 
-  // Future<void> showAlert(
-  //     BuildContext context, String title, String content, Function onPressed) {
-  //   return showDialog<void>(
-  //     barrierDismissible: false,
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return AlertDialog(
-  //         title: Text(title ?? ''),
-  //         content: Text(content ?? ''),
-  //         actions: <Widget>[
-  //           FlatButton(
-  //             child: Text('OK'),
-  //             onPressed: onPressed,
-  //           ),
-  //           FlatButton(
-  //             child: Text('Renunță'),
-  //             onPressed: () {
-  //               Navigator.of(context).pop();
-  //             },
-  //           ),
-  //         ],
-  //       );
-  //     },
-  //   );
-  // }
-
-  @override
-  void dispose() {
-    //subscription?.cancel();
-    super.dispose();
-  }
 
   _onScannerListener(BuildContext context, HomeState state) {
     if (state is ScanningErrorState) {
@@ -336,7 +258,7 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
     }
   }
 
-  _onApiCallListener(BuildContext context, ApiCallState state) {
+  _onApiCallListener(BuildContext context, ApiCallState state) async {
     if (state is ApiCallErrorState) {
       if (state.message.isNotEmpty) {
         if (state.message.contains('Nu am găsit nume/cod')) {
@@ -350,11 +272,11 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
             var barCode = messageList
                 .firstWhere((element) => int.tryParse(element) != null);
             var product = ProductModel(
-              id: int.tryParse(barCode) ?? 0,
+              code: int.tryParse(barCode) ?? 0,
               name: "Produs inexistent în Contliv",
               quantity: 0,
               belongsToOrder: false,
-              productType: ProductType.RECEPTION,
+              productType: ProductType.ORDER,
             );
             final navKey = NavKey.navKey;
             navKey.currentState
@@ -370,13 +292,17 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
       }
     }
     if (state is ApiCallLoadedState) {
+      var product = (state.response as PaginatedModel).products.first;
+      product.belongsToOrder = false;
+      product.productType = ProductType.ORDER;
       final navKey = NavKey.navKey;
-      navKey.currentState.pushNamed(InputQuantityPage.route,
-          arguments: (state.response as PaginatedModel).products.first);
+      await navKey.currentState.pushNamed(InputQuantityPage.route,
+          arguments: product);
+      _orderSummaryBloc.add(ProgressRefreshEvent());
     }
   }
 
-  _onListener(BuildContext context, OrderSummaryState state) {
+  _onListener(BuildContext context, OrderSummaryState state) async {
     if (state is ProductBelongOrderState) {
       if (!state.product.belongsToOrder) {
         dialogAlert(
@@ -386,14 +312,15 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
                 'Vrei să-l caut totuși în ContLiv?'), onPressedPositive: () {
           Navigator.of(context).pop();
           _apiCallBloc.add(GetProductsEvent(
-              SearchType.BY_CODE, state.product.id.toString(), 1));
+              SearchType.BY_CODE, state.product.code.toString(), 1));
         }, onPressedNegative: () {
           Navigator.of(context).pop();
         });
       } else {
         final navKey = NavKey.navKey;
-        navKey.currentState
+        await navKey.currentState
             .pushNamed(InputQuantityPage.route, arguments: state.product);
+        _orderSummaryBloc.add(ProgressRefreshEvent());
       }
     }
   }

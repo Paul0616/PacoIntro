@@ -13,7 +13,7 @@ class SalesProductModel extends BaseModel {
       this.startIntervalStockDate,
       this.endIntervalStockDate,
       String name})
-      : super(id: id, name: name);
+      : super(code: id, name: name);
 
   factory SalesProductModel.fromMap(Map<String, dynamic> json) {
     return SalesProductModel(

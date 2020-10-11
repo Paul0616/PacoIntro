@@ -76,12 +76,12 @@ class _DetailsPageState extends State<DetailsPage> {
                     builder: (context, apiState) {
                   if (apiState is ApiCallEmptyState) {
                     BlocProvider.of<ApiCallBloc1>(context)
-                        .add(GetProductDetailsEvent(_currentProduct.id));
+                        .add(GetProductDetailsEvent(_currentProduct.code));
                     BlocProvider.of<ApiCallBloc2>(context)
-                        .add(LastInputEvent(_currentProduct.id));
+                        .add(LastInputEvent(_currentProduct.code));
                     BlocProvider.of<ApiCallBloc3>(context).add(
                         GetSalesInPeriodEvent(
-                            code: _currentProduct.id,
+                            code: _currentProduct.code,
                             startDate: DateTime.now(),
                             endDate: DateTime.now()));
                   }
@@ -181,7 +181,7 @@ class _DetailsPageState extends State<DetailsPage> {
                         'Produsul va fi trimis la coș cu eticheta \"DENUMIRE INCORECTĂ\". Vrei să faci asta?'),
                     onPressedPositive: () {
                   BlocProvider.of<ApiCallBloc>(context).add(
-                      PutProductWithIssueEvent(_currentProduct.id,
+                      PutProductWithIssueEvent(_currentProduct.code,
                           productStatus(ProductStatus.WRONG_NAME)));
                   Navigator.of(context).pop();
                 });
@@ -258,7 +258,7 @@ class _DetailsPageState extends State<DetailsPage> {
                         'Produsul va fi trimis la coș cu eticheta \"STOC INCORECT\". Vrei să faci asta?'),
                     onPressedPositive: () {
                   BlocProvider.of<ApiCallBloc>(context).add(
-                      PutProductWithIssueEvent(_currentProduct.id,
+                      PutProductWithIssueEvent(_currentProduct.code,
                           productStatus(ProductStatus.WRONG_STOCK)));
                   Navigator.of(context).pop();
                 });
@@ -324,7 +324,7 @@ class _DetailsPageState extends State<DetailsPage> {
                         'Produsul va fi trimis la coș cu eticheta \"DATA ULTIMEI INTRARI INCORECTĂ\". Vrei să faci asta?'),
                     onPressedPositive: () {
                   BlocProvider.of<ApiCallBloc>(context).add(
-                      PutProductWithIssueEvent(_currentProduct.id,
+                      PutProductWithIssueEvent(_currentProduct.code,
                           productStatus(ProductStatus.WRONG_INPUT_DATE)));
                   Navigator.of(context).pop();
                 });
@@ -417,7 +417,7 @@ class _DetailsPageState extends State<DetailsPage> {
                       print('refresh');
                       BlocProvider.of<ApiCallBloc3>(context).add(
                           GetSalesInPeriodEvent(
-                              code: _currentProduct.id,
+                              code: _currentProduct.code,
                               startDate: BlocProvider.of<DetailBloc>(context)
                                   .startDate,
                               endDate: BlocProvider.of<DetailBloc>(context)
@@ -503,7 +503,7 @@ class _DetailsPageState extends State<DetailsPage> {
                         onPressedPositive: () {
                       BlocProvider.of<ApiCallBloc>(context).add(
                           PutProductWithIssueEvent(
-                              _currentProduct.id,
+                              _currentProduct.code,
                               productStatus(
                                   ProductStatus.WRONG_SALE_IN_PERIOD)));
                       Navigator.of(context).pop();

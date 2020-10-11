@@ -7,7 +7,7 @@ class StockProductModel extends BaseModel {
 
   StockProductModel(
       {int id, this.stock, this.stockDate, this.measureUnit, String name})
-      : super(id: id, name: name);
+      : super(code: id, name: name);
 
   factory StockProductModel.fromMap(Map<String, dynamic> json) {
     return StockProductModel(

@@ -4,8 +4,6 @@ import 'package:pacointro/blocs/input_quantity_state.dart';
 
 import 'package:pacointro/database/database.dart';
 
-import 'package:pacointro/models/invoice_model.dart';
-import 'package:pacointro/models/product_model.dart';
 
 class InputQuantityBloc extends Bloc<InputQuantityEvent, InputQuantityState> {
   @override
@@ -14,7 +12,12 @@ class InputQuantityBloc extends Bloc<InputQuantityEvent, InputQuantityState> {
   @override
   Stream<InputQuantityState> mapEventToState(InputQuantityEvent event) async* {
     if (event is QuantityChangeEvent) {
-      yield ValidationQuantityState(double.tryParse(event.newQuantity) != null);
+      yield ValidationQuantityState(double.tryParse(event.newQuantity));
+    }
+
+    if (event is SaveProductReceptionEvent) {
+      await DBProvider.db.insertProduct(event.product, ProductType.RECEPTION);
+      yield QuantityInputDoneState();
     }
   }
 }

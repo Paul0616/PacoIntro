@@ -19,25 +19,6 @@ void main() {
   BlocSupervisor.delegate = SimpleBlocDelegate();
   runApp(MyApp());
 }
-//runApp(
-//      MultiProvider(
-//        providers: [
-//          Provider<LoginBloc>(
-//            create: (context) => LoginBloc.withRepository(
-//              FakeRepository(),
-//            ),
-//            dispose: (context, bloc) => bloc.dispose(),
-//          ),
-//          Provider<MainBloc>(
-//            create: (context) => MainBloc.withRepository(
-//              FakeRepository(),
-//            ),
-//            dispose: (context, bloc) => bloc.dispose(),
-//          ),
-//        ],
-//        child: MyApp(),
-//      ),
-//    );
 
 class MyApp extends StatelessWidget {
   @override

@@ -5,7 +5,6 @@ import 'package:pacointro/blocs/home_event.dart';
 import 'package:pacointro/blocs/home_state.dart';
 
 import 'package:pacointro/pages/CheckProducts/check_products_page.dart';
-import 'package:pacointro/pages/Reception/order_display_page.dart';
 
 import 'package:pacointro/utils/constants.dart';
 import 'package:pacointro/utils/nav_key.dart';

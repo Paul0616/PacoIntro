@@ -129,7 +129,7 @@ class _PricePageState extends State<PricePage> {
                                   onPressedPositive: () {
                                 BlocProvider.of<ApiCallBloc>(context).add(
                                     PutProductWithIssueEvent(
-                                        _currentProduct.id,
+                                        _currentProduct.code,
                                         productStatus(
                                             ProductStatus.WRONG_PRICE)));
                                 Navigator.of(context).pop();

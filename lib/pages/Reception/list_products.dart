@@ -5,12 +5,13 @@ import 'package:intl/intl.dart';
 import 'package:pacointro/blocs/list_products_bloc.dart';
 import 'package:pacointro/blocs/list_products_event.dart';
 import 'package:pacointro/blocs/list_products_state.dart';
-import 'package:pacointro/blocs/main_bloc.dart';
+import 'package:pacointro/database/database.dart';
 import 'package:pacointro/models/balance_item.dart';
-import 'package:pacointro/repository/api_response1.dart';
+import 'package:pacointro/models/product_model.dart';
+import 'package:pacointro/pages/Reception/input_quantity_page.dart';
 import 'package:pacointro/utils/constants.dart';
+import 'package:pacointro/utils/nav_key.dart';
 import 'package:pacointro/widgets/top_bar.dart';
-import 'package:provider/provider.dart';
 
 class ListProductsPage extends StatefulWidget {
   static String route = '/ListProductsPage';
@@ -20,16 +21,9 @@ class ListProductsPage extends StatefulWidget {
 }
 
 class _ListProductsPageState extends State<ListProductsPage> {
-  // MainBloc _bloc;
-
   @override
   Widget build(BuildContext context) {
     final bool isReceivedOnly = ModalRoute.of(context).settings.arguments;
-
-    // isReceivedOnly
-    //     ? _bloc.getScannedProducts()
-    //     : _bloc.getAndSaveOrderProducts();
-
     return Scaffold(
       body: MultiBlocProvider(
         providers: [
@@ -52,10 +46,8 @@ class _ListProductsPageState extends State<ListProductsPage> {
                       //margin: EdgeInsets.symmetric(horizontal: 16),
                       // padding: EdgeInsets.symmetric(horizontal: 8),
                       child: BlocBuilder<ListProductsBloc, ListProductsState>(
-                          // stream: isReceivedOnly
-                          //     ? _bloc.receivedItems
-                          //     : _bloc.balancedItems,
                           builder: (context, state) {
+
                         if (state is EmptyListState) {
                           if (isReceivedOnly)
                             BlocProvider.of<ListProductsBloc>(context)
@@ -76,41 +68,6 @@ class _ListProductsPageState extends State<ListProductsPage> {
                           return _buildProductsList(
                               state.items, isReceivedOnly);
                         }
-//                       if (snapshot.hasData) {
-//                         switch (snapshot.data.status) {
-//                           //======================
-//                           case Status.LOADING:
-//                             return Center(
-//                               child: CircularProgressIndicator(),
-//                             );
-//                             break;
-//                           //======================
-//                           case Status.COMPLETED:
-//                             if (snapshot.data.data.isEmpty)
-//                               return _noProducts();
-//                             return _buildProductsList(
-//                                 snapshot.data.data, isReceivedOnly);
-//                             break;
-//                           //======================
-//                           case Status.ERROR:
-// //                            StreamSubscription<String> subscription;
-// //                            subscription = _bloc.errorController.listen((message) {
-// //                              Scaffold.of(context).showSnackBar(SnackBar(
-// //                                content: Text(message),
-// //                              ));
-// //                              _bloc.errorController.sink.add('');
-// //                              subscription.cancel();
-// //                            });
-//                             return Center(
-//                               child: Text(
-//                                 snapshot.data.message,
-//                                 style: textStyle,
-//                               ),
-//                             );
-//                             break;
-//                         }
-//                       }
-
                         return Container();
                       }),
                     ),
@@ -148,80 +105,103 @@ class _ListProductsPageState extends State<ListProductsPage> {
               : product.type == BalanceType.INSUFFICIENT
                   ? pacoAppBarColor.withAlpha(20)
                   : Colors.blue.withAlpha(20),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  '${product.name} (${product.measureUnit})',
-                  style: textStyleBold,
-                ),
-                Text(
-                  '${(product.barcode ?? '')}',
-                  style: textStyle,
-                ),
-              ],
-            ),
-          ),
-          Row(
-            children: <Widget>[
-              !isReceivedItems
-                  ? Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: <Widget>[
-                        FaIcon(FontAwesomeIcons.cartArrowDown,
-                            color: Colors.black45),
-                        Container(
-                          width: 60,
-                          alignment: Alignment.centerRight,
-                          child: Text(
-                            '${NumberFormat('##0.00').format(product.orderedQuantity)}',
-                            style: textStyleBold.copyWith(
-                                color: Colors.black, fontSize: 14),
-                          ),
-                        ),
-                      ],
-                    )
-                  : Container(),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
+      child: MaterialButton(
+        onPressed: () async {
+          if (isReceivedItems) {
+            final navKey = NavKey.navKey;
+            await navKey.currentState.pushNamed(InputQuantityPage.route,
+                arguments: ProductModel(
+                  id: product.receivedItemId,
+                  code: product.barcode,
+                  name: product.name,
+                  measureUnit: product.measureUnit,
+                  productType: ProductType.RECEPTION,
+                  quantity: product.receivedQuantity,
+                  belongsToOrder: product.orderedQuantity != 0,
+                ));
+            BlocProvider.of<ListProductsBloc>(context)
+                .add(RefreshEvent());
+          }
+        },
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  FaIcon(FontAwesomeIcons.truck, color: Colors.black45),
-                  Container(
-                    width: 60,
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      '${NumberFormat('##0.00').format(product.receivedQuantity)}',
-                      style: textStyleBold.copyWith(
-                          color: product.type == BalanceType.BALANCED
-                              ? Colors.green
-                              : product.type == BalanceType.INSUFFICIENT
-                                  ? pacoAppBarColor
-                                  : Colors.black,
-                          fontSize: 14),
-                    ),
+                  Text(
+                    '${product.name} (${product.measureUnit})',
+                    style: textStyleBold,
+                  ),
+                  Text(
+                    '${(product.barcode ?? '')}',
+                    style: textStyle,
                   ),
                 ],
               ),
-              isReceivedItems
-                  ? MaterialButton(
-                      onPressed: () {
-                        //_bloc.deleteProduct(product);
-                      },
-                      padding: EdgeInsets.all(8),
-                      minWidth: 0,
-                      child: Icon(
-                        Icons.delete,
-                        color: Colors.black45,
+            ),
+            Row(
+              children: <Widget>[
+                !isReceivedItems
+                    ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: <Widget>[
+                          FaIcon(FontAwesomeIcons.cartArrowDown,
+                              color: Colors.black45),
+                          Container(
+                            width: 60,
+                            alignment: Alignment.centerRight,
+                            child: Text(
+                              '${NumberFormat('##0.00').format(product.orderedQuantity)}',
+                              style: textStyleBold.copyWith(
+                                  color: Colors.black, fontSize: 14),
+                            ),
+                          ),
+                        ],
+                      )
+                    : Container(),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: <Widget>[
+                    FaIcon(FontAwesomeIcons.truck, color: Colors.black45),
+                    Container(
+                      width: 60,
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        '${NumberFormat('##0.00').format(product.receivedQuantity)}',
+                        style: textStyleBold.copyWith(
+                            color: product.type == BalanceType.BALANCED
+                                ? Colors.green
+                                : product.type == BalanceType.INSUFFICIENT
+                                    ? pacoAppBarColor
+                                    : Colors.black,
+                            fontSize: 14),
                       ),
-                    )
-                  : Container(),
-            ],
-          ),
-        ],
+                    ),
+                  ],
+                ),
+                isReceivedItems
+                    ? MaterialButton(
+                        onPressed: () {
+                          //_bloc.deleteProduct(product);
+                          print('delete');
+
+                          BlocProvider.of<ListProductsBloc>(context)
+                              .add(DeleteItemEvent(product.receivedItemId));
+                        },
+                        padding: EdgeInsets.all(8),
+                        minWidth: 0,
+                        child: Icon(
+                          Icons.delete,
+                          color: Colors.black45,
+                        ),
+                      )
+                    : Container(),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -235,16 +215,5 @@ class _ListProductsPageState extends State<ListProductsPage> {
         style: textStyle,
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  @override
-  void didChangeDependencies() {
-    // _bloc = Provider.of<MainBloc>(context);
-    super.didChangeDependencies();
   }
 }

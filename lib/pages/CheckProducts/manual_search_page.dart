@@ -193,7 +193,7 @@ class _ManualSearchingPageState extends State<ManualSearchingPage> {
               style: textStyleBold,
             ),
             subtitle: Text(
-              '${_products[index].id}',
+              '${_products[index].code}',
               style: textStyle,
             ),
           );

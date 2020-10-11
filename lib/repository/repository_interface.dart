@@ -1,10 +1,7 @@
 import 'package:pacointro/models/credentials_model.dart';
 
-import 'package:pacointro/models/product_model.dart';
-
 import 'package:pacointro/utils/constants.dart';
 
-import 'api_response1.dart';
 
 abstract class DataSource {
   void dispose();
@@ -21,7 +18,7 @@ abstract class DataSource {
   Future<Map<String, dynamic>> getOrderByNumber(
       {String orderNumber, String repository});
 
-  Future<ApiResponse1<int>> getOrderCount(
+  Future<int> getOrderCount(
       {String orderNumber, String repository});
   Future<Map<String, dynamic>> getOrderItems(
       {String orderNumber, String repository});

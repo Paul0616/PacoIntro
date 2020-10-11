@@ -21,27 +21,34 @@ class ListProductsBloc extends Bloc<ListProductsEvent, ListProductsState> {
           .getProductsByOrderType(productType: ProductType.RECEPTION);
       for (ProductModel receivedProduct in receivedProducts) {
         var orderProduct = orderedProducts.firstWhere(
-            (element) => element.id == receivedProduct.id,
+            (element) => element.code == receivedProduct.code,
             orElse: () => null);
-        balanceItems.add(BalanceItemModel(
-            barcode: receivedProduct.id,
+        balanceItems.add(
+          BalanceItemModel(
+            barcode: receivedProduct.code,
             name: receivedProduct.name,
             measureUnit: receivedProduct.measureUnit,
             orderedQuantity: (orderProduct != null ? orderProduct.quantity : 0),
-            receivedQuantity: receivedProduct.quantity));
+            receivedQuantity: receivedProduct.quantity,
+            receivedItemId: receivedProduct.id,
+          ),
+        );
       }
       for (ProductModel orderProduct in orderedProducts) {
         var receivedProduct = receivedProducts.firstWhere(
-            (element) => element.id == orderProduct.id,
+            (element) => element.code == orderProduct.code,
             orElse: () => null);
 
         if (receivedProduct == null)
-          balanceItems.add(BalanceItemModel(
-              barcode: orderProduct.id,
+          balanceItems.add(
+            BalanceItemModel(
+              barcode: orderProduct.code,
               name: orderProduct.name,
               measureUnit: orderProduct.measureUnit,
               orderedQuantity: orderProduct.quantity,
-              receivedQuantity: 0));
+              receivedQuantity: 0,
+            ),
+          );
       }
 
       yield BalanceLoadedState(balanceItems);
@@ -52,15 +59,29 @@ class ListProductsBloc extends Bloc<ListProductsEvent, ListProductsState> {
       List<ProductModel> products = await DBProvider.db
           .getProductsByOrderType(productType: ProductType.RECEPTION);
       List<BalanceItemModel> balanceItems = List<BalanceItemModel>();
+
       for (ProductModel product in products) {
-        balanceItems.add(BalanceItemModel(
-            barcode: product.id,
+        balanceItems.add(
+          BalanceItemModel(
+            barcode: product.code,
             name: product.name,
             measureUnit: product.measureUnit,
             orderedQuantity: 0,
-            receivedQuantity: product.quantity));
+            receivedQuantity: product.quantity,
+            receivedItemId: product.id,
+          ),
+        );
       }
       yield BalanceLoadedState(balanceItems);
+    }
+    //===============================
+    if (event is RefreshEvent) {
+      yield EmptyListState();
+    }
+    //===============================
+    if (event is DeleteItemEvent) {
+      await DBProvider.db.deleteProductById(id: event.id);
+      yield EmptyListState();
     }
   }
 }

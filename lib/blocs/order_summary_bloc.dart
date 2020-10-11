@@ -2,9 +2,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pacointro/blocs/order_summary_event.dart';
 import 'package:pacointro/blocs/order_summary_state.dart';
 import 'package:pacointro/database/database.dart';
-
-import 'package:pacointro/models/invoice_model.dart';
 import 'package:pacointro/models/product_model.dart';
+import 'package:pacointro/models/progress_model.dart';
 
 class OrderSummaryBloc extends Bloc<OrderSummaryEvent, OrderSummaryState> {
   @override
@@ -19,12 +18,16 @@ class OrderSummaryBloc extends Bloc<OrderSummaryEvent, OrderSummaryState> {
         products.isNotEmpty
             ? products.first
             : ProductModel(
-                id: event.barCode,
+                code: event.barCode,
                 belongsToOrder: false,
                 productType: ProductType.RECEPTION,
               ),
       );
     }
-    if (event is ProgressRefreshEvent) {}
+    if (event is ProgressRefreshEvent) {
+      var scanned = await DBProvider.db.getCountProductsByOrderType(productType: ProductType.RECEPTION);
+      var ordered = await DBProvider.db.getCountProductsByOrderType(productType: ProductType.ORDER);
+      yield UpdateProgressState(ProgressModel(scanned, ordered));
+    }
   }
 }

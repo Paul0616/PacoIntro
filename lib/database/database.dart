@@ -122,11 +122,11 @@ class DBProvider {
     return res.isNotEmpty;
   }
 
-  Future<int> deleteProduct({int code, ProductType productType}) async {
+  Future<int> deleteProductById({int id}) async {
     final db = await database;
     return await db.delete(tableProducts,
-        where: "productType = ? AND code = ?",
-        whereArgs: [(productType == ProductType.ORDER ? 1 : 0), code]);
+        where: "id = ?",
+        whereArgs: [id]);
   }
 
   Future<int> deleteProductsByOrderType({ProductType productType}) async {
@@ -145,7 +145,7 @@ class DBProvider {
     final db = await database;
     var res = await db.update(tableProducts,
         product.toDatabaseMap(productType: ProductType.RECEPTION),
-        where: "code = ? AND productType = ?", whereArgs: [product.id, 0]);
+        where: "code = ? AND productType = ?", whereArgs: [product.code, 0]);
     return res;
   }
 }

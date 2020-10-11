@@ -1,17 +1,17 @@
 class BaseModel {
-  int id;
+  int code;
   String name;
 
-  BaseModel({this.id, this.name});
+  BaseModel({this.code, this.name});
 
   BaseModel.fromJson(Map<String, dynamic> json) {
-    id = json['ID'];
+    code = json['ID'];
     name = json['NUME UTILIZATOR'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['ID'] = this.id;
+    data['ID'] = this.code;
     data['NUME UTILIZATOR'] = this.name;
     return data;
   }
@@ -22,8 +22,8 @@ class BaseModel {
       other is BaseModel &&
           runtimeType == other.runtimeType &&
           name == other.name &&
-          id == other.id;
+          code == other.code;
 
   @override
-  int get hashCode => id.hashCode;
+  int get hashCode => code.hashCode;
 }

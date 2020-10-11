@@ -1,17 +1,12 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pacointro/blocs/input_quantity_bloc.dart';
 import 'package:pacointro/blocs/input_quantity_event.dart';
 import 'package:pacointro/blocs/input_quantity_state.dart';
-import 'package:pacointro/blocs/main_bloc.dart';
 import 'package:pacointro/database/database.dart';
 import 'package:pacointro/models/product_model.dart';
 import 'package:pacointro/utils/constants.dart';
-import 'package:pacointro/utils/nav_key.dart';
 import 'package:pacointro/widgets/top_bar.dart';
-import 'package:provider/provider.dart';
 
 class InputQuantityPage extends StatefulWidget {
   static String route = '/InputQuantityPage';
@@ -28,8 +23,8 @@ class _InputQuantityPageState extends State<InputQuantityPage> {
   Widget build(BuildContext context) {
     final ProductModel productModel = ModalRoute.of(context).settings.arguments;
     if (productModel.productType == ProductType.RECEPTION) {
-      //_bloc.quantityChanged(productModel.quantity.toString());
       _quantityController.text = productModel.quantity.toString();
+      _bloc.add(QuantityChangeEvent(productModel.quantity.toString()));
     }
     return Scaffold(
       body: MultiBlocProvider(
@@ -67,9 +62,11 @@ class _InputQuantityPageState extends State<InputQuantityPage> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         Text(
-          product.name != null
+          product.name != 'Produs inexistent în Contliv'
               ? product.name + " (" + product.measureUnit + ")"
-              : "",
+              : product != null
+                  ? product.name + " (" + product.code.toString() + ")"
+                  : "",
           style: textStyleBold,
         ),
         TextFormField(
@@ -99,34 +96,39 @@ class _InputQuantityPageState extends State<InputQuantityPage> {
         ),
         Padding(
           padding: EdgeInsets.symmetric(vertical: 8.0),
-          child: BlocBuilder<InputQuantityBloc, InputQuantityState>(
-              builder: (context, state) {
-            bool isValid = false;
-            if (state is ValidationQuantityState) {
-              isValid = state.isValid;
-            }
-            return FlatButton(
-              shape: RoundedRectangleBorder(
-                borderRadius: new BorderRadius.circular(18.0),
-                // side: BorderSide(color: pacoAppBarColor),
-              ),
-              onPressed: isValid
-                  ? () {
-                      FocusScope.of(context).requestFocus(FocusNode());
-
-                      // _bloc.saveReception(product);
-                      // _bloc.setCurrentProduct(null);
-                      final navKey = NavKey.navKey;
-                      navKey.currentState.pop();
-                    }
-                  : null,
-              disabledColor: pacoAppBarColor.withOpacity(0.5),
-              disabledTextColor: pacoRedDisabledColor,
-              color: pacoAppBarColor,
-              textColor: Colors.white,
-              child: Text('Salveaza'),
-            );
-          }),
+          child: BlocListener<InputQuantityBloc, InputQuantityState>(
+            listener: (context, state){
+              if(state is QuantityInputDoneState){
+                Navigator.of(context).pop();
+              }
+            },
+            child: BlocBuilder<InputQuantityBloc, InputQuantityState>(
+                builder: (context, state) {
+              double quantity;
+              if (state is ValidationQuantityState) {
+                quantity = state.quantity;
+              }
+              return FlatButton(
+                shape: RoundedRectangleBorder(
+                  borderRadius: new BorderRadius.circular(18.0),
+                  // side: BorderSide(color: pacoAppBarColor),
+                ),
+                onPressed: quantity != null
+                    ? () {
+                        FocusScope.of(context).requestFocus(FocusNode());
+                        product.quantity = quantity;
+                        if(product.productType == ProductType.ORDER) product.id = null;
+                        _bloc.add(SaveProductReceptionEvent(product));
+                      }
+                    : null,
+                disabledColor: pacoAppBarColor.withOpacity(0.5),
+                disabledTextColor: pacoRedDisabledColor,
+                color: pacoAppBarColor,
+                textColor: Colors.white,
+                child: Text('Salveaza'),
+              );
+            }),
+          ),
         ),
       ],
     );

@@ -4,13 +4,15 @@ class BalanceItemModel {
   String measureUnit;
   double orderedQuantity;
   double receivedQuantity;
+  int receivedItemId;
 
   BalanceItemModel(
       {this.barcode,
       this.name,
       this.measureUnit,
       this.orderedQuantity,
-      this.receivedQuantity});
+      this.receivedQuantity,
+      this.receivedItemId});
 
   BalanceType get type {
     double diff = orderedQuantity - receivedQuantity;

@@ -2,6 +2,7 @@ import 'package:pacointro/database/database.dart';
 import 'package:pacointro/models/base_model.dart';
 
 class ProductModel extends BaseModel {
+  int id;
   double price;
   String measureUnit;
   double quantity;
@@ -10,7 +11,7 @@ class ProductModel extends BaseModel {
   int createdAt = DateTime.now().millisecondsSinceEpoch;
 
   ProductModel(
-      {int id,
+      {this.id, int code,
       this.price,
       this.measureUnit,
       this.quantity,
@@ -18,7 +19,7 @@ class ProductModel extends BaseModel {
       this.productType,
       this.createdAt,
       String name})
-      : super(id: id, name: name);
+      : super(code: code, name: name);
 
   @override
   Map<String, dynamic> toJson() {
@@ -30,7 +31,8 @@ class ProductModel extends BaseModel {
 
   Map<String, dynamic> toDatabaseMap({ProductType productType}) {
     Map<String, dynamic> data = Map<String, dynamic>();
-    data['code'] = this.id;
+    if(this.id != null) data['id'] = this.id;
+    data['code'] = this.code;
     data['name'] = this.name;
     data['quantity'] = this.quantity;
     data['measureUnit'] = this.measureUnit;
@@ -42,7 +44,8 @@ class ProductModel extends BaseModel {
 
   factory ProductModel.fromDatabase(Map<String, dynamic> json) {
     return ProductModel(
-      id: json["code"],
+      id:  json["id"],
+      code: json["code"],
       name: json["name"],
       price: (json["price"] ?? 0).toDouble(),
       quantity: json["quantity"] ?? 0,
@@ -56,7 +59,7 @@ class ProductModel extends BaseModel {
   factory ProductModel.fromMap(Map<String, dynamic> json) {
     // double q = json["quantity"].toDouble();
     return ProductModel(
-      id: json["COD"],
+      code: json["COD"],
       name: json["DENUMIRE"],
       price: (json["PRET"] ?? 0).toDouble(),
       quantity: json["CANTITATE"] ?? 0,

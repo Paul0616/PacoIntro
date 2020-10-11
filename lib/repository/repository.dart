@@ -2,10 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:pacointro/models/credentials_model.dart';
-
-import 'package:pacointro/models/product_model.dart';
 import 'package:pacointro/models/token_response_model.dart';
-import 'package:pacointro/repository/api_response1.dart';
+
 import 'package:pacointro/repository/preferences_repository.dart';
 import 'package:pacointro/repository/repository_interface.dart';
 import 'package:http/http.dart' as http;
@@ -130,7 +128,7 @@ class Repository extends PreferencesRepository implements DataSource {
   }
 
   @override
-  Future<ApiResponse1<int>> getOrderCount(
+  Future<int> getOrderCount(
       {String orderNumber, String repository}) {
     // TODO: implement getOrderCount
     throw UnimplementedError();

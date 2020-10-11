@@ -4,7 +4,7 @@ class LastInputProductModel extends BaseModel {
   DateTime lastInputDate;
 
   LastInputProductModel({int id, this.lastInputDate, String name})
-      : super(id: id, name: name);
+      : super(code: id, name: name);
 
   factory LastInputProductModel.fromMap(Map<String, dynamic> json) {
     return LastInputProductModel(
