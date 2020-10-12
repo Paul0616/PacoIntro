@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:pacointro/database/database.dart';
 import 'package:pacointro/models/last_input_product_model.dart';
@@ -9,8 +10,6 @@ import 'package:pacointro/models/sales_product_model.dart';
 import 'package:pacointro/models/stock_product_model.dart';
 import 'package:pacointro/models/token_response_model.dart';
 import 'package:pacointro/models/user_model.dart';
-import 'package:http/http.dart' as http;
-import 'package:pacointro/repository/fake_repository.dart';
 import 'package:pacointro/repository/preferences_repository.dart';
 import 'package:pacointro/repository/repository.dart';
 import 'package:pacointro/utils/constants.dart';
@@ -165,35 +164,37 @@ class ApiCallBloc extends Bloc<ApiCallEvent, ApiCallState> {
 
     if (event is OrderByNumberEvent) {
       yield ApiCallLoadingState('looking for order...');
-      // try {
-      var prefs = PreferencesRepository();
-      var currentLocation = await prefs.getLocalLocation();
-      final Map<String, dynamic> response = await repository.getOrderItems(
-        orderNumber: event.orderNumber,
-        repository: currentLocation.name,
-      );
-      List<ProductModel> orderedProducts = List<ProductModel>();
-      orderedProducts = (response['data'])
-          .map((e) => ProductModel.fromMap(e))
-          .toList()
-          .cast<ProductModel>();
-      await DBProvider.db.deleteAllFromTable();
-      await DBProvider.db.insertBulkProduct(orderedProducts, ProductType.ORDER);
-      // orderedProducts = await DBProvider.db
-      //     .getProductsByOrderType(productType: ProductType.ORDER);
-      final Map<String, dynamic> response1 = await repository.getOrderByNumber(
-        orderNumber: event.orderNumber,
-        repository: currentLocation.name,
-      );
-      // var productNumber = await DBProvider.db.getCountProductsByOrderType(productType: ProductType.ORDER);
-      // if(productNumber == 0)
-      OrderModel orderModel = OrderModel.fromMap(response1);
+      try {
+        var prefs = PreferencesRepository();
+        var currentLocation = await prefs.getLocalLocation();
+        final Map<String, dynamic> response = await repository.getOrderItems(
+          orderNumber: event.orderNumber,
+          repository: currentLocation.name,
+        );
+        List<ProductModel> orderedProducts = List<ProductModel>();
+        orderedProducts = (response['data'])
+            .map((e) => ProductModel.fromMap(e))
+            .toList()
+            .cast<ProductModel>();
+        await DBProvider.db.deleteAllFromTable();
+        await DBProvider.db
+            .insertBulkProduct(orderedProducts, ProductType.ORDER);
+        // orderedProducts = await DBProvider.db
+        //     .getProductsByOrderType(productType: ProductType.ORDER);
+        final Map<String, dynamic> response1 =
+            await repository.getOrderByNumber(
+          orderNumber: event.orderNumber,
+          repository: currentLocation.name,
+        );
+        // var productNumber = await DBProvider.db.getCountProductsByOrderType(productType: ProductType.ORDER);
+        // if(productNumber == 0)
+        OrderModel orderModel = OrderModel.fromMap(response1);
 
-      yield ApiCallLoadedState(
-          response: orderModel, callId: CallId.GET_ORDER_BY_NUMBER);
-      // } catch (e) {
-      //   yield ApiCallErrorState(message: '${e.toString()}');
-      // }
+        yield ApiCallLoadedState(
+            response: orderModel, callId: CallId.GET_ORDER_BY_NUMBER);
+      } catch (e) {
+        yield ApiCallErrorState(message: '${e.toString()}');
+      }
     }
 
     if (event is ApiCallErrorEvent) {

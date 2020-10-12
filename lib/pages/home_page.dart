@@ -5,6 +5,7 @@ import 'package:pacointro/blocs/home_event.dart';
 import 'package:pacointro/blocs/home_state.dart';
 
 import 'package:pacointro/pages/CheckProducts/check_products_page.dart';
+import 'package:pacointro/pages/Reception/order_display_page.dart';
 
 import 'package:pacointro/utils/constants.dart';
 import 'package:pacointro/utils/nav_key.dart';
@@ -21,20 +22,13 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  // MainBloc _bloc;
-
-  @override
-  void didChangeDependencies() {
-    // _bloc = Provider.of<MainBloc>(context);
-    // _bloc.getCurrentLocation();
-    super.didChangeDependencies();
-  }
+  HomeBloc _bloc = HomeBloc();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: BlocProvider(
-        create: (_) => HomeBloc(),
+        create: (_) => _bloc,
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
@@ -96,21 +90,33 @@ class _HomePageState extends State<HomePage> {
             SizedBox(
               width: 50,
             ),
-            MenuButtonWidget(
-              image: Image(
-                color: Colors.white,
-                image: AssetImage('images/box.png'),
-                fit: BoxFit.cover,
-              ),
-              text: Text(
-                'Recepție Marfă',
-                style: textStyle.copyWith(color: Colors.black87),
-              ),
-              onTap: () {
-                print("Reception");
-                final navKey = NavKey.navKey;
-                navKey.currentState.pushNamed(OrderInputPage.route);
+            BlocListener<HomeBloc, HomeState>(
+              listener: (context, state){
+                if(state is CurrentOrderState){
+                  final navKey = NavKey.navKey;
+                  if(state.currentOrder == null){
+                    navKey.currentState.pushNamed(OrderInputPage.route);
+                  } else {
+                    navKey.currentState.pushNamed(OrderDisplayPage.route,
+                        arguments: state.currentOrder);
+                  }
+                }
               },
+              child: MenuButtonWidget(
+                image: Image(
+                  color: Colors.white,
+                  image: AssetImage('images/box.png'),
+                  fit: BoxFit.cover,
+                ),
+                text: Text(
+                  'Recepție Marfă',
+                  style: textStyle.copyWith(color: Colors.black87),
+                ),
+                onTap: () {
+                  print("Reception");
+                  _bloc.add(CheckLocalOrderEvent());
+                },
+              ),
             ),
           ],
         ),
@@ -145,21 +151,33 @@ class _HomePageState extends State<HomePage> {
           SizedBox(
             height: 50,
           ),
-          MenuButtonWidget(
-            image: Image(
-              color: Colors.white,
-              image: AssetImage('images/box.png'),
-              fit: BoxFit.cover,
-            ),
-            text: Text(
-              'Recepție Marfă',
-              style: textStyle.copyWith(color: Colors.black87),
-            ),
-            onTap: () {
-              print("Reception");
-              final navKey = NavKey.navKey;
-              navKey.currentState.pushNamed(OrderInputPage.route);
+          BlocListener<HomeBloc, HomeState>(
+            listener: (context, state){
+              if(state is CurrentOrderState){
+                final navKey = NavKey.navKey;
+                if(state.currentOrder == null){
+                  navKey.currentState.pushNamed(OrderInputPage.route);
+                } else {
+                  navKey.currentState.pushNamed(OrderDisplayPage.route,
+                      arguments: state.currentOrder);
+                }
+              }
             },
+            child: MenuButtonWidget(
+              image: Image(
+                color: Colors.white,
+                image: AssetImage('images/box.png'),
+                fit: BoxFit.cover,
+              ),
+              text: Text(
+                'Recepție Marfă',
+                style: textStyle.copyWith(color: Colors.black87),
+              ),
+              onTap: () {
+                print("Reception");
+                _bloc.add(CheckLocalOrderEvent());
+              },
+            ),
           ),
         ],
       ),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pacointro/database/database.dart';
+
 import 'package:pacointro/models/product_model.dart';
 import 'package:pacointro/models/progress_model.dart';
 
@@ -19,3 +19,5 @@ class UpdateProgressState extends OrderSummaryState {
 
   UpdateProgressState(this.progressModel);
 }
+
+class NavigateToHomeState extends OrderSummaryState {}

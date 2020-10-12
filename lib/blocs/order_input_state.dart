@@ -18,3 +18,5 @@ class ValidationInvoiceState extends OrderInputState {
 
   ValidationInvoiceState(this.invoice);
 }
+
+class NavigateToSummaryState extends OrderInputState {}

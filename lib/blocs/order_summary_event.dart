@@ -10,3 +10,5 @@ class FindProductInOrderEvent extends OrderSummaryEvent {
 }
 
 class ProgressRefreshEvent extends OrderSummaryEvent {}
+
+class FinishReceptionEvent extends OrderSummaryEvent {}

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pacointro/models/order_model.dart';
 
 @immutable
 abstract class OrderInputEvent {}
@@ -20,3 +21,10 @@ class InvoiceDateChangeEvent extends OrderInputEvent {
 
   InvoiceDateChangeEvent(this.invoiceDate);
 }
+
+class SaveToPrefsCurrentOrderEvent extends OrderInputEvent {
+  final OrderModel order;
+  SaveToPrefsCurrentOrderEvent(this.order);
+}
+
+class EmptyEvent extends OrderInputEvent {}

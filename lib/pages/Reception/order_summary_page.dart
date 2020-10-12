@@ -16,6 +16,7 @@ import 'package:pacointro/models/product_model.dart';
 import 'package:pacointro/models/progress_model.dart';
 import 'package:pacointro/pages/Reception/input_quantity_page.dart';
 import 'package:pacointro/pages/Reception/list_products.dart';
+import 'package:pacointro/pages/home_page.dart';
 import 'package:pacointro/utils/constants.dart';
 import 'package:pacointro/utils/nav_key.dart';
 import 'package:pacointro/widgets/top_bar.dart';
@@ -29,12 +30,10 @@ class OrderSummaryPage extends StatefulWidget {
 }
 
 class _OrderSummaryPageState extends State<OrderSummaryPage> {
-
   HomeBloc _homeBloc = HomeBloc();
   ApiCallBloc _apiCallBloc = ApiCallBloc();
   OrderSummaryBloc _orderSummaryBloc = OrderSummaryBloc();
-
-
+  String _manualBarcode = "";
 
   @override
   Widget build(BuildContext context) {
@@ -51,41 +50,42 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
             create: (_) => _orderSummaryBloc,
           ),
         ],
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            TopBar(
-              withBackNavigation: true,
-            ),
-            BlocListener<HomeBloc, HomeState>(
-              listener: _onScannerListener,
-              child:
-                  BlocBuilder<HomeBloc, HomeState>(builder: (context, state) {
-                var currentLocationName = '';
-                if (state is EmptyState) {
-                  _homeBloc.add(InitCurrentLocationEvent());
-                }
-                if (state is LocationInitiatedState) {
-                  currentLocationName = state.location.name;
-                  _orderSummaryBloc.add(ProgressRefreshEvent());
-                }
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              TopBar(
+                withBackNavigation: true,
+              ),
+              BlocListener<HomeBloc, HomeState>(
+                listener: _onScannerListener,
+                child:
+                    BlocBuilder<HomeBloc, HomeState>(builder: (context, state) {
+                  var currentLocationName = '';
+                  if (state is EmptyState) {
+                    _homeBloc.add(InitCurrentLocationEvent());
+                  }
+                  if (state is LocationInitiatedState) {
+                    currentLocationName = state.location.name;
+                    _orderSummaryBloc.add(ProgressRefreshEvent());
+                  }
 
-                return Text('Magazin: $currentLocationName',
-                    style: textStyle.copyWith(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 18,
-                        color: pacoAppBarColor));
-              }),
-            ),
-            Expanded(
-              child: Container(
+                  return Text('Magazin: $currentLocationName',
+                      style: textStyle.copyWith(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 18,
+                          color: pacoAppBarColor));
+                }),
+              ),
+              Container(
+                //height: MediaQuery.of(context).size.height-150,
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: _buildBody(context),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
       // This trailing comma makes auto-formatting nicer for build methods.
@@ -98,8 +98,8 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
       child: BlocListener<ApiCallBloc, ApiCallState>(
         listener: _onApiCallListener,
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -149,78 +149,103 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
             // SizedBox(
             //   height: 50,
             // ),
-            Expanded(
-              child: BlocBuilder<ApiCallBloc, ApiCallState>(builder: (context, state) {
-                if (state is ApiCallLoadingState) {
-                  return Center(
-                    child: CircularProgressIndicator(),
-                  );
+            BlocBuilder<ApiCallBloc, ApiCallState>(builder: (context, state) {
+              if (state is ApiCallLoadingState) {
+                return Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+              return BlocBuilder<OrderSummaryBloc, OrderSummaryState>(
+                  builder: (context, state) {
+                ProgressModel progress = ProgressModel(0, 0);
+                if (state is UpdateProgressState) {
+                  progress = state.progressModel;
                 }
-                return BlocBuilder<OrderSummaryBloc, OrderSummaryState>(
-                    builder: (context, state) {
-                      ProgressModel progress = ProgressModel(0,0);
-                      if(state is UpdateProgressState){
-                        progress = state.progressModel;
-                      }
-                      return CircularPercentIndicator(
-                        radius: 130.0,
-                        animation: true,
-                        animationDuration: 1200,
-                        lineWidth: 15.0,
-                        percent: progress.ratio > 1 ? 1.0 : progress.ratio,
-                        center: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            Text(
-                              progress.max != 0
-                                  ? "${progress.current}/${progress.max}"
-                                  : "0/0",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 20.0),
-                            ),
-                            Text(
-                              "produse",
-                              style: textStyle,
-                            ),
-                          ],
-                        ),
-                        circularStrokeCap: CircularStrokeCap.butt,
-                        backgroundColor: Colors.yellow,
-                        progressColor:
-                            progress.ratio > 1
-                                ? Colors.green
-                                : Colors.red,
-                      );
-                    });
-              }),
-            ),
+                return CircularPercentIndicator(
+                  radius: 130.0,
+                  animation: true,
+                  animationDuration: 1200,
+                  lineWidth: 15.0,
+                  percent: progress.ratio > 1 ? 1.0 : progress.ratio,
+                  center: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Text(
+                        progress.max != 0
+                            ? "${progress.current}/${progress.max}"
+                            : "0/0",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 20.0),
+                      ),
+                      Text(
+                        "produse",
+                        style: textStyle,
+                      ),
+                    ],
+                  ),
+                  circularStrokeCap: CircularStrokeCap.butt,
+                  backgroundColor: Colors.yellow,
+                  progressColor: progress.ratio > 1 ? Colors.green : Colors.red,
+                );
+              });
+            }),
             // SizedBox(
             //   height: 50,
             // ),
-            RaisedButton(
-              padding: EdgeInsets.all(8),
-              child: Column(
-                children: <Widget>[
-                  Container(
-                    width: 60,
-                    height: 60,
-                    child: Image(
-                      image: AssetImage('images/barcode_scan.png'),
-                      color: pacoLightGray,
-                      fit: BoxFit.cover,
-                    ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                RaisedButton(
+                  padding: EdgeInsets.all(8),
+                  child: Column(
+                    children: <Widget>[
+                      Container(
+                        width: 60,
+                        height: 60,
+                        child: Image(
+                          image: AssetImage('images/barcode_scan.png'),
+                          color: pacoLightGray,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      Text(
+                        "Scaneaza barcod",
+                        style: textStyleBold.copyWith(color: pacoLightGray),
+                      ),
+                    ],
                   ),
-                  Text(
-                    "Scaneaza cod produs",
-                    style: textStyleBold.copyWith(color: pacoLightGray),
+                  color: pacoAppBarColor,
+                  elevation: 4,
+                  onPressed: () {
+                    _homeBloc.add(ScanBarcodeEvent());
+                  },
+                ),
+                RaisedButton(
+                  padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 14),
+                  child: Column(
+                    children: <Widget>[
+                      Container(
+                        width: 60,
+                        height: 60,
+                        child: Image(
+                          image: AssetImage('images/barcode_manual.png'),
+                          color: pacoLightGray,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      Text(
+                        "Introdu barcod",
+                        style: textStyleBold.copyWith(color: pacoLightGray),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              color: pacoAppBarColor,
-              elevation: 4,
-              onPressed: () {
-                _homeBloc.add(ScanBarcodeEvent());
-              },
+                  color: pacoAppBarColor,
+                  elevation: 4,
+                  onPressed: () {
+                    _dialogManualInputBarcode(context);
+                  },
+                ),
+              ],
             ),
             SizedBox(
               height: 20,
@@ -230,7 +255,9 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
                 borderRadius: new BorderRadius.circular(18.0),
                 // side: BorderSide(color: pacoAppBarColor),
               ),
-              onPressed: () {},
+              onPressed: () {
+                _orderSummaryBloc.add(FinishReceptionEvent());
+              },
               disabledColor: pacoAppBarColor.withOpacity(0.5),
               disabledTextColor: pacoRedDisabledColor,
               color: pacoAppBarColor,
@@ -243,6 +270,42 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
     );
   }
 
+  _dialogManualInputBarcode(BuildContext context) {
+    return dialogAlert(
+        context,
+        'Codul de bare',
+        TextField(
+          onChanged: (code) {
+            // _loginBloc.add(UserNameChangeEvent(newUser));
+            _manualBarcode = code;
+          },
+          textInputAction: TextInputAction.next,
+          keyboardType: TextInputType.number,
+          obscureText: false,
+          //focusNode: _userFocusNode,
+
+          style: textStyle.copyWith(decoration: TextDecoration.none),
+          decoration: InputDecoration(
+            prefixIcon: Icon(Icons.input),
+            contentPadding: EdgeInsets.symmetric(horizontal: 16),
+            border: OutlineInputBorder(
+              borderSide: BorderSide.none,
+              borderRadius: BorderRadius.circular(25.0),
+            ),
+            filled: true,
+            fillColor: pacoLightGray,
+            hintText: "Introduceți codul",
+            hintStyle: textStyle,
+          ),
+        ), onPressedPositive: () {
+      Navigator.pop(context);
+      int barcode = int.tryParse(_manualBarcode);
+      if(barcode != null) {
+        _orderSummaryBloc
+            .add(FindProductInOrderEvent(barcode));
+      }
+    });
+  }
 
   _onScannerListener(BuildContext context, HomeState state) {
     if (state is ScanningErrorState) {
@@ -296,8 +359,8 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
       product.belongsToOrder = false;
       product.productType = ProductType.ORDER;
       final navKey = NavKey.navKey;
-      await navKey.currentState.pushNamed(InputQuantityPage.route,
-          arguments: product);
+      await navKey.currentState
+          .pushNamed(InputQuantityPage.route, arguments: product);
       _orderSummaryBloc.add(ProgressRefreshEvent());
     }
   }
@@ -322,6 +385,11 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
             .pushNamed(InputQuantityPage.route, arguments: state.product);
         _orderSummaryBloc.add(ProgressRefreshEvent());
       }
+    }
+
+    if (state is NavigateToHomeState) {
+      final navKey = NavKey.navKey;
+      navKey.currentState.popUntil(ModalRoute.withName(HomePage.route));
     }
   }
 }

@@ -46,7 +46,7 @@ const String userKey = 'user';
 const String passwordKey = 'password';
 const String tokenKey = 'apiKey';
 const String currentLocationKey = 'currentLocation';
-const String orderCountKey = 'orderCount';
+const String orderKey = 'order';
 
 /*----------------------
   ENUMS

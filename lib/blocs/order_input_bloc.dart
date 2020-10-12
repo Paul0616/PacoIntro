@@ -1,7 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pacointro/blocs/order_input_event.dart';
 import 'package:pacointro/blocs/order_input_state.dart';
+
 import 'package:pacointro/models/invoice_model.dart';
+import 'package:pacointro/repository/preferences_repository.dart';
 
 class OrderInputBloc extends Bloc<OrderInputEvent, OrderInputState> {
   String _invoiceNumber;
@@ -27,6 +29,16 @@ class OrderInputBloc extends Bloc<OrderInputEvent, OrderInputState> {
       _invoiceDate = event.invoiceDate;
       yield ValidationInvoiceState(InvoiceModel(
           invoiceNumber: _invoiceNumber, invoiceDate: _invoiceDate));
+    }
+
+    if(event is SaveToPrefsCurrentOrderEvent) {
+      event.order.invoice = InvoiceModel(invoiceNumber: _invoiceNumber, invoiceDate: _invoiceDate);
+      await PreferencesRepository().saveLocalOrder(order: event.order);
+      yield NavigateToSummaryState();
+    }
+
+    if(event is EmptyEvent){
+      yield EmptyOrderState();
     }
   }
 }

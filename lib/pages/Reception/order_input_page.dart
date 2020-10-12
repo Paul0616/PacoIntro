@@ -25,14 +25,7 @@ class OrderInputPage extends StatefulWidget {
 }
 
 class _OrderInputPageState extends State<OrderInputPage> {
-  // MainBloc _bloc;
 
-  @override
-  void didChangeDependencies() {
-    // _bloc = Provider.of<MainBloc>(context);
-    // _bloc.getCurrentLocation();
-    super.didChangeDependencies();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -112,7 +105,7 @@ class _OrderInputPageState extends State<OrderInputPage> {
     }
     if (state is ApiCallLoadedState) {
       final navKey = NavKey.navKey;
-      navKey.currentState.pushNamed(OrderDisplayPage.route,
+      navKey.currentState.pushReplacementNamed(OrderDisplayPage.route,
           arguments: (state.response as OrderModel));
     }
   }
@@ -163,8 +156,6 @@ class _OrderInputPageState extends State<OrderInputPage> {
               onPressed: isValid
                   ? () {
                       FocusScope.of(context).requestFocus(FocusNode());
-                      // BlocProvider.of<ApiCallBloc>(context)
-                      //                       //     .add(OrderByNumberEvent(orderNumber));
                       BlocProvider.of<ApiCallBloc>(context)
                           .add(OrderByNumberEvent(orderNumber));
                     }

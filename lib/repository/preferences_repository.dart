@@ -1,4 +1,5 @@
 import 'package:pacointro/models/location_model.dart';
+import 'package:pacointro/models/order_model.dart';
 import 'package:pacointro/models/token_response_model.dart';
 import 'package:pacointro/models/user_model.dart';
 import 'package:pacointro/repository/local_base_repository.dart';
@@ -13,6 +14,16 @@ class PreferencesRepository extends LocalBaseRepository {
 
   Future<bool> saveLocalToken({TokenResponseModel token}) async {
     return await super.saveLocalObjectMap(map: token.toJson(), key: tokenKey);
+  }
+
+  Future<OrderModel> getLocalOrder() async {
+    var map = await super.getLocalObjectMap(key: orderKey);
+    if (map == null) return null;
+    return OrderModel.fromPreferences(map);
+  }
+
+  Future<bool> saveLocalOrder({OrderModel order}) async {
+    return await super.saveLocalObjectMap(map: order.toJson(), key: orderKey);
   }
 
   Future<UserModel> getLocalUser() async {

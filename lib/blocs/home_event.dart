@@ -6,3 +6,5 @@ abstract class HomeEvent {}
 class InitCurrentLocationEvent extends HomeEvent {}
 
 class ScanBarcodeEvent extends HomeEvent {}
+
+class CheckLocalOrderEvent extends HomeEvent {}

@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pacointro/blocs/home_event.dart';
 import 'package:pacointro/blocs/home_state.dart';
 import 'package:pacointro/models/location_model.dart';
+import 'package:pacointro/models/order_model.dart';
 import 'package:pacointro/repository/preferences_repository.dart';
 
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
@@ -31,6 +32,13 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         else
           yield ScanningErrorState('Unknown error: $e');
       }
+    }
+
+    if(event is CheckLocalOrderEvent) {
+      print('check');
+      var prefs = PreferencesRepository();
+      OrderModel currentOrder = await prefs.getLocalOrder();
+      yield CurrentOrderState(currentOrder);
     }
   }
 }

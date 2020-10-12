@@ -4,6 +4,8 @@ import 'package:pacointro/blocs/order_summary_state.dart';
 import 'package:pacointro/database/database.dart';
 import 'package:pacointro/models/product_model.dart';
 import 'package:pacointro/models/progress_model.dart';
+import 'package:pacointro/repository/preferences_repository.dart';
+import 'package:pacointro/utils/constants.dart';
 
 class OrderSummaryBloc extends Bloc<OrderSummaryEvent, OrderSummaryState> {
   @override
@@ -28,6 +30,11 @@ class OrderSummaryBloc extends Bloc<OrderSummaryEvent, OrderSummaryState> {
       var scanned = await DBProvider.db.getCountProductsByOrderType(productType: ProductType.RECEPTION);
       var ordered = await DBProvider.db.getCountProductsByOrderType(productType: ProductType.ORDER);
       yield UpdateProgressState(ProgressModel(scanned, ordered));
+    }
+
+    if(event is FinishReceptionEvent) {
+      await PreferencesRepository().removeLocalObject(key: orderKey);
+      yield NavigateToHomeState();
     }
   }
 }

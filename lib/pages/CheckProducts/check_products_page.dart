@@ -180,42 +180,81 @@ class _CheckProductsPageState extends State<CheckProductsPage> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          Container(
-            height: 40,
-            child: RaisedButton.icon(
-              onPressed: () {
-                BlocProvider.of<HomeBloc>(context).add(ScanBarcodeEvent());
-              },
-              shape: StadiumBorder(),
-              color: pacoAppBarColor,
-              icon: Icon(
-                Icons.scanner,
-                color: pacoLightGray,
+          // Container(
+          //   height: 40,
+          //   child: RaisedButton.icon(
+          //     onPressed: () {
+          //       BlocProvider.of<HomeBloc>(context).add(ScanBarcodeEvent());
+          //     },
+          //     shape: StadiumBorder(),
+          //     color: pacoAppBarColor,
+          //     icon: Icon(
+          //       Icons.scanner,
+          //       color: pacoLightGray,
+          //     ),
+          //     label: Text("Scanare produs",
+          //         style: textStyleBold.copyWith(color: pacoLightGray)),
+          //   ),
+          // ),
+          // SizedBox(
+          //   height: 50,
+          // ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              RaisedButton(
+                padding: EdgeInsets.all(8),
+                child: Column(
+                  children: <Widget>[
+                    Container(
+                      width: 60,
+                      height: 60,
+                      child: Image(
+                        image: AssetImage('images/barcode_scan.png'),
+                        color: pacoLightGray,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    Text(
+                      "Scaneaza barcod",
+                      style: textStyleBold.copyWith(color: pacoLightGray),
+                    ),
+                  ],
+                ),
+                color: pacoAppBarColor,
+                elevation: 4,
+                onPressed: () {
+                  BlocProvider.of<HomeBloc>(context).add(ScanBarcodeEvent());
+                },
               ),
-              label: Text("Scanare produs",
-                  style: textStyleBold.copyWith(color: pacoLightGray)),
-            ),
-          ),
-          SizedBox(
-            height: 50,
-          ),
-          Container(
-            height: 40,
-            child: RaisedButton.icon(
-              onPressed: () {
-                final navKey = NavKey.navKey;
-                navKey.currentState.pushNamed(ManualSearchingPage.route,
-                    arguments: SearchType.BY_CODE);
-              },
-              shape: StadiumBorder(),
-              color: Colors.orangeAccent,
-              icon: Icon(
-                Icons.search,
-                color: pacoLightGray,
+              RaisedButton(
+                padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 14),
+                child: Column(
+                  children: <Widget>[
+                    Container(
+                      width: 60,
+                      height: 60,
+                      child: Image(
+                        image: AssetImage('images/barcode_manual.png'),
+                        color: pacoLightGray,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    Text(
+                      "Manual barcod",
+                      style: textStyleBold.copyWith(color: pacoLightGray),
+                    ),
+                  ],
+                ),
+                color: pacoAppBarColor,
+                elevation: 4,
+                onPressed: () {
+                  final navKey = NavKey.navKey;
+                  navKey.currentState.pushNamed(ManualSearchingPage.route,
+                      arguments: SearchType.BY_CODE);
+                },
               ),
-              label: Text("Cautare manuala produs dupa cod",
-                  style: textStyleBold.copyWith(color: pacoLightGray)),
-            ),
+            ],
           ),
           SizedBox(
             height: 50,
@@ -234,7 +273,7 @@ class _CheckProductsPageState extends State<CheckProductsPage> {
                 Icons.search,
                 color: pacoLightGray,
               ),
-              label: Text("Cautare manuala produs dupa nume",
+              label: Text("Cautare produs dupa nume",
                   style: textStyleBold.copyWith(color: pacoLightGray)),
             ),
           ),

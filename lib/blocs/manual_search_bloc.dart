@@ -20,20 +20,5 @@ class ManualSearchBloc extends Bloc<ManualSearchEvent, ManualSearchState> {
       yield SearchWidgetEnabledState(event.searchText.length >
           (event.searchType == SearchType.BY_CODE ? 0 : 2));
     }
-
-    // if (event is StartSearchProductEvent) {
-    //   yield LoadingProductsState('caut produse...')
-    //   var productList = await
-    //   yield ProductListState();
-    // }
-    //
-    // if (event is PasswordChangeEvent) {
-    //   _password = event.newPassword;
-    //   yield LoginRefreshState(_isValid(), credentials);
-    // }
-    //
-    // if (event is NavigateToLocations) {
-    //   yield NavigateAwayState(true);
-    // }
   }
 }

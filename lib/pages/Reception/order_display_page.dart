@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:pacointro/blocs/api_call_bloc.dart';
 import 'package:pacointro/blocs/home_bloc.dart';
 import 'package:pacointro/blocs/home_event.dart';
 import 'package:pacointro/blocs/home_state.dart';
@@ -23,6 +24,7 @@ class OrderDisplayPage extends StatefulWidget {
 
 class _OrderDisplayPageState extends State<OrderDisplayPage> {
   final OrderInputBloc _bloc = OrderInputBloc();
+  TextEditingController _invoiceNumberController = TextEditingController();
 
   @override
   void didChangeDependencies() {
@@ -41,6 +43,9 @@ class _OrderDisplayPageState extends State<OrderDisplayPage> {
           ),
           BlocProvider(
             create: (_) => _bloc,
+          ),
+          BlocProvider(
+            create: (_) => ApiCallBloc(),
           )
         ],
         child: Column(
@@ -181,26 +186,38 @@ class _OrderDisplayPageState extends State<OrderDisplayPage> {
         SizedBox(
           height: 8,
         ),
-        TextField(
-          //autofocus: true,
-          onChanged: (text) {
-            _bloc.add(InvoiceNumberChangeEvent(text));
-          },
-          textInputAction: TextInputAction.done,
-          keyboardType: TextInputType.number,
-          obscureText: false,
-          style: textStyle.copyWith(decoration: TextDecoration.none),
-          decoration: InputDecoration(
-            contentPadding: EdgeInsets.symmetric(horizontal: 16),
-            border: OutlineInputBorder(
-              borderSide: BorderSide.none,
-              borderRadius: BorderRadius.circular(25.0),
-            ),
-            filled: true,
-            fillColor: pacoLightGray,
-            hintText: "Numărul facturii:",
-            hintStyle: textStyle,
-          ),
+        BlocBuilder<OrderInputBloc, OrderInputState>(
+          builder: (context, state) {
+            if(state is EmptyOrderState){
+              if(order.invoice != null) {
+                _invoiceNumberController.text = order.invoice.invoiceNumber;
+                _bloc.add(
+                    InvoiceNumberChangeEvent(order.invoice.invoiceNumber));
+              }
+            }
+            return TextField(
+              //autofocus: true,
+              controller: _invoiceNumberController,
+              onChanged: (text) {
+                _bloc.add(InvoiceNumberChangeEvent(text));
+              },
+              textInputAction: TextInputAction.done,
+              keyboardType: TextInputType.number,
+              obscureText: false,
+              style: textStyle.copyWith(decoration: TextDecoration.none),
+              decoration: InputDecoration(
+                contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                border: OutlineInputBorder(
+                  borderSide: BorderSide.none,
+                  borderRadius: BorderRadius.circular(25.0),
+                ),
+                filled: true,
+                fillColor: pacoLightGray,
+                hintText: "Numărul facturii:",
+                hintStyle: textStyle,
+              ),
+            );
+          }
         ),
         SizedBox(
           height: 8,
@@ -220,6 +237,10 @@ class _OrderDisplayPageState extends State<OrderDisplayPage> {
                     child: BlocBuilder<OrderInputBloc, OrderInputState>(
                         builder: (context, state) {
                       String invoiceDateString = 'Data facturii:';
+                      if(state is EmptyOrderState){
+                        if(order.invoice != null)
+                          _bloc.add(InvoiceDateChangeEvent(order.invoice.invoiceDate));
+                      }
                       if (state is ValidationInvoiceState) {
                         if (state.invoice.invoiceDate != null)
                           invoiceDateString = state.invoice.invoiceDateString;
@@ -252,31 +273,39 @@ class _OrderDisplayPageState extends State<OrderDisplayPage> {
         ),
         Padding(
           padding: EdgeInsets.symmetric(vertical: 8.0),
-          child: BlocBuilder<OrderInputBloc, OrderInputState>(
-              builder: (context, state) {
-            bool isValid = false;
-            if (state is ValidationInvoiceState) {
-              isValid = state.invoice.isValid;
-            }
-            return FlatButton(
-              shape: RoundedRectangleBorder(
-                borderRadius: new BorderRadius.circular(18.0),
-                // side: BorderSide(color: pacoAppBarColor),
-              ),
-              onPressed: isValid
-                  ? () {
-                      FocusScope.of(context).requestFocus(FocusNode());
-                      final navKey = NavKey.navKey;
-                      navKey.currentState.pushNamed(OrderSummaryPage.route);
-                    }
-                  : null,
-              disabledColor: pacoAppBarColor.withOpacity(0.5),
-              disabledTextColor: pacoRedDisabledColor,
-              color: pacoAppBarColor,
-              textColor: Colors.white,
-              child: Text('Începe recepție'),
-            );
-          }),
+          child: BlocListener<OrderInputBloc, OrderInputState>(
+            listener: (context, state) async {
+              if (state is NavigateToSummaryState) {
+                final navKey = NavKey.navKey;
+                await navKey.currentState.pushNamed(OrderSummaryPage.route);
+                _bloc.add(EmptyEvent());
+              }
+            },
+            child: BlocBuilder<OrderInputBloc, OrderInputState>(
+                builder: (context, state) {
+              bool isValid = false;
+              if (state is ValidationInvoiceState) {
+                isValid = state.invoice.isValid;
+              }
+              return FlatButton(
+                shape: RoundedRectangleBorder(
+                  borderRadius: new BorderRadius.circular(18.0),
+                  // side: BorderSide(color: pacoAppBarColor),
+                ),
+                onPressed: isValid
+                    ? () {
+                        FocusScope.of(context).requestFocus(FocusNode());
+                        _bloc.add(SaveToPrefsCurrentOrderEvent(order));
+                      }
+                    : null,
+                disabledColor: pacoAppBarColor.withOpacity(0.5),
+                disabledTextColor: pacoRedDisabledColor,
+                color: pacoAppBarColor,
+                textColor: Colors.white,
+                child: Text('Începe recepție'),
+              );
+            }),
+          ),
         ),
       ],
     );

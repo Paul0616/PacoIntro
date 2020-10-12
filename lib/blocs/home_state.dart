@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pacointro/models/location_model.dart';
+import 'package:pacointro/models/order_model.dart';
 
 @immutable
 abstract class HomeState {}
@@ -21,4 +22,11 @@ class ScanningSuccessfullyState extends HomeState {
   final String barcode;
 
   ScanningSuccessfullyState(this.barcode);
+}
+
+class CurrentOrderState extends HomeState {
+  final OrderModel currentOrder;
+
+  CurrentOrderState(this.currentOrder);
+
 }
