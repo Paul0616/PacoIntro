@@ -4,6 +4,7 @@ import 'package:pacointro/blocs/list_products_state.dart';
 import 'package:pacointro/database/database.dart';
 import 'package:pacointro/models/balance_item.dart';
 import 'package:pacointro/models/product_model.dart';
+import 'package:pacointro/utils/constants.dart';
 
 class ListProductsBloc extends Bloc<ListProductsEvent, ListProductsState> {
   @override
@@ -13,43 +14,7 @@ class ListProductsBloc extends Bloc<ListProductsEvent, ListProductsState> {
   Stream<ListProductsState> mapEventToState(ListProductsEvent event) async* {
     if (event is MakeBalanceEvent) {
       yield LoadingBalanceState('loading balance...');
-      List<BalanceItemModel> balanceItems = List<BalanceItemModel>();
-
-      List<ProductModel> orderedProducts = await DBProvider.db
-          .getProductsByOrderType(productType: ProductType.ORDER);
-      List<ProductModel> receivedProducts = await DBProvider.db
-          .getProductsByOrderType(productType: ProductType.RECEPTION);
-      for (ProductModel receivedProduct in receivedProducts) {
-        var orderProduct = orderedProducts.firstWhere(
-            (element) => element.code == receivedProduct.code,
-            orElse: () => null);
-        balanceItems.add(
-          BalanceItemModel(
-            barcode: receivedProduct.code,
-            name: receivedProduct.name,
-            measureUnit: receivedProduct.measureUnit,
-            orderedQuantity: (orderProduct != null ? orderProduct.quantity : 0),
-            receivedQuantity: receivedProduct.quantity,
-            receivedItemId: receivedProduct.id,
-          ),
-        );
-      }
-      for (ProductModel orderProduct in orderedProducts) {
-        var receivedProduct = receivedProducts.firstWhere(
-            (element) => element.code == orderProduct.code,
-            orElse: () => null);
-
-        if (receivedProduct == null)
-          balanceItems.add(
-            BalanceItemModel(
-              barcode: orderProduct.code,
-              name: orderProduct.name,
-              measureUnit: orderProduct.measureUnit,
-              orderedQuantity: orderProduct.quantity,
-              receivedQuantity: 0,
-            ),
-          );
-      }
+      List<BalanceItemModel> balanceItems = await makeBalance();
 
       yield BalanceLoadedState(balanceItems);
     }
@@ -84,4 +49,6 @@ class ListProductsBloc extends Bloc<ListProductsEvent, ListProductsState> {
       yield EmptyListState();
     }
   }
+
+
 }

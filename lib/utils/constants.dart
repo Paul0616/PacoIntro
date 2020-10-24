@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:pacointro/database/database.dart';
+import 'package:pacointro/models/balance_item.dart';
+import 'package:pacointro/models/product_model.dart';
 
 /*----------------------
   TOP BAR
@@ -67,7 +70,8 @@ enum CallId {
   GET_DETAILS_CALL,
   GET_LAST_INPUT_CALL,
   GET_SALE_IN_PERIOD_CALL,
-  GET_ORDER_BY_NUMBER
+  GET_ORDER_BY_NUMBER,
+  POST_RECEPTION
 }
 
 int productStatus(ProductStatus productStatus) =>
@@ -110,4 +114,45 @@ Future<void> dialogAlert(BuildContext context, String title, Widget child,
       );
     },
   );
+}
+
+Future<List<BalanceItemModel>> makeBalance() async {
+  List<BalanceItemModel> balanceItems = List<BalanceItemModel>();
+
+  List<ProductModel> orderedProducts = await DBProvider.db
+      .getProductsByOrderType(productType: ProductType.ORDER);
+  List<ProductModel> receivedProducts = await DBProvider.db
+      .getProductsByOrderType(productType: ProductType.RECEPTION);
+  for (ProductModel receivedProduct in receivedProducts) {
+    var orderProduct = orderedProducts.firstWhere(
+            (element) => element.code == receivedProduct.code,
+        orElse: () => null);
+    balanceItems.add(
+      BalanceItemModel(
+        barcode: receivedProduct.code,
+        name: receivedProduct.name,
+        measureUnit: receivedProduct.measureUnit,
+        orderedQuantity: (orderProduct != null ? orderProduct.quantity : 0),
+        receivedQuantity: receivedProduct.quantity,
+        receivedItemId: receivedProduct.id,
+      ),
+    );
+  }
+  for (ProductModel orderProduct in orderedProducts) {
+    var receivedProduct = receivedProducts.firstWhere(
+            (element) => element.code == orderProduct.code,
+        orElse: () => null);
+
+    if (receivedProduct == null)
+      balanceItems.add(
+        BalanceItemModel(
+          barcode: orderProduct.code,
+          name: orderProduct.name,
+          measureUnit: orderProduct.measureUnit,
+          orderedQuantity: orderProduct.quantity,
+          receivedQuantity: 0,
+        ),
+      );
+  }
+  return balanceItems;
 }

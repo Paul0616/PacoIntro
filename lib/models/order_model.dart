@@ -31,6 +31,15 @@ class OrderModel {
     return data;
   }
 
+  Map<String, dynamic> toAPIJson() {
+    Map<String, dynamic> data = Map<String, dynamic>();
+    data['id'] = this.id;
+    data['orderNumber'] = this.orderNumber;
+    data['invoiceNumber'] = this.invoice.invoiceNumber;
+    data['invoiceDate'] = this.invoice.invoiceDate.toLocal().toIso8601String();
+    return data;
+  }
+
   factory OrderModel.fromPreferences(Map<String, dynamic> json) {
     return OrderModel(
       id: json['id'],

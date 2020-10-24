@@ -23,6 +23,16 @@ class BalanceItemModel {
     else
       return BalanceType.PRODUCT_EXTRA;
   }
+
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> data = Map<String, dynamic>();
+    data['code'] = this.barcode;
+    data['name'] = this.name;
+    data['UM'] = this.measureUnit;
+    data['orderedQuantity'] = this.orderedQuantity;
+    data['receivedQuantity'] = this.receivedQuantity;
+    return data;
+  }
 }
 
 enum BalanceType { BALANCED, INSUFFICIENT, PRODUCT_EXTRA }

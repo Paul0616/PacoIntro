@@ -32,7 +32,8 @@ class OrderSummaryBloc extends Bloc<OrderSummaryEvent, OrderSummaryState> {
       yield UpdateProgressState(ProgressModel(scanned, ordered));
     }
 
-    if(event is FinishReceptionEvent) {
+    if(event is DeleteOrderAndNavigateEvent) {
+
       await PreferencesRepository().removeLocalObject(key: orderKey);
       yield NavigateToHomeState();
     }

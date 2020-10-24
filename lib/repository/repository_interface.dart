@@ -22,4 +22,5 @@ abstract class DataSource {
       {String orderNumber, String repository});
   Future<Map<String, dynamic>> getOrderItems(
       {String orderNumber, String repository});
+  Future<Map<String, dynamic>> postReception(Map<String, dynamic> body);
 }

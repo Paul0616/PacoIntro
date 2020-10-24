@@ -92,6 +92,12 @@ class FakeRepository extends PreferencesRepository implements DataSource {
   }
 
   @override
+  Future<Map<String, dynamic>> postReception(Map<String, dynamic> body) {
+    // TODO: implement postReception
+    throw UnimplementedError();
+  }
+
+  @override
   Future<Map<String, dynamic>> getProductDetails(
       {int code, String debit}) async {
     Map<String, dynamic> response;

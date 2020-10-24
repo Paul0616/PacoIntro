@@ -162,6 +162,24 @@ class ApiCallBloc extends Bloc<ApiCallEvent, ApiCallState> {
       }
     }
 
+    if (event is PostReceptionEvent) {
+      yield ApiCallLoadingState('se trimite...');
+      try {
+        var prefs = PreferencesRepository();
+        var localOrder = await prefs.getLocalOrder();
+        var balancedProducts = await makeBalance();
+        Map<String, dynamic> data = localOrder.toAPIJson();
+        data["items"] = balancedProducts.map((product) => product.toJson()).toList();
+        data["location"] = (await prefs.getLocalLocation()).name;
+
+        final Map<String, dynamic> response = await repository.postReception(data);
+        yield ApiCallLoadedState(
+            response: response, callId: CallId.POST_RECEPTION);
+      } catch (e) {
+        yield ApiCallErrorState(message: '${e.toString()}');
+      }
+    }
+
     if (event is OrderByNumberEvent) {
       yield ApiCallLoadingState('looking for order...');
       try {
@@ -172,6 +190,7 @@ class ApiCallBloc extends Bloc<ApiCallEvent, ApiCallState> {
           repository: currentLocation.name,
         );
         List<ProductModel> orderedProducts = List<ProductModel>();
+        print(response['data']);
         orderedProducts = (response['data'])
             .map((e) => ProductModel.fromMap(e))
             .toList()

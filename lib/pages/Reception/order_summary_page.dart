@@ -256,7 +256,7 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
                 // side: BorderSide(color: pacoAppBarColor),
               ),
               onPressed: () {
-                _orderSummaryBloc.add(FinishReceptionEvent());
+                _apiCallBloc.add(PostReceptionEvent());
               },
               disabledColor: pacoAppBarColor.withOpacity(0.5),
               disabledTextColor: pacoRedDisabledColor,
@@ -300,9 +300,8 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
         ), onPressedPositive: () {
       Navigator.pop(context);
       int barcode = int.tryParse(_manualBarcode);
-      if(barcode != null) {
-        _orderSummaryBloc
-            .add(FindProductInOrderEvent(barcode));
+      if (barcode != null) {
+        _orderSummaryBloc.add(FindProductInOrderEvent(barcode));
       }
     });
   }
@@ -355,13 +354,23 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
       }
     }
     if (state is ApiCallLoadedState) {
-      var product = (state.response as PaginatedModel).products.first;
-      product.belongsToOrder = false;
-      product.productType = ProductType.ORDER;
-      final navKey = NavKey.navKey;
-      await navKey.currentState
-          .pushNamed(InputQuantityPage.route, arguments: product);
-      _orderSummaryBloc.add(ProgressRefreshEvent());
+      if (state.callId == CallId.GET_PRODUCTS_CALL) {
+        var product = (state.response as PaginatedModel).products.first;
+        product.belongsToOrder = false;
+        product.productType = ProductType.ORDER;
+        final navKey = NavKey.navKey;
+        await navKey.currentState
+            .pushNamed(InputQuantityPage.route, arguments: product);
+        _orderSummaryBloc.add(ProgressRefreshEvent());
+      }
+      if (state.callId == CallId.POST_RECEPTION) {
+        dialogAlert(context, 'Succes',
+            Text('Recepția a fost trimisă cu succes pe server.'),
+            onPressedPositive: () {
+          Navigator.of(context).pop();
+          _orderSummaryBloc.add(DeleteOrderAndNavigateEvent());
+        });
+      }
     }
   }
 

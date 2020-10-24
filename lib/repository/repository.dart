@@ -1,12 +1,11 @@
 import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
+import 'package:http/http.dart' as http;
 import 'package:pacointro/models/credentials_model.dart';
 import 'package:pacointro/models/token_response_model.dart';
-
 import 'package:pacointro/repository/preferences_repository.dart';
 import 'package:pacointro/repository/repository_interface.dart';
-import 'package:http/http.dart' as http;
 import 'package:pacointro/utils/constants.dart';
 
 class Repository extends PreferencesRepository implements DataSource {
@@ -128,8 +127,7 @@ class Repository extends PreferencesRepository implements DataSource {
   }
 
   @override
-  Future<int> getOrderCount(
-      {String orderNumber, String repository}) {
+  Future<int> getOrderCount({String orderNumber, String repository}) {
     // TODO: implement getOrderCount
     throw UnimplementedError();
   }
@@ -148,6 +146,29 @@ class Repository extends PreferencesRepository implements DataSource {
 
     var res = _responseMap(response);
 
+    if (res['status'] == 401) {
+      var prefs = PreferencesRepository();
+      var credentials = CredentialModel(
+          userName: (await prefs.getLocalUser()).name,
+          password: await prefs.getPassword());
+      res = await getToken(credentials);
+    }
+    return res;
+  }
+
+  @override
+  Future<Map<String, dynamic>> postReception(Map<String, dynamic> body) async {
+    var url = '$baseUrl/api/PostReception';
+    Map<String, String> headers = new Map<String, String>();
+    TokenResponseModel tokenResponse = await getLocalToken();
+    headers['Authorization'] = tokenResponse.apiKey;
+    headers['Content-Type'] = 'application/json';
+    headers['Accept'] = 'application/json';
+    print('$url');
+    final response = await this
+        .httpClient
+        .post('$url', headers: headers, body: jsonEncode(body));
+    var res = _responseMap(response);
     if (res['status'] == 401) {
       var prefs = PreferencesRepository();
       var credentials = CredentialModel(
@@ -263,7 +284,9 @@ class Repository extends PreferencesRepository implements DataSource {
         throw ApiException('Error fetching data');
     }
 
-    final Map<String, dynamic> responseJson = json.decode(response.body);
+    final Map<String, dynamic> responseJson = response.body.isEmpty
+        ? {"message": "succes"}
+        : json.decode(response.body);
     return responseJson;
   }
 }

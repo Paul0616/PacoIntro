@@ -83,6 +83,12 @@ class PutProductWithIssueEvent extends ApiCallEvent {
   List<Object> get props => [];
 }
 
+class PostReceptionEvent extends ApiCallEvent {
+  @override
+  // TODO: implement props
+  List<Object> get props => [];
+}
+
 class LastInputEvent extends ApiCallEvent {
   final int code;
 
