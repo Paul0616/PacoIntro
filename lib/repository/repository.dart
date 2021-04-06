@@ -10,7 +10,7 @@ import 'package:pacointro/utils/constants.dart';
 
 class Repository extends PreferencesRepository implements DataSource {
   final http.Client httpClient;
-  final String baseUrl = 'http://api-paco.bavial.ro';
+  final String baseUrl = 'https://api-paco.bavial.ro';
 
   @override
   void dispose() {}

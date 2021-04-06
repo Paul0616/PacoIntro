@@ -41,8 +41,8 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
   bool _isValid() {
     return _username != null &&
-        _username.length > 3 &&
+        _username.length > 2 &&
         _password != null &&
-        _password.length > 3;
+        _password.length > 1;
   }
 }

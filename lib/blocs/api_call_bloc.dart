@@ -38,10 +38,17 @@ class ApiCallBloc extends Bloc<ApiCallEvent, ApiCallState> {
             await repository.getToken(event.credentials);
 
         String token = baseApiResponse['apikey'];
-        var prefs = PreferencesRepository();
-        await prefs.saveLocalToken(token: TokenResponseModel(apiKey: token));
-        await prefs.savePassword(event.credentials.password);
-        yield ApiCallLoadedState(response: token, callId: CallId.TOKEN_CALL);
+        if(token != null) {
+          var prefs = PreferencesRepository();
+          await prefs.saveLocalToken(token: TokenResponseModel(apiKey: token));
+          await prefs.savePassword(event.credentials.password);
+          yield ApiCallLoadedState(response: token, callId: CallId.TOKEN_CALL);
+        } else {
+          if(baseApiResponse['status'] != null && baseApiResponse['status'] == 401)
+            yield ApiCallErrorState(message: 'User sau parola gresite');
+          else
+            yield ApiCallErrorState(message: baseApiResponse.toString());
+        }
       } catch (e) {
         yield ApiCallErrorState(message: '${e.toString()}');
       }
