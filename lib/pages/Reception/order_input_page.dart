@@ -98,7 +98,7 @@ class _OrderInputPageState extends State<OrderInputPage> {
   _onApiListener(BuildContext context, ApiCallState state) {
     if (state is ApiCallErrorState) {
       if (state.message.isNotEmpty) {
-        Scaffold.of(context).showSnackBar(SnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(state.message),
         ));
       }

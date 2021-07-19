@@ -5,7 +5,12 @@ abstract class ListProductsEvent {}
 
 class MakeBalanceEvent extends ListProductsEvent {}
 
-class GetScannedProductsEvent extends ListProductsEvent {}
+class GetScannedProductsEvent extends ListProductsEvent {
+  final int invoiceIdFilter;
+
+  GetScannedProductsEvent(this.invoiceIdFilter);
+
+}
 
 class RefreshEvent extends ListProductsEvent {}
 

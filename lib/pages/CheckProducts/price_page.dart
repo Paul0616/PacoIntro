@@ -108,12 +108,42 @@ class _PricePageState extends State<PricePage> {
                                       ),
                                     )
                                   : Container(),
+                              _currentProduct != null
+                                  ? Text('/${_currentProduct.measureUnit}')
+                                  : Container(),
+                              _currentProduct?.secondPrice != null ? Padding(
+                                padding: const EdgeInsets.only(top: 16.0),
+                                child: Text(
+                                  'PREȚ valabil pentru ${_currentProduct?.quantityWhereSecondPriceIsValidFor??0} ${_currentProduct?.measureUnit??""}',
+                                  style: textStyle,
+                                ),
+                              ) : Container(),
+                              _currentProduct?.secondPrice != null
+                                  ? Container(
+                                padding: EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: pacoAppBarColor,
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: McCountingText(
+                                  begin: 0,
+                                  end: _currentProduct.secondPrice,
+                                  precision: 2,
+                                  style: textStyle.copyWith(
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 42,
+                                      color: pacoLightGray),
+                                  duration: Duration(seconds: 1),
+                                  curve: Curves.decelerate,
+                                ),
+                              )
+                                  : Container(),
                               //     }),
                               // StreamBuilder<ApiResponse1<ProductModel>>(
                               //     stream: _bloc.currentProductStream,
                               //     builder: (context, snapshot) {
                               //       return snapshot.hasData && snapshot.data != null
-                              _currentProduct != null
+                              _currentProduct?.secondPrice != null
                                   ? Text('/${_currentProduct.measureUnit}')
                                   : Container(),
                               //     }),

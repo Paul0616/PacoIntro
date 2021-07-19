@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:pacointro/models/invoice_model.dart';
 import 'package:pacointro/models/product_model.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -10,6 +11,7 @@ class DBProvider {
 
   static final DBProvider db = DBProvider._();
   static final String tableProducts = 'Products';
+  // static final String tableInvoices = 'Invoices';
   Database _database;
 
   Future<Database> get database async {
@@ -40,18 +42,55 @@ class DBProvider {
         "quantity REAL DEFAULT 0,"
         "productType BIT,"
         "belongsToOrder BIT,"
+        "invoiceId INTEGER,"
         "createdAt INTEGER"
         ")");
+    // await db.execute("CREATE TABLE $tableInvoices ("
+    //     "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+    //     "invoiceNumber TEXT,"
+    //     "invoiceDateMillis INTEGER,"
+    //     "isCurrent BIT,"
+    //     "createdAt INTEGER"
+    //     ")");
   }
 
   _onUpgrade(Database db, int oldVersion, int newVersion) async {
     if (oldVersion < newVersion) {
       await db.execute("DROP TABLE IF EXISTS $tableProducts;");
+      // await db.execute("DROP TABLE IF EXISTS $tableInvoices;");
       await _onCreate(db, newVersion);
     }
   }
 
   Future close() async => _database.close();
+
+  //INVOICES---------------------------------------
+  // updateCurrentInvoice({InvoiceModel invoice}) async {
+  //   final db = await database;
+  //   await db.update(tableInvoices,
+  //       {"isCurrent": 0},
+  //       where: "id != ?", whereArgs: [invoice.id]);
+  //   var res1 = await db.update(tableInvoices,
+  //       {"isCurrent": 1},
+  //       where: "id = ?", whereArgs: [invoice.id]);
+  //   return res1;
+  // }
+  //
+  // Future<InvoiceModel> getCurrentInvoice({InvoiceModel invoice}) async {
+  //   final db = await database;
+  //   var list = await db.query(tableInvoices,
+  //       where: "isCurrent = 1", limit: 1);
+  //   return list.isNotEmpty ? InvoiceModel.fromMap(list[0]) : null;
+  // }
+  //
+  // Future<int> insertInvoice(
+  //     InvoiceModel invoice) async {
+  //   final db = await database;
+  //   var raw = await db.insert(
+  //       tableInvoices, invoice.toJson(),
+  //       conflictAlgorithm: ConflictAlgorithm.replace);
+  //   return raw;
+  // }
 
   //PRODUCTS---------------------------------------
   Future<int> insertProduct(
@@ -86,14 +125,18 @@ class DBProvider {
     var res = await db.query(tableProducts,
         where: "productType = ? ",
         whereArgs: [(productType == ProductType.ORDER ? 1 : 0)]);
-    return res.length;
+    var products = res.map((e) => ProductModel.fromDatabase(e)).toList();
+    var listOfCodes = products.map((e) => e.code).toSet();
+    products.retainWhere((element) => listOfCodes.remove(element.code));
+    return products.length;
   }
 
   Future<List<ProductModel>> getProductsByOrderType(
-      {ProductType productType}) async {
+      {ProductType productType, int invoiceIdFilter}) async {
     final db = await database;
+    //var where = invoiceIdFilter != null ? "productType = ? AND invoiceId = ?"
     var res = await db.query(tableProducts,
-        where: "productType = ? ",
+        where: "productType = ? ${invoiceIdFilter != null ? 'AND invoiceId = $invoiceIdFilter' : ''}",
         whereArgs: [(productType == ProductType.ORDER ? 1 : 0)],
         orderBy: "name");
     List<ProductModel> list = res.isNotEmpty
@@ -112,6 +155,14 @@ class DBProvider {
         ? res.map((product) => ProductModel.fromDatabase(product)).toList()
         : [];
     return list;
+  }
+
+  Future<ProductModel> getProductIfAlreadyScanned(ProductModel product) async{
+    final db = await database;
+    var res = await db.query(tableProducts,
+        where: "code = ? AND productType = ? AND invoiceId = ?",
+        whereArgs: [product.code, 0, product.invoiceId]);
+    return res.isEmpty ? null : ProductModel.fromDatabase(res.first);
   }
 
   Future<bool> checkProduct({int code, ProductType productType}) async {

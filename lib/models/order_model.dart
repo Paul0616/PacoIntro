@@ -8,7 +8,7 @@ class OrderModel {
   int supplierFiscalCode;
   String supplierName;
   int productsCount;
-  InvoiceModel invoice;
+  List<InvoiceModel> invoices;
 
   OrderModel(
       {this.id,
@@ -17,7 +17,7 @@ class OrderModel {
       this.supplierFiscalCode,
       this.supplierName,
       this.productsCount,
-      this.invoice});
+      this.invoices = const []});
 
   Map<String, dynamic> toJson() {
     Map<String, dynamic> data = Map<String, dynamic>();
@@ -27,7 +27,7 @@ class OrderModel {
     data['supplierFiscalCode'] = this.supplierFiscalCode;
     data['supplierName'] = this.supplierName;
     data['productsCount'] = this.productsCount;
-    data['invoice'] = this.invoice.toJson();
+    data['invoices'] = this.invoices;
     return data;
   }
 
@@ -35,8 +35,9 @@ class OrderModel {
     Map<String, dynamic> data = Map<String, dynamic>();
     data['id'] = this.id;
     data['orderNumber'] = this.orderNumber;
-    data['invoiceNumber'] = this.invoice.invoiceNumber;
-    data['invoiceDate'] = this.invoice.invoiceDate.toLocal().toIso8601String();
+    data['invoices'] = this.invoices.map((e) => e.toAPIJson()).toList();
+    // data['invoiceNumber'] = this.invoice.invoiceNumber;
+    // data['invoiceDate'] = this.invoice.invoiceDate.toLocal().toIso8601String().replaceAll('T', " ");
     return data;
   }
 
@@ -48,7 +49,9 @@ class OrderModel {
       supplierName: json['supplierName'],
       supplierFiscalCode: json['supplierFiscalCode'],
       productsCount: json['productsCount'],
-      invoice: InvoiceModel.fromMap(json['invoice']),
+      invoices: json['invoices']
+          .map<InvoiceModel>((e) => InvoiceModel.fromMap(e))
+          .toList(),
     );
   }
 
@@ -63,4 +66,17 @@ class OrderModel {
   }
 
   String get orderDateString => DateFormat('dd.MM.yyyy').format(orderDate);
+
+  int get nextAvailableInvoiceId =>
+      invoices.fold(
+          invoices.isEmpty ? 0 : invoices[0].id,
+          (previousValue, element) =>
+              previousValue < element.id ? element.id : previousValue) +
+      1;
+
+  int get currentInvoiceId {
+    var inv = invoices.where((element) => element.isCurrent).toList();
+    return inv.isEmpty ? null : inv[0].id;
+  }
+
 }

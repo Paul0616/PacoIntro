@@ -27,4 +27,9 @@ class SaveToPrefsCurrentOrderEvent extends OrderInputEvent {
   SaveToPrefsCurrentOrderEvent(this.order);
 }
 
+
+class NavigateToSummaryEvent extends OrderInputEvent {
+  NavigateToSummaryEvent();
+}
+
 class EmptyEvent extends OrderInputEvent {}

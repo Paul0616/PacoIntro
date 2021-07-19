@@ -97,8 +97,8 @@ class _InputQuantityPageState extends State<InputQuantityPage> {
         Padding(
           padding: EdgeInsets.symmetric(vertical: 8.0),
           child: BlocListener<InputQuantityBloc, InputQuantityState>(
-            listener: (context, state){
-              if(state is QuantityInputDoneState){
+            listener: (context, state) {
+              if (state is QuantityInputDoneState) {
                 Navigator.of(context).pop();
               }
             },
@@ -108,23 +108,32 @@ class _InputQuantityPageState extends State<InputQuantityPage> {
               if (state is ValidationQuantityState) {
                 quantity = state.quantity;
               }
-              return FlatButton(
-                shape: RoundedRectangleBorder(
-                  borderRadius: new BorderRadius.circular(18.0),
-                  // side: BorderSide(color: pacoAppBarColor),
+              return TextButton(
+                style: ButtonStyle(
+                  shape: MaterialStateProperty.all(
+                    RoundedRectangleBorder(
+                      borderRadius: new BorderRadius.circular(18.0),
+                    ),
+                  ),
+                  foregroundColor: MaterialStateProperty.resolveWith<Color>(
+                      (states) => states.contains(MaterialState.disabled)
+                          ? pacoRedDisabledColor
+                          : Colors.white),
+                  backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                      (states) => states.contains(MaterialState.disabled)
+                          ? pacoAppBarColor.withOpacity(0.5)
+                          : pacoAppBarColor),
                 ),
                 onPressed: quantity != null
                     ? () {
                         FocusScope.of(context).requestFocus(FocusNode());
                         product.quantity = quantity;
-                        if(product.productType == ProductType.ORDER) product.id = null;
+
+                        if (product.productType == ProductType.ORDER)
+                          product.id = null;
                         _bloc.add(SaveProductReceptionEvent(product));
                       }
                     : null,
-                disabledColor: pacoAppBarColor.withOpacity(0.5),
-                disabledTextColor: pacoRedDisabledColor,
-                color: pacoAppBarColor,
-                textColor: Colors.white,
                 child: Text('Salveaza'),
               );
             }),

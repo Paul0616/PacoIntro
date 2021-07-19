@@ -159,6 +159,7 @@ class Repository extends PreferencesRepository implements DataSource {
   @override
   Future<Map<String, dynamic>> postReception(Map<String, dynamic> body) async {
     var url = '$baseUrl/api/PostReception';
+    prettyPrintJson(body);
     Map<String, String> headers = new Map<String, String>();
     TokenResponseModel tokenResponse = await getLocalToken();
     headers['Authorization'] = tokenResponse.apiKey;
@@ -177,6 +178,12 @@ class Repository extends PreferencesRepository implements DataSource {
       res = await getToken(credentials);
     }
     return res;
+  }
+
+  static void prettyPrintJson(Map<String, dynamic> map){
+    JsonEncoder encoder = JsonEncoder.withIndent('  ');
+    var prettyString = encoder.convert(map);
+    prettyString.split('\n').forEach((element) => print(element));
   }
 
   @override

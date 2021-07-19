@@ -1,7 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:pacointro/database/database.dart';
 import 'package:pacointro/models/balance_item.dart';
+import 'package:pacointro/models/order_model.dart';
 import 'package:pacointro/models/product_model.dart';
+import 'package:pacointro/repository/preferences_repository.dart';
 
 /*----------------------
   TOP BAR
@@ -117,7 +121,8 @@ Future<void> dialogAlert(BuildContext context, String title, Widget child,
 }
 
 Future<List<BalanceItemModel>> makeBalance() async {
-  List<BalanceItemModel> balanceItems = List<BalanceItemModel>();
+  List<BalanceItemModel> balanceItems = [];
+  var order = await PreferencesRepository().getLocalOrder();
 
   List<ProductModel> orderedProducts = await DBProvider.db
       .getProductsByOrderType(productType: ProductType.ORDER);
@@ -125,7 +130,7 @@ Future<List<BalanceItemModel>> makeBalance() async {
       .getProductsByOrderType(productType: ProductType.RECEPTION);
   for (ProductModel receivedProduct in receivedProducts) {
     var orderProduct = orderedProducts.firstWhere(
-            (element) => element.code == receivedProduct.code,
+        (element) => element.code == receivedProduct.code,
         orElse: () => null);
     balanceItems.add(
       BalanceItemModel(
@@ -135,12 +140,14 @@ Future<List<BalanceItemModel>> makeBalance() async {
         orderedQuantity: (orderProduct != null ? orderProduct.quantity : 0),
         receivedQuantity: receivedProduct.quantity,
         receivedItemId: receivedProduct.id,
+        invoiceId: receivedProduct.invoiceId,
+        invoiceInfo: getInvoiceInfo(fromOrder: order, invoiceId: receivedProduct.invoiceId),
       ),
     );
   }
   for (ProductModel orderProduct in orderedProducts) {
     var receivedProduct = receivedProducts.firstWhere(
-            (element) => element.code == orderProduct.code,
+        (element) => element.code == orderProduct.code,
         orElse: () => null);
 
     if (receivedProduct == null)
@@ -156,3 +163,19 @@ Future<List<BalanceItemModel>> makeBalance() async {
   }
   return balanceItems;
 }
+
+String getInvoiceInfo({OrderModel fromOrder, int invoiceId}) {
+  var invoices = fromOrder.invoices.where((element) => element.id == invoiceId);
+  return invoices.isNotEmpty
+      ? "${invoices.first.invoiceNumber}/${invoices.first.invoiceDateString}"
+      : "";
+}
+
+void prettyPrintJson(Map<String, dynamic> map){
+  JsonEncoder encoder = JsonEncoder.withIndent('  ');
+  var prettyString = encoder.convert(map);
+  prettyString.split('\n').forEach((element) => print(element));
+}
+
+
+

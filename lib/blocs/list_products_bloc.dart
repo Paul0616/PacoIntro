@@ -4,6 +4,7 @@ import 'package:pacointro/blocs/list_products_state.dart';
 import 'package:pacointro/database/database.dart';
 import 'package:pacointro/models/balance_item.dart';
 import 'package:pacointro/models/product_model.dart';
+import 'package:pacointro/repository/preferences_repository.dart';
 import 'package:pacointro/utils/constants.dart';
 
 class ListProductsBloc extends Bloc<ListProductsEvent, ListProductsState> {
@@ -21,9 +22,10 @@ class ListProductsBloc extends Bloc<ListProductsEvent, ListProductsState> {
     //===============================
     if (event is GetScannedProductsEvent) {
       yield LoadingBalanceState('loading balance...');
+      var order = await PreferencesRepository().getLocalOrder();
       List<ProductModel> products = await DBProvider.db
-          .getProductsByOrderType(productType: ProductType.RECEPTION);
-      List<BalanceItemModel> balanceItems = List<BalanceItemModel>();
+          .getProductsByOrderType(productType: ProductType.RECEPTION, invoiceIdFilter: event.invoiceIdFilter);
+      List<BalanceItemModel> balanceItems = [];
 
       for (ProductModel product in products) {
         balanceItems.add(
@@ -34,6 +36,8 @@ class ListProductsBloc extends Bloc<ListProductsEvent, ListProductsState> {
             orderedQuantity: 0,
             receivedQuantity: product.quantity,
             receivedItemId: product.id,
+            invoiceId: product.invoiceId,
+            invoiceInfo: getInvoiceInfo(fromOrder: order, invoiceId: product.invoiceId),
           ),
         );
       }

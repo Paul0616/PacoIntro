@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import 'package:mccounting_text/mccounting_text.dart';
 import 'package:pacointro/blocs/api_call_bloc.dart';
 import 'package:pacointro/blocs/api_call_event.dart';
@@ -14,8 +15,6 @@ import 'package:pacointro/models/stock_product_model.dart';
 import 'package:pacointro/utils/constants.dart';
 import 'package:pacointro/widgets/top_bar.dart';
 
-import 'package:intl/intl.dart';
-
 class DetailsPage extends StatefulWidget {
   static String route = "/DetailsPage";
 
@@ -25,6 +24,7 @@ class DetailsPage extends StatefulWidget {
 
 class _DetailsPageState extends State<DetailsPage> {
   ProductModel _currentProduct;
+  DateTime currentStartDate, currentEndDate;
 
   //final Repository _repository = Repository(httpClient: http.Client());
 
@@ -345,17 +345,27 @@ class _DetailsPageState extends State<DetailsPage> {
         Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: <
             Widget>[
           BlocBuilder<DetailBloc, DetailState>(builder: (context, state) {
-            DateTime startDate;
-            if (state is EmptyState) {
-              startDate = state.date;
-            }
-            if (state is RefreshStartDateState) {
-              startDate = state.startDate;
+            //DateTime startDate;
+            // if (state is EmptyState) {
+            //   startDate = currentStartDate;//state.date;
+            // }
+            if (state is RefreshDateState) {
+              currentStartDate = state.startDate;
             }
             return GestureDetector(
               onTap: () async {
-                BlocProvider.of<DetailBloc>(context).add(ChangeStartDateEvent(
-                    await getDate(initialDate: startDate ?? DateTime.now())));
+                //if(currentStartDate)
+                var pickerDate = await getDate(
+                  initialDate: currentStartDate ??
+                      DateTime.now().subtract(Duration(days: 1)),
+                  lastDate: (currentEndDate ?? DateTime.now())
+                );
+                BlocProvider.of<DetailBloc>(context).add(
+                  ChangeDateEvent(
+                    startDate: pickerDate,
+                    endDate: (currentEndDate ?? DateTime.now()),
+                  ),
+                );
               },
               child: Container(
                 padding: EdgeInsets.all(8),
@@ -363,7 +373,8 @@ class _DetailsPageState extends State<DetailsPage> {
                     border:
                         Border.all(color: pacoRedDisabledColor, width: 1.0)),
                 child: Text(
-                  DateFormat('dd.MM.yyyy').format(startDate ?? DateTime.now()),
+                  DateFormat('dd.MM.yyyy').format(currentStartDate ??
+                      DateTime.now().subtract(Duration(days: 1))),
                   style: textStyle.copyWith(
                       fontWeight: FontWeight.w700,
                       fontSize: 18,
@@ -373,17 +384,33 @@ class _DetailsPageState extends State<DetailsPage> {
             );
           }),
           BlocBuilder<DetailBloc, DetailState>(builder: (context, state) {
-            DateTime endDate;
-            if (state is EmptyState) {
-              endDate = state.date;
-            }
-            if (state is RefreshEndDateState) {
-              endDate = state.endDate;
+            // DateTime endDate;
+            // if (state is EmptyState) {
+            //   endDate = state.date;
+            // }
+            if (state is RefreshDateState) {
+              currentEndDate = state.endDate;
             }
             return GestureDetector(
               onTap: () async {
-                BlocProvider.of<DetailBloc>(context).add(ChangeEndDateEvent(
-                    await getDate(initialDate: endDate ?? DateTime.now())));
+                var pickerDate = await getDate(
+                    initialDate: currentEndDate ??
+                        DateTime.now(),
+                    lastDate: DateTime.now()
+                );
+                // if(pickerDate.compareTo(currentEndDate ?? DateTime.now()) > 0){
+                //   pickerDate = currentEndDate;
+                // }
+                if(pickerDate.compareTo(currentStartDate ?? DateTime.now().subtract(Duration(days: 1))) < 0){
+                  currentStartDate = pickerDate;
+                }
+                BlocProvider.of<DetailBloc>(context).add(
+                  ChangeDateEvent(
+                    startDate: currentStartDate ??
+                        DateTime.now().subtract(Duration(days: 1)),
+                    endDate: pickerDate,
+                  ),
+                );
               },
               child: Container(
                 padding: EdgeInsets.all(8),
@@ -391,7 +418,8 @@ class _DetailsPageState extends State<DetailsPage> {
                     border:
                         Border.all(color: pacoRedDisabledColor, width: 1.0)),
                 child: Text(
-                  DateFormat('dd.MM.yyyy').format(endDate ?? DateTime.now()),
+                  DateFormat('dd.MM.yyyy')
+                      .format(currentEndDate ?? DateTime.now()),
                   style: textStyle.copyWith(
                       fontWeight: FontWeight.w700,
                       fontSize: 18,
@@ -521,13 +549,13 @@ class _DetailsPageState extends State<DetailsPage> {
     );
   }
 
-  Future<DateTime> getDate({DateTime initialDate}) {
+  Future<DateTime> getDate({DateTime initialDate, DateTime lastDate}) {
     return showDatePicker(
       context: context,
       initialDate: initialDate,
       firstDate: DateTime.now().subtract(Duration(days: 365)),
       //  DateTime(DateTime.now().year),
-      lastDate: DateTime.now(),
+      lastDate: lastDate,
       builder: (BuildContext context, Widget child) {
         return Theme(
           data: ThemeData.light(),

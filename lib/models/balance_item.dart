@@ -5,6 +5,8 @@ class BalanceItemModel {
   double orderedQuantity;
   double receivedQuantity;
   int receivedItemId;
+  int invoiceId;
+  String invoiceInfo;
 
   BalanceItemModel(
       {this.barcode,
@@ -12,7 +14,9 @@ class BalanceItemModel {
       this.measureUnit,
       this.orderedQuantity,
       this.receivedQuantity,
-      this.receivedItemId});
+      this.receivedItemId,
+      this.invoiceId,
+      this.invoiceInfo});
 
   BalanceType get type {
     double diff = orderedQuantity - receivedQuantity;
@@ -30,9 +34,11 @@ class BalanceItemModel {
     data['name'] = this.name;
     data['UM'] = this.measureUnit;
     data['orderedQuantity'] = this.orderedQuantity;
-    data['receivedQuantity'] = this.receivedQuantity;
+    //data['receivedQuantity'] = this.receivedQuantity;
     return data;
   }
+
+
 }
 
 enum BalanceType { BALANCED, INSUFFICIENT, PRODUCT_EXTRA }

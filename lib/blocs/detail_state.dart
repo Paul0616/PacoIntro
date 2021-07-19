@@ -13,14 +13,22 @@ class EmptyState extends DetailState {
   final DateTime date = DateTime.now();
 }
 
-class RefreshStartDateState extends DetailState {
+// class RefreshStartDateState extends DetailState {
+//   final DateTime startDate;
+//
+//   RefreshStartDateState(this.startDate);
+// }
+//
+// class RefreshEndDateState extends DetailState {
+//   final DateTime endDate;
+//
+//   RefreshEndDateState(this.endDate);
+// }
+
+class RefreshDateState extends DetailState {
   final DateTime startDate;
-
-  RefreshStartDateState(this.startDate);
-}
-
-class RefreshEndDateState extends DetailState {
   final DateTime endDate;
 
-  RefreshEndDateState(this.endDate);
+  RefreshDateState({this.startDate, this.endDate});
 }
+

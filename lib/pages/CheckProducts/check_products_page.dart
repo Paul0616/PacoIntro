@@ -261,14 +261,16 @@ class _CheckProductsPageState extends State<CheckProductsPage> {
           ),
           Container(
             height: 40,
-            child: RaisedButton.icon(
+            child: ElevatedButton.icon(
               onPressed: () {
                 final navKey = NavKey.navKey;
                 navKey.currentState.pushNamed(ManualSearchingPage.route,
                     arguments: SearchType.BY_NAME);
               },
-              shape: StadiumBorder(),
-              color: Colors.orangeAccent,
+              style: ElevatedButton.styleFrom(
+                shape: StadiumBorder(),
+                primary: Colors.orangeAccent,
+              ),
               icon: Icon(
                 Icons.search,
                 color: pacoLightGray,
@@ -299,7 +301,7 @@ class _CheckProductsPageState extends State<CheckProductsPage> {
   _onApiListener(BuildContext context, ApiCallState state) {
     if (state is ApiCallErrorState) {
       if (state.message.isNotEmpty) {
-        Scaffold.of(context).showSnackBar(SnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(state.message),
         ));
       }

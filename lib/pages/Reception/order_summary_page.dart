@@ -7,10 +7,15 @@ import 'package:pacointro/blocs/api_call_state.dart';
 import 'package:pacointro/blocs/home_bloc.dart';
 import 'package:pacointro/blocs/home_event.dart';
 import 'package:pacointro/blocs/home_state.dart';
+import 'package:pacointro/blocs/invoice_bloc.dart';
+import 'package:pacointro/blocs/invoice_event.dart';
+import 'package:pacointro/blocs/invoice_state.dart';
 import 'package:pacointro/blocs/order_summary_bloc.dart';
 import 'package:pacointro/blocs/order_summary_event.dart';
 import 'package:pacointro/blocs/order_summary_state.dart';
 import 'package:pacointro/database/database.dart';
+import 'package:pacointro/models/invoice_model.dart';
+import 'package:pacointro/models/order_model.dart';
 import 'package:pacointro/models/paginated_model.dart';
 import 'package:pacointro/models/product_model.dart';
 import 'package:pacointro/models/progress_model.dart';
@@ -31,9 +36,11 @@ class OrderSummaryPage extends StatefulWidget {
 
 class _OrderSummaryPageState extends State<OrderSummaryPage> {
   HomeBloc _homeBloc = HomeBloc();
+  InvoiceBloc _invoiceBloc = InvoiceBloc();
   ApiCallBloc _apiCallBloc = ApiCallBloc();
   OrderSummaryBloc _orderSummaryBloc = OrderSummaryBloc();
   String _manualBarcode = "";
+  int _currentInvoiceId;
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +55,9 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
           ),
           BlocProvider(
             create: (_) => _orderSummaryBloc,
+          ),
+          BlocProvider(
+            create: (_) => _invoiceBloc,
           ),
         ],
         child: SingleChildScrollView(
@@ -101,13 +111,62 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
+            BlocListener<HomeBloc, HomeState>(
+              listener: _onScannerListener,
+              child: BlocBuilder<InvoiceBloc, InvoiceState>(
+                  builder: (context, state) {
+                if (state is ValidationInvoiceState) {
+                  return SizedBox(
+                    height: 110,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        _buildInvoiceInput(),
+                        _buildAddInvoiceButton(
+                            isValid: state.invoice?.isValid ?? false,
+                            needSaveInvoice: true),
+                      ],
+                    ),
+                  );
+                }
+                if (state is GetOrderState) {
+                  var order = state.order;
+                  if (order == null) {
+                    _invoiceBloc.add(EmptyInvoiceEvent());
+                  }
+                  return order != null
+                      ? SizedBox(
+                          height: 110,
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildInvoicesList(context, order),
+                              _buildAddInvoiceButton(needSaveInvoice: false),
+                            ],
+                          ),
+                        )
+                      : SizedBox(
+                          height: 80,
+                        );
+                } else {
+                  return SizedBox(
+                    height: 80,
+                  );
+                }
+              }),
+            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Expanded(
                   child: Container(
                     padding: EdgeInsets.all(8),
-                    child: OutlineButton(
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        shape: StadiumBorder(),
+                        padding: EdgeInsets.all(10),
+                        side: BorderSide(color: pacoAppBarColor),
+                      ),
                       onPressed: () {
                         final navKey = NavKey.navKey;
                         navKey.currentState.pushNamed(ListProductsPage.route,
@@ -118,37 +177,35 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
                         style: textStyleBold,
                         textAlign: TextAlign.center,
                       ),
-                      borderSide: BorderSide(color: pacoAppBarColor),
-                      shape: StadiumBorder(),
-                      padding: EdgeInsets.all(10),
                     ),
                   ),
                 ),
                 Expanded(
                   child: Container(
                     padding: EdgeInsets.all(8),
-                    child: OutlineButton(
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        shape: StadiumBorder(),
+                        padding: EdgeInsets.all(10),
+                        side: BorderSide(color: pacoAppBarColor),
+                      ),
                       onPressed: () {
                         final navKey = NavKey.navKey;
                         navKey.currentState
-                            .pushNamed(ListProductsPage.route, arguments: true);
+                            .pushNamed(ListProductsPage.route, arguments: true).then((value) {
+                          _orderSummaryBloc.add(ProgressRefreshEvent());
+                        });
                       },
                       child: Text(
-                        'Vezi produsele deja scanate',
+                        'Vezi produsele deja recepționate',
                         style: textStyleBold,
                         textAlign: TextAlign.center,
                       ),
-                      borderSide: BorderSide(color: pacoAppBarColor),
-                      shape: StadiumBorder(),
-                      padding: EdgeInsets.all(10),
                     ),
                   ),
                 ),
               ],
             ),
-            // SizedBox(
-            //   height: 50,
-            // ),
             BlocBuilder<ApiCallBloc, ApiCallState>(builder: (context, state) {
               if (state is ApiCallLoadingState) {
                 return Center(
@@ -189,83 +246,254 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
                 );
               });
             }),
-            // SizedBox(
-            //   height: 50,
-            // ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                RaisedButton(
-                  padding: EdgeInsets.all(8),
-                  child: Column(
-                    children: <Widget>[
-                      Container(
-                        width: 60,
-                        height: 60,
-                        child: Image(
-                          image: AssetImage('images/barcode_scan.png'),
-                          color: pacoLightGray,
-                          fit: BoxFit.cover,
+            BlocBuilder<InvoiceBloc, InvoiceState>(builder: (context, state) {
+              bool isValid = false;
+              if (state is GetOrderState) {
+                isValid = state.order?.invoices?.isNotEmpty ?? false;
+                if (isValid) {
+                  _currentInvoiceId = state.order.currentInvoiceId;
+                } else {
+                  _currentInvoiceId = null;
+                }
+              }
+              return Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          padding: EdgeInsets.all(8),
+                          elevation: 4,
+                          primary: pacoAppBarColor,
                         ),
+                        child: Column(
+                          children: <Widget>[
+                            Container(
+                              width: 60,
+                              height: 60,
+                              child: Image(
+                                image: AssetImage('images/barcode_scan.png'),
+                                color: pacoLightGray,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            Text(
+                              "Scaneaza barcod",
+                              style:
+                                  textStyleBold.copyWith(color: pacoLightGray),
+                            ),
+                          ],
+                        ),
+                        onPressed: isValid
+                            ? () {
+                                _homeBloc.add(ScanBarcodeEvent());
+                              }
+                            : null,
                       ),
-                      Text(
-                        "Scaneaza barcod",
-                        style: textStyleBold.copyWith(color: pacoLightGray),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          padding: EdgeInsets.symmetric(
+                              vertical: 8.0, horizontal: 14),
+                          elevation: 4,
+                          primary: pacoAppBarColor,
+                        ),
+                        child: Column(
+                          children: <Widget>[
+                            Container(
+                              width: 60,
+                              height: 60,
+                              child: Image(
+                                image: AssetImage('images/barcode_manual.png'),
+                                color: pacoLightGray,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            Text(
+                              "Introdu barcod",
+                              style:
+                                  textStyleBold.copyWith(color: pacoLightGray),
+                            ),
+                          ],
+                        ),
+                        onPressed: isValid
+                            ? () {
+                                _dialogManualInputBarcode(context);
+                              }
+                            : null,
                       ),
                     ],
                   ),
-                  color: pacoAppBarColor,
-                  elevation: 4,
-                  onPressed: () {
-                    _homeBloc.add(ScanBarcodeEvent());
-                  },
-                ),
-                RaisedButton(
-                  padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 14),
-                  child: Column(
-                    children: <Widget>[
-                      Container(
-                        width: 60,
-                        height: 60,
-                        child: Image(
-                          image: AssetImage('images/barcode_manual.png'),
-                          color: pacoLightGray,
-                          fit: BoxFit.cover,
+                  SizedBox(
+                    height: 20,
+                  ),
+                  TextButton(
+                    style: ButtonStyle(
+                      shape: MaterialStateProperty.all(
+                        RoundedRectangleBorder(
+                          borderRadius: new BorderRadius.circular(18.0),
                         ),
                       ),
-                      Text(
-                        "Introdu barcod",
-                        style: textStyleBold.copyWith(color: pacoLightGray),
-                      ),
-                    ],
+                      foregroundColor: MaterialStateProperty.resolveWith<Color>(
+                          (states) => states.contains(MaterialState.disabled)
+                              ? pacoRedDisabledColor
+                              : Colors.white),
+                      backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                          (states) => states.contains(MaterialState.disabled)
+                              ? pacoAppBarColor.withOpacity(0.5)
+                              : pacoAppBarColor),
+                    ),
+                    onPressed: isValid
+                        ? () {
+                            _apiCallBloc.add(PostReceptionEvent());
+                          }
+                        : null,
+                    child: Text('Finalizează recepție'),
                   ),
-                  color: pacoAppBarColor,
-                  elevation: 4,
-                  onPressed: () {
-                    _dialogManualInputBarcode(context);
-                  },
+                ],
+              );
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+
+  _buildInvoicesList(BuildContext context, OrderModel order) {
+    return Expanded(
+      child: order.invoices.isEmpty
+          ? Text(
+              'Trebuie sa adaugi cel putin o factura pentru a putea scana produse.',
+              style: textStyle.copyWith(fontSize: 12, color: Colors.black87),
+              textAlign: TextAlign.center,
+            )
+          : MediaQuery.removePadding(
+              context: context,
+              removeTop: true,
+              child: ListView.builder(
+                itemCount: order.invoices.length,
+                shrinkWrap: true,
+                itemExtent: 35,
+                // separatorBuilder: (context, index) {
+                //   return Divider();
+                // },
+                itemBuilder: (context, index) =>
+                    _buildInvoiceTile(context, order.invoices[index]),
+              ),
+            ),
+    );
+  }
+
+  _buildAddInvoiceButton({bool isValid = true, bool needSaveInvoice}) {
+    return Container(
+      width: 30,
+      height: 30,
+      margin: EdgeInsets.only(left: 16),
+      child: RawMaterialButton(
+        onPressed: isValid
+            ? needSaveInvoice
+                ? () {
+                    _invoiceBloc.add(SaveInvoiceEvent());
+                  }
+                : () {
+                    _invoiceBloc.add(AddNewInvoiceEvent());
+                  }
+            : () {
+                _invoiceBloc.add(EmptyInvoiceEvent());
+              },
+        elevation: 4,
+        fillColor: isValid ? pacoAppBarColor : Colors.grey,
+        child: Icon(
+          needSaveInvoice
+              ? isValid
+                  ? Icons.check
+                  : Icons.close
+              : Icons.add,
+          size: 20.0,
+          color: Colors.white,
+        ),
+        padding: EdgeInsets.zero,
+        shape: CircleBorder(),
+      ),
+    );
+  }
+
+  _buildInvoiceInput() {
+    return Expanded(
+      child: Column(
+        children: [
+          TextField(
+            //autofocus: true,
+            //controller: _invoiceNumberController,
+            onChanged: (text) {
+              _invoiceBloc.add(InvoiceNumberChangeEvent(text));
+            },
+            textInputAction: TextInputAction.done,
+            keyboardType: TextInputType.number,
+            obscureText: false,
+            style: textStyle.copyWith(decoration: TextDecoration.none),
+            decoration: InputDecoration(
+              contentPadding: EdgeInsets.symmetric(horizontal: 16),
+              border: OutlineInputBorder(
+                borderSide: BorderSide.none,
+                borderRadius: BorderRadius.circular(25.0),
+              ),
+              filled: true,
+              fillColor: pacoLightGray,
+              hintText: "Numărul facturii:",
+              hintStyle: textStyle,
+            ),
+          ),
+          SizedBox(
+            height: 8,
+          ),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: pacoLightGray,
+              borderRadius: BorderRadius.all(Radius.circular(25.0)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: BlocBuilder<InvoiceBloc, InvoiceState>(
+                          builder: (context, state) {
+                        String invoiceDateString = 'Data facturii:';
+                        if (state is ValidationInvoiceState) {
+                          if (state.invoice?.invoiceDate != null)
+                            invoiceDateString = state.invoice.invoiceDateString;
+                        }
+                        return Text(
+                          invoiceDateString,
+                          style: textStyle.copyWith(
+                            fontSize: 16,
+                          ),
+                        );
+                      }),
+                    ),
+                    GestureDetector(
+                      onTap: () async {
+                        FocusScope.of(context).requestFocus(FocusNode());
+                        var date = await getDate();
+                        _invoiceBloc.add(InvoiceDateChangeEvent(date));
+                      },
+                      child: CircleAvatar(
+                        radius: 12,
+                        child: Icon(
+                          Icons.calendar_view_day,
+                          size: 20,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
-            SizedBox(
-              height: 20,
-            ),
-            FlatButton(
-              shape: RoundedRectangleBorder(
-                borderRadius: new BorderRadius.circular(18.0),
-                // side: BorderSide(color: pacoAppBarColor),
-              ),
-              onPressed: () {
-                _apiCallBloc.add(PostReceptionEvent());
-              },
-              disabledColor: pacoAppBarColor.withOpacity(0.5),
-              disabledTextColor: pacoRedDisabledColor,
-              color: pacoAppBarColor,
-              textColor: Colors.white,
-              child: Text('Finalizează recepție'),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -309,7 +537,7 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
   _onScannerListener(BuildContext context, HomeState state) {
     if (state is ScanningErrorState) {
       if (state.message.isNotEmpty) {
-        Scaffold.of(context).showSnackBar(SnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(state.message),
         ));
       }
@@ -333,11 +561,13 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
             var messageList = state.message.split('\'');
             var barCode = messageList
                 .firstWhere((element) => int.tryParse(element) != null);
+            print("InvoiceId: $_currentInvoiceId");
             var product = ProductModel(
               code: int.tryParse(barCode) ?? 0,
               name: "Produs inexistent în Contliv",
               quantity: 0,
               belongsToOrder: false,
+              invoiceId: _currentInvoiceId ?? 0,
               productType: ProductType.ORDER,
             );
             final navKey = NavKey.navKey;
@@ -347,7 +577,7 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
             Navigator.of(context).pop();
           });
         } else {
-          Scaffold.of(context).showSnackBar(SnackBar(
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text(state.message),
           ));
         }
@@ -355,9 +585,11 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
     }
     if (state is ApiCallLoadedState) {
       if (state.callId == CallId.GET_PRODUCTS_CALL) {
+        print("InvoiceId: $_currentInvoiceId");
         var product = (state.response as PaginatedModel).products.first;
         product.belongsToOrder = false;
         product.productType = ProductType.ORDER;
+        product.invoiceId = _currentInvoiceId ?? 0;
         final navKey = NavKey.navKey;
         await navKey.currentState
             .pushNamed(InputQuantityPage.route, arguments: product);
@@ -389,10 +621,24 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
           Navigator.of(context).pop();
         });
       } else {
+        print("InvoiceId: $_currentInvoiceId");
+        state.product.invoiceId = _currentInvoiceId ?? 0;
         final navKey = NavKey.navKey;
-        await navKey.currentState
-            .pushNamed(InputQuantityPage.route, arguments: state.product);
-        _orderSummaryBloc.add(ProgressRefreshEvent());
+        var prod = await DBProvider.db.getProductIfAlreadyScanned(state.product);
+        if(prod != null) {
+          prod.productType = ProductType.RECEPTION;
+          navKey.currentState
+              .pushNamed(InputQuantityPage.route, arguments: prod)
+              .then((value) {
+            _orderSummaryBloc.add(ProgressRefreshEvent());
+          });
+        } else {
+          navKey.currentState
+              .pushNamed(InputQuantityPage.route, arguments: state.product)
+              .then((value) {
+            _orderSummaryBloc.add(ProgressRefreshEvent());
+          });
+        }
       }
     }
 
@@ -400,5 +646,54 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
       final navKey = NavKey.navKey;
       navKey.currentState.popUntil(ModalRoute.withName(HomePage.route));
     }
+  }
+
+  _buildInvoiceTile(BuildContext context, InvoiceModel invoice) {
+    return GestureDetector(
+      onTap: () {
+        _invoiceBloc.add(SelectInvoiceEvent(invoice));
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.all(
+            Radius.circular(4),
+          ),
+          color: (invoice.isCurrent ?? false) ? Colors.yellow : Colors.white,
+        ),
+        child: Row(
+          //mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(
+              child: Text(
+                "Factura: ${invoice.invoiceNumber ?? "- "}/${invoice.invoiceDateString}",
+              ),
+            ),
+            GestureDetector(
+                onTap: () {
+                  _invoiceBloc.add(RemoveInvoiceEvent(invoice));
+                },
+                child: Icon(Icons.remove_circle, color: Colors.grey)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<DateTime> getDate() {
+    return showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now().subtract(Duration(days: 10)),
+      //  DateTime(DateTime.now().year),
+      lastDate: DateTime.now(),
+      builder: (BuildContext context, Widget child) {
+        return Theme(
+          data: ThemeData.light(),
+          child: child,
+        );
+      },
+    );
   }
 }

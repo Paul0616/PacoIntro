@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pacointro/blocs/api_call_bloc.dart';
@@ -24,7 +22,6 @@ class OrderDisplayPage extends StatefulWidget {
 
 class _OrderDisplayPageState extends State<OrderDisplayPage> {
   final OrderInputBloc _bloc = OrderInputBloc();
-  TextEditingController _invoiceNumberController = TextEditingController();
 
   @override
   void didChangeDependencies() {
@@ -186,90 +183,8 @@ class _OrderDisplayPageState extends State<OrderDisplayPage> {
         SizedBox(
           height: 8,
         ),
-        BlocBuilder<OrderInputBloc, OrderInputState>(
-          builder: (context, state) {
-            if(state is EmptyOrderState){
-              if(order.invoice != null) {
-                _invoiceNumberController.text = order.invoice.invoiceNumber;
-                _bloc.add(
-                    InvoiceNumberChangeEvent(order.invoice.invoiceNumber));
-              }
-            }
-            return TextField(
-              //autofocus: true,
-              controller: _invoiceNumberController,
-              onChanged: (text) {
-                _bloc.add(InvoiceNumberChangeEvent(text));
-              },
-              textInputAction: TextInputAction.done,
-              keyboardType: TextInputType.number,
-              obscureText: false,
-              style: textStyle.copyWith(decoration: TextDecoration.none),
-              decoration: InputDecoration(
-                contentPadding: EdgeInsets.symmetric(horizontal: 16),
-                border: OutlineInputBorder(
-                  borderSide: BorderSide.none,
-                  borderRadius: BorderRadius.circular(25.0),
-                ),
-                filled: true,
-                fillColor: pacoLightGray,
-                hintText: "Numărul facturii:",
-                hintStyle: textStyle,
-              ),
-            );
-          }
-        ),
         SizedBox(
           height: 8,
-        ),
-        Container(
-          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          decoration: BoxDecoration(
-            color: pacoLightGray,
-            borderRadius: BorderRadius.all(Radius.circular(25.0)),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Row(
-                children: <Widget>[
-                  Expanded(
-                    child: BlocBuilder<OrderInputBloc, OrderInputState>(
-                        builder: (context, state) {
-                      String invoiceDateString = 'Data facturii:';
-                      if(state is EmptyOrderState){
-                        if(order.invoice != null)
-                          _bloc.add(InvoiceDateChangeEvent(order.invoice.invoiceDate));
-                      }
-                      if (state is ValidationInvoiceState) {
-                        if (state.invoice.invoiceDate != null)
-                          invoiceDateString = state.invoice.invoiceDateString;
-                      }
-                      return Text(
-                        invoiceDateString,
-                        style: textStyle.copyWith(
-                          fontSize: 16,
-                        ),
-                      );
-                    }),
-                  ),
-                  GestureDetector(
-                    onTap: () async {
-                      var date = await getDate();
-                      _bloc.add(InvoiceDateChangeEvent(date));
-                    },
-                    child: CircleAvatar(
-                      radius: 12,
-                      child: Icon(
-                        Icons.calendar_view_day,
-                        size: 20,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
         ),
         Padding(
           padding: EdgeInsets.symmetric(vertical: 8.0),
@@ -281,49 +196,30 @@ class _OrderDisplayPageState extends State<OrderDisplayPage> {
                 _bloc.add(EmptyEvent());
               }
             },
-            child: BlocBuilder<OrderInputBloc, OrderInputState>(
-                builder: (context, state) {
-              bool isValid = false;
-              if (state is ValidationInvoiceState) {
-                isValid = state.invoice.isValid;
-              }
-              return FlatButton(
-                shape: RoundedRectangleBorder(
-                  borderRadius: new BorderRadius.circular(18.0),
-                  // side: BorderSide(color: pacoAppBarColor),
+            child: TextButton(
+              style: ButtonStyle(
+                foregroundColor: MaterialStateProperty.resolveWith<Color>(
+                    (states) => states.contains(MaterialState.disabled)
+                        ? pacoRedDisabledColor
+                        : Colors.white),
+                shape: MaterialStateProperty.all(
+                  RoundedRectangleBorder(
+                    borderRadius: new BorderRadius.circular(18.0),
+                  ),
                 ),
-                onPressed: isValid
-                    ? () {
-                        FocusScope.of(context).requestFocus(FocusNode());
-                        _bloc.add(SaveToPrefsCurrentOrderEvent(order));
-                      }
-                    : null,
-                disabledColor: pacoAppBarColor.withOpacity(0.5),
-                disabledTextColor: pacoRedDisabledColor,
-                color: pacoAppBarColor,
-                textColor: Colors.white,
-                child: Text('Începe recepție'),
-              );
-            }),
+                backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                    (states) => states.contains(MaterialState.disabled)
+                        ? pacoAppBarColor.withOpacity(0.5)
+                        : pacoAppBarColor),
+              ),
+              onPressed: () {
+                _bloc.add(SaveToPrefsCurrentOrderEvent(order));
+              },
+              child: Text('Începe recepție'),
+            ),
           ),
         ),
       ],
-    );
-  }
-
-  Future<DateTime> getDate() {
-    return showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime.now().subtract(Duration(days: 10)),
-      //  DateTime(DateTime.now().year),
-      lastDate: DateTime.now(),
-      builder: (BuildContext context, Widget child) {
-        return Theme(
-          data: ThemeData.light(),
-          child: child,
-        );
-      },
     );
   }
 }

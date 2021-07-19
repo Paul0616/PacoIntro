@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:pacointro/database/database.dart';
+import 'package:pacointro/models/balance_item.dart';
 import 'package:pacointro/models/last_input_product_model.dart';
 import 'package:pacointro/models/order_model.dart';
 import 'package:pacointro/models/paginated_model.dart';
@@ -38,13 +39,14 @@ class ApiCallBloc extends Bloc<ApiCallEvent, ApiCallState> {
             await repository.getToken(event.credentials);
 
         String token = baseApiResponse['apikey'];
-        if(token != null) {
+        if (token != null) {
           var prefs = PreferencesRepository();
           await prefs.saveLocalToken(token: TokenResponseModel(apiKey: token));
           await prefs.savePassword(event.credentials.password);
           yield ApiCallLoadedState(response: token, callId: CallId.TOKEN_CALL);
         } else {
-          if(baseApiResponse['status'] != null && baseApiResponse['status'] == 401)
+          if (baseApiResponse['status'] != null &&
+              baseApiResponse['status'] == 401)
             yield ApiCallErrorState(message: 'User sau parola gresite');
           else
             yield ApiCallErrorState(message: baseApiResponse.toString());
@@ -176,10 +178,34 @@ class ApiCallBloc extends Bloc<ApiCallEvent, ApiCallState> {
         var localOrder = await prefs.getLocalOrder();
         var balancedProducts = await makeBalance();
         Map<String, dynamic> data = localOrder.toAPIJson();
-        data["items"] = balancedProducts.map((product) => product.toJson()).toList();
+        List<BalanceItemModel> _finalProducts = [];
+        for (var product in balancedProducts) {
+          if (!_finalProducts
+              .any((element) => element.barcode == product.barcode)) {
+            _finalProducts.add(product);
+          }
+          // else {
+          //   var _p = _finalProducts.firstWhere(
+          //       (element) => element.barcode == product.barcode,
+          //       orElse: () => null);
+          //   _p.receivedQuantity += product.receivedQuantity;
+          // }
+        }
+        data["items"] = _finalProducts.map((product) {
+          var _productMap = product.toJson();
+          var productWithSameCode = balancedProducts
+              .where((element) => element.barcode == product.barcode)
+              .toList();
+          _productMap['receivedQuantity'] = productWithSameCode
+              .map((e) =>
+                  {"invoiceId": e.invoiceId, "quantity": e.receivedQuantity})
+              .toList();
+          return _productMap;
+        }).toList();
         data["location"] = (await prefs.getLocalLocation()).name;
-
-        final Map<String, dynamic> response = await repository.postReception(data);
+        //prettyPrintJson(data);
+        final Map<String, dynamic> response =
+            await repository.postReception(data);
         yield ApiCallLoadedState(
             response: response, callId: CallId.POST_RECEPTION);
       } catch (e) {

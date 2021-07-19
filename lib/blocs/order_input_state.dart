@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pacointro/models/invoice_model.dart';
+import 'package:pacointro/models/order_model.dart';
 
 @immutable
 abstract class OrderInputState {}
@@ -13,10 +14,11 @@ class ValidationSendRequestState extends OrderInputState {
   ValidationSendRequestState(this.isValid, this.orderNumber);
 }
 
-class ValidationInvoiceState extends OrderInputState {
-  final InvoiceModel invoice;
+// class ValidationInvoiceState extends OrderInputState {
+//   final InvoiceModel invoice;
+//
+//   ValidationInvoiceState(this.invoice);
+// }
 
-  ValidationInvoiceState(this.invoice);
-}
 
 class NavigateToSummaryState extends OrderInputState {}
