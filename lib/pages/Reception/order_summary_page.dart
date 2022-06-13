@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pacointro/blocs/api_call_bloc.dart';
@@ -571,7 +570,7 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
       Navigator.pop(context);
       int barcode = int.tryParse(_manualBarcode);
       if (barcode != null) {
-        10_orderSummaryBloc.add(FindProductInOrderEvent(barcode));
+        _orderSummaryBloc.add(FindProductInOrderEvent(barcode));
       }
     });
   }
