@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mccounting_text/mccounting_text.dart';
 import 'package:pacointro/blocs/api_call_bloc.dart';
-import 'package:pacointro/blocs/api_call_state.dart';
 import 'package:pacointro/blocs/api_call_event.dart';
+import 'package:pacointro/blocs/api_call_state.dart';
 import 'package:pacointro/models/product_model.dart';
 import 'package:pacointro/pages/CheckProducts/details_page.dart';
 import 'package:pacointro/utils/constants.dart';
@@ -94,7 +94,8 @@ class _PricePageState extends State<PricePage> {
                                         padding: EdgeInsets.all(8),
                                         decoration: BoxDecoration(
                                           color: pacoAppBarColor,
-                                          borderRadius: BorderRadius.circular(16),
+                                          borderRadius:
+                                              BorderRadius.circular(16),
                                         ),
                                         child: McCountingText(
                                           begin: 0,
@@ -112,32 +113,36 @@ class _PricePageState extends State<PricePage> {
                                 _currentProduct != null
                                     ? Text('/${_currentProduct.measureUnit}')
                                     : Container(),
-                                _currentProduct?.secondPrice != null ? Padding(
-                                  padding: const EdgeInsets.only(top: 16.0),
-                                  child: Text(
-                                    'PREȚ valabil pentru ${_currentProduct?.quantityWhereSecondPriceIsValidFor??0} ${_currentProduct?.measureUnit??""}',
-                                    style: textStyle,
-                                  ),
-                                ) : Container(),
+                                _currentProduct?.secondPrice != null
+                                    ? Padding(
+                                        padding:
+                                            const EdgeInsets.only(top: 16.0),
+                                        child: Text(
+                                          'PREȚ valabil pentru ${_currentProduct?.quantityWhereSecondPriceIsValidFor ?? 0} ${_currentProduct?.measureUnit ?? ""}',
+                                          style: textStyle,
+                                        ),
+                                      )
+                                    : Container(),
                                 _currentProduct?.secondPrice != null
                                     ? Container(
-                                  padding: EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: pacoAppBarColor,
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  child: McCountingText(
-                                    begin: 0,
-                                    end: _currentProduct.secondPrice,
-                                    precision: 2,
-                                    style: textStyle.copyWith(
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 42,
-                                        color: pacoLightGray),
-                                    duration: Duration(seconds: 1),
-                                    curve: Curves.decelerate,
-                                  ),
-                                )
+                                        padding: EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: pacoAppBarColor,
+                                          borderRadius:
+                                              BorderRadius.circular(16),
+                                        ),
+                                        child: McCountingText(
+                                          begin: 0,
+                                          end: _currentProduct.secondPrice,
+                                          precision: 2,
+                                          style: textStyle.copyWith(
+                                              fontWeight: FontWeight.w700,
+                                              fontSize: 42,
+                                              color: pacoLightGray),
+                                          duration: Duration(seconds: 1),
+                                          curve: Curves.decelerate,
+                                        ),
+                                      )
                                     : Container(),
                                 //     }),
                                 // StreamBuilder<ApiResponse1<ProductModel>>(
@@ -180,15 +185,17 @@ class _PricePageState extends State<PricePage> {
                               fillColor: Colors.white,
                               padding: const EdgeInsets.all(30.0),
                             ),
-                            OutlineButton(
+                            OutlinedButton(
                               onPressed: () {
                                 final navKey = NavKey.navKey;
                                 navKey.currentState.pushNamed(DetailsPage.route,
                                     arguments: _currentProduct);
                               },
                               child: Text('Alte detalii'),
-                              borderSide: BorderSide(
-                                  color: pacoAppBarColor.withOpacity(0.5)),
+                              style: OutlinedButton.styleFrom(
+                                side: BorderSide(
+                                    color: pacoAppBarColor.withOpacity(0.5)),
+                              ),
                             ),
                           ],
                         ),
@@ -208,7 +215,7 @@ class _PricePageState extends State<PricePage> {
   _onApiListener(BuildContext context, ApiCallState state) {
     if (state is ApiCallErrorState) {
       if (state.message.isNotEmpty) {
-        Scaffold.of(context).showSnackBar(SnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(state.message),
         ));
       }
