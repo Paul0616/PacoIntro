@@ -2,7 +2,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pacointro/blocs/order_input_event.dart';
 import 'package:pacointro/blocs/order_input_state.dart';
 
-import 'package:pacointro/models/invoice_model.dart';
 import 'package:pacointro/repository/preferences_repository.dart';
 
 class OrderInputBloc extends Bloc<OrderInputEvent, OrderInputState> {

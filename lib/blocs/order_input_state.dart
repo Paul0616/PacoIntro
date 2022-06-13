@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:pacointro/models/invoice_model.dart';
-import 'package:pacointro/models/order_model.dart';
 
 @immutable
 abstract class OrderInputState {}

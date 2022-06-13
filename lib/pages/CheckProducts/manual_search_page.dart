@@ -25,7 +25,7 @@ class ManualSearchingPage extends StatefulWidget {
 
 class _ManualSearchingPageState extends State<ManualSearchingPage> {
   ManualSearchBloc _bloc = ManualSearchBloc();
-  List<ProductModel> _products = List<ProductModel>();
+  List<ProductModel> _products = <ProductModel>[];
   ScrollController _scrollController = ScrollController();
   SearchType _searchType;
   bool _isLoading = false;
@@ -220,7 +220,7 @@ class _ManualSearchingPageState extends State<ManualSearchingPage> {
   _errorListener(BuildContext context, ApiCallState state) {
     if (state is ApiCallErrorState) {
       if (state.message.isNotEmpty) {
-        Scaffold.of(context).showSnackBar(SnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(state.message),
         ));
       }

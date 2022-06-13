@@ -107,12 +107,11 @@ class _CheckProductsPageState extends State<CheckProductsPage> {
         children: [
           Container(
             height: 60,
-            child: RaisedButton.icon(
+            child: ElevatedButton.icon(
               onPressed: () {
                 BlocProvider.of<HomeBloc>(context).add(ScanBarcodeEvent());
               },
-              shape: StadiumBorder(),
-              color: pacoAppBarColor,
+              style: ElevatedButton.styleFrom(shape: StadiumBorder(), primary: pacoAppBarColor,),
               icon: Icon(
                 Icons.scanner,
                 color: pacoLightGray,
@@ -121,22 +120,21 @@ class _CheckProductsPageState extends State<CheckProductsPage> {
                   style: textStyleBold.copyWith(color: pacoLightGray)),
             ),
           ),
-          SizedBox(
-            height: 50,
-          ),
+          Spacer(),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Container(
                 height: 60,
-                child: RaisedButton.icon(
+                child: ElevatedButton.icon(
                   onPressed: () {
                     final navKey = NavKey.navKey;
                     navKey.currentState.pushNamed(ManualSearchingPage.route,
                         arguments: SearchType.BY_CODE);
                   },
-                  shape: StadiumBorder(),
-                  color: Colors.orangeAccent,
+                  style: ElevatedButton.styleFrom(shape: StadiumBorder(),
+                    primary: Colors.orangeAccent,),
+
                   icon: Icon(
                     Icons.search,
                     color: pacoLightGray,
@@ -150,14 +148,14 @@ class _CheckProductsPageState extends State<CheckProductsPage> {
               ),
               Container(
                 height: 60,
-                child: RaisedButton.icon(
+                child: ElevatedButton.icon(
                   onPressed: () {
                     final navKey = NavKey.navKey;
                     navKey.currentState.pushNamed(ManualSearchingPage.route,
                         arguments: SearchType.BY_NAME);
                   },
-                  shape: StadiumBorder(),
-                  color: Colors.orangeAccent,
+                  style: ElevatedButton.styleFrom(shape: StadiumBorder(),
+                    primary: Colors.orangeAccent,),
                   icon: Icon(
                     Icons.search,
                     color: pacoLightGray,
@@ -180,30 +178,10 @@ class _CheckProductsPageState extends State<CheckProductsPage> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          // Container(
-          //   height: 40,
-          //   child: RaisedButton.icon(
-          //     onPressed: () {
-          //       BlocProvider.of<HomeBloc>(context).add(ScanBarcodeEvent());
-          //     },
-          //     shape: StadiumBorder(),
-          //     color: pacoAppBarColor,
-          //     icon: Icon(
-          //       Icons.scanner,
-          //       color: pacoLightGray,
-          //     ),
-          //     label: Text("Scanare produs",
-          //         style: textStyleBold.copyWith(color: pacoLightGray)),
-          //   ),
-          // ),
-          // SizedBox(
-          //   height: 50,
-          // ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              RaisedButton(
-                padding: EdgeInsets.all(8),
+              ElevatedButton(
                 child: Column(
                   children: <Widget>[
                     Container(
@@ -221,14 +199,14 @@ class _CheckProductsPageState extends State<CheckProductsPage> {
                     ),
                   ],
                 ),
-                color: pacoAppBarColor,
-                elevation: 4,
+                style: ElevatedButton.styleFrom(padding: EdgeInsets.all(8),  primary: pacoAppBarColor,
+                  elevation: 4,),
                 onPressed: () {
                   BlocProvider.of<HomeBloc>(context).add(ScanBarcodeEvent());
                 },
               ),
-              RaisedButton(
-                padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 14),
+              ElevatedButton(
+
                 child: Column(
                   children: <Widget>[
                     Container(
@@ -246,8 +224,8 @@ class _CheckProductsPageState extends State<CheckProductsPage> {
                     ),
                   ],
                 ),
-                color: pacoAppBarColor,
-                elevation: 4,
+                style: ElevatedButton.styleFrom(padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 14),primary: pacoAppBarColor,
+                  elevation: 4,),
                 onPressed: () {
                   final navKey = NavKey.navKey;
                   navKey.currentState.pushNamed(ManualSearchingPage.route,
@@ -287,7 +265,7 @@ class _CheckProductsPageState extends State<CheckProductsPage> {
   _onErrorScanListener(BuildContext context, HomeState state) {
     if (state is ScanningErrorState) {
       if (state.message.isNotEmpty) {
-        Scaffold.of(context).showSnackBar(SnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(state.message),
         ));
       }

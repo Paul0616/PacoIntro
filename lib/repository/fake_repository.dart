@@ -39,7 +39,7 @@ class FakeRepository extends PreferencesRepository implements DataSource {
       {String orderNumber, String repository}) async {
     return await Future.delayed(Duration(milliseconds: 1000), () {
       List items = JsonDecoder().convert(orderItems);
-      List<ProductModel> foundedProducts = List<ProductModel>();
+      List<ProductModel> foundedProducts = <ProductModel>[];
       items.forEach((map) {
         ProductModel product = ProductModel.fromMap(map);
         foundedProducts.add(product);

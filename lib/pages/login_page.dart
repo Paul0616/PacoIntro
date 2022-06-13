@@ -63,7 +63,13 @@ class _LoginPageState extends State<LoginPage> {
               FutureBuilder(
                   future: PackageInfo.fromPlatform(),
                   builder: (context, snapshot) {
-                    return snapshot.hasData ? Text('v${(snapshot.data as PackageInfo)?.version ?? ""}', style: TextStyle(fontSize: 11, color: Colors.black54),) : Container();
+                    return snapshot.hasData
+                        ? Text(
+                            'v${(snapshot.data as PackageInfo)?.version ?? ""}',
+                            style:
+                                TextStyle(fontSize: 11, color: Colors.black54),
+                          )
+                        : Container();
                   }),
               Expanded(
                 child: Padding(
@@ -143,10 +149,24 @@ class _LoginPageState extends State<LoginPage> {
   Widget _buildSubmitButton(BuildContext context, LoginState state) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 8.0),
-      child: FlatButton(
-        shape: RoundedRectangleBorder(
-          borderRadius: new BorderRadius.circular(18.0),
-          // side: BorderSide(color: pacoAppBarColor),
+      child: TextButton(
+        style: ButtonStyle(
+          shape: MaterialStateProperty.all(
+            RoundedRectangleBorder(
+              borderRadius: new BorderRadius.circular(18.0),
+              // side: BorderSide(color: pacoAppBarColor),
+            ),
+          ),
+          foregroundColor: MaterialStateProperty.resolveWith(
+            (states) => states.contains(MaterialState.disabled)
+                ? pacoRedDisabledColor
+                : Colors.white,
+          ),
+          backgroundColor: MaterialStateProperty.resolveWith(
+            (states) => states.contains(MaterialState.disabled)
+                ? pacoAppBarColor.withOpacity(0.5)
+                : pacoAppBarColor,
+          ),
         ),
         onPressed: state.isValid
             ? () {
@@ -155,10 +175,6 @@ class _LoginPageState extends State<LoginPage> {
                     .add(GetTokenEvent(credentials));
               }
             : null,
-        disabledColor: pacoAppBarColor.withOpacity(0.5),
-        disabledTextColor: pacoRedDisabledColor,
-        color: pacoAppBarColor,
-        textColor: Colors.white,
         child: Text('Log in'),
       ),
     );

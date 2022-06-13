@@ -6,13 +6,11 @@ import 'package:pacointro/blocs/api_call_state.dart';
 import 'package:pacointro/blocs/home_bloc.dart';
 import 'package:pacointro/blocs/home_event.dart';
 import 'package:pacointro/blocs/home_state.dart';
-
 import 'package:pacointro/blocs/order_input_bloc.dart';
 import 'package:pacointro/blocs/order_input_event.dart';
 import 'package:pacointro/blocs/order_input_state.dart';
 import 'package:pacointro/models/order_model.dart';
 import 'package:pacointro/pages/Reception/order_display_page.dart';
-
 import 'package:pacointro/utils/constants.dart';
 import 'package:pacointro/utils/nav_key.dart';
 import 'package:pacointro/widgets/top_bar.dart';
@@ -25,8 +23,6 @@ class OrderInputPage extends StatefulWidget {
 }
 
 class _OrderInputPageState extends State<OrderInputPage> {
-
-
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
@@ -148,10 +144,23 @@ class _OrderInputPageState extends State<OrderInputPage> {
               isValid = state.isValid;
               orderNumber = state.orderNumber;
             }
-            return FlatButton(
-              shape: RoundedRectangleBorder(
-                borderRadius: new BorderRadius.circular(18.0),
-                // side: BorderSide(color: pacoAppBarColor),
+            return TextButton(
+              style: ButtonStyle(
+                foregroundColor: MaterialStateProperty.resolveWith(
+                  (states) => states.contains(MaterialState.disabled)
+                      ? pacoRedDisabledColor
+                      : Colors.white,
+                ),
+                backgroundColor: MaterialStateProperty.resolveWith(
+                  (states) => states.contains(MaterialState.disabled)
+                      ? pacoAppBarColor.withOpacity(0.5)
+                      : pacoAppBarColor,
+                ),
+                shape: MaterialStateProperty.all(
+                  RoundedRectangleBorder(
+                    borderRadius: new BorderRadius.circular(18.0),
+                  ),
+                ),
               ),
               onPressed: isValid
                   ? () {
@@ -160,10 +169,10 @@ class _OrderInputPageState extends State<OrderInputPage> {
                           .add(OrderByNumberEvent(orderNumber));
                     }
                   : null,
-              disabledColor: pacoAppBarColor.withOpacity(0.5),
-              disabledTextColor: pacoRedDisabledColor,
-              color: pacoAppBarColor,
-              textColor: Colors.white,
+              // disabledColor: pacoAppBarColor.withOpacity(0.5),
+              // disabledTextColor: pacoRedDisabledColor,
+              // color: pacoAppBarColor,
+              // textColor: Colors.white,
               child: Text('Încarcă comanda'),
             );
           }),

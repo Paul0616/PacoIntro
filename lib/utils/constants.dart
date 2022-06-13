@@ -60,6 +60,7 @@ const String orderKey = 'order';
   ENUMS
  -----------------------*/
 enum SearchType { BY_CODE, BY_NAME, FROM_RECEPTION }
+
 enum ProductStatus {
   WRONG_PRICE,
   WRONG_NAME,
@@ -67,6 +68,7 @@ enum ProductStatus {
   WRONG_INPUT_DATE,
   WRONG_SALE_IN_PERIOD
 }
+
 enum CallId {
   TOKEN_CALL,
   CHECK_USER_CALL,
@@ -99,19 +101,23 @@ Future<void> dialogAlert(BuildContext context, String title, Widget child,
         content: child,
         actions: <Widget>[
           onPressedNegative != null
-              ? RaisedButton(
-                  shape:
-                      StadiumBorder(side: BorderSide(color: pacoAppBarColor)),
-                  color: Colors.white,
-                  textColor: pacoAppBarColor,
+              ? ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    shape:
+                        StadiumBorder(side: BorderSide(color: pacoAppBarColor)),
+                    primary: Colors.white,
+                    onPrimary: pacoAppBarColor,
+                  ),
                   child: Text('Renunță'),
                   onPressed: onPressedNegative,
                 )
               : Container(),
-          RaisedButton(
-            shape: StadiumBorder(side: BorderSide(color: pacoAppBarColor)),
-            color: Colors.white,
-            textColor: pacoAppBarColor,
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              shape: StadiumBorder(side: BorderSide(color: pacoAppBarColor)),
+              primary: Colors.white,
+              onPrimary: pacoAppBarColor,
+            ),
             child: Text("OK"),
             onPressed: onPressedPositive,
           ),
@@ -142,7 +148,8 @@ Future<List<BalanceItemModel>> makeBalance() async {
         receivedQuantity: receivedProduct.quantity,
         receivedItemId: receivedProduct.id,
         invoiceId: receivedProduct.invoiceId,
-        invoiceInfo: getInvoiceInfo(fromOrder: order, invoiceId: receivedProduct.invoiceId),
+        invoiceInfo: getInvoiceInfo(
+            fromOrder: order, invoiceId: receivedProduct.invoiceId),
       ),
     );
   }
@@ -172,11 +179,8 @@ String getInvoiceInfo({OrderModel fromOrder, int invoiceId}) {
       : "";
 }
 
-void prettyPrintJson(Map<String, dynamic> map){
+void prettyPrintJson(Map<String, dynamic> map) {
   JsonEncoder encoder = JsonEncoder.withIndent('  ');
   var prettyString = encoder.convert(map);
   prettyString.split('\n').forEach((element) => print(element));
 }
-
-
-

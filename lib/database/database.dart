@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:pacointro/models/invoice_model.dart';
 import 'package:pacointro/models/product_model.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';

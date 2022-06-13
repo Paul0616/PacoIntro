@@ -568,7 +568,7 @@ class _DetailsPageState extends State<DetailsPage> {
   _onApiListener(BuildContext context, ApiCallState state, bool isApiCallBloc) {
     if (state is ApiCallErrorState) {
       if (state.message.isNotEmpty) {
-        Scaffold.of(context).showSnackBar(SnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(state.message),
         ));
       }
