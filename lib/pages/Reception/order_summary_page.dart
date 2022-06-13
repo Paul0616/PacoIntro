@@ -41,6 +41,7 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
   OrderSummaryBloc _orderSummaryBloc = OrderSummaryBloc();
   String _manualBarcode = "";
   int _currentInvoiceId;
+  bool _searchIsNotDone = true;
 
   @override
   Widget build(BuildContext context) {
@@ -192,7 +193,8 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
                       onPressed: () {
                         final navKey = NavKey.navKey;
                         navKey.currentState
-                            .pushNamed(ListProductsPage.route, arguments: true).then((value) {
+                            .pushNamed(ListProductsPage.route, arguments: true)
+                            .then((value) {
                           _orderSummaryBloc.add(ProgressRefreshEvent());
                         });
                       },
@@ -265,7 +267,7 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
                         style: ElevatedButton.styleFrom(
                           padding: EdgeInsets.all(8),
                           elevation: 4,
-                          primary: pacoAppBarColor,
+                          primary: pacoAppGreen,
                         ),
                         child: Column(
                           children: <Widget>[
@@ -296,7 +298,7 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
                           padding: EdgeInsets.symmetric(
                               vertical: 8.0, horizontal: 14),
                           elevation: 4,
-                          primary: pacoAppBarColor,
+                          primary: pacoAppGreen,
                         ),
                         child: Column(
                           children: <Widget>[
@@ -327,28 +329,44 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
                   SizedBox(
                     height: 20,
                   ),
-                  TextButton(
-                    style: ButtonStyle(
-                      shape: MaterialStateProperty.all(
-                        RoundedRectangleBorder(
-                          borderRadius: new BorderRadius.circular(18.0),
+                  Row(
+                    children: [
+                      Spacer(),
+                      TextButton(
+                        style: ButtonStyle(
+                          shape: MaterialStateProperty.all(
+                            RoundedRectangleBorder(
+                              borderRadius: new BorderRadius.circular(18.0),
+                            ),
+                          ),
+                          foregroundColor:
+                              MaterialStateProperty.resolveWith<Color>(
+                                  (states) =>
+                                      states.contains(MaterialState.disabled)
+                                          ? pacoRedDisabledColor
+                                          : Colors.white),
+                          backgroundColor:
+                              MaterialStateProperty.resolveWith<Color>(
+                                  (states) =>
+                                      states.contains(MaterialState.disabled)
+                                          ? pacoAppGreen.withOpacity(0.5)
+                                          : pacoAppGreen),
                         ),
+                        onPressed: isValid
+                            ? () {
+                                _apiCallBloc.add(PostReceptionEvent());
+                              }
+                            : null,
+                        child: Text('Finalizează recepție'),
                       ),
-                      foregroundColor: MaterialStateProperty.resolveWith<Color>(
-                          (states) => states.contains(MaterialState.disabled)
-                              ? pacoRedDisabledColor
-                              : Colors.white),
-                      backgroundColor: MaterialStateProperty.resolveWith<Color>(
-                          (states) => states.contains(MaterialState.disabled)
-                              ? pacoAppBarColor.withOpacity(0.5)
-                              : pacoAppBarColor),
-                    ),
-                    onPressed: isValid
-                        ? () {
-                            _apiCallBloc.add(PostReceptionEvent());
-                          }
-                        : null,
-                    child: Text('Finalizează recepție'),
+                      Expanded(
+                        child: Align(
+                          child: _buildCancelReceptionButton(context,
+                              isDisabled: !isValid),
+                          alignment: Alignment.centerRight,
+                        ),
+                      )
+                    ],
                   ),
                 ],
               );
@@ -411,6 +429,30 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
               : Icons.add,
           size: 20.0,
           color: Colors.white,
+        ),
+        padding: EdgeInsets.zero,
+        shape: CircleBorder(),
+      ),
+    );
+  }
+
+  _buildCancelReceptionButton(BuildContext context, {bool isDisabled}) {
+    return Container(
+      width: 30,
+      height: 30,
+      margin: EdgeInsets.only(left: 16),
+      child: RawMaterialButton(
+        onPressed: isDisabled
+            ? null
+            : () {
+                _dialogCancelReception(context);
+              },
+        elevation: 4,
+        fillColor: !isDisabled ? pacoAppBarColor : Colors.grey,
+        child: Icon(
+          Icons.delete,
+          size: 20.0,
+          color: Colors.white54,
         ),
         padding: EdgeInsets.zero,
         shape: CircleBorder(),
@@ -529,9 +571,24 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
       Navigator.pop(context);
       int barcode = int.tryParse(_manualBarcode);
       if (barcode != null) {
-        _orderSummaryBloc.add(FindProductInOrderEvent(barcode));
+        10_orderSummaryBloc.add(FindProductInOrderEvent(barcode));
       }
     });
+  }
+
+  _dialogCancelReception(BuildContext context) {
+    return dialogAlert(
+      context,
+      'Anulare recepție',
+      Text("Dorești să anulezi această recepție? Atenție: Recepția NU va fi trimisă pe server și toate datele legate de ea se vor șterge!"),
+      onPressedPositive: () {
+        Navigator.pop(context);
+        _orderSummaryBloc.add(DeleteOrderAndNavigateEvent());
+      },
+      onPressedNegative: () {
+        Navigator.pop(context);
+      },
+    );
   }
 
   _onScannerListener(BuildContext context, HomeState state) {
@@ -542,7 +599,8 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
         ));
       }
     }
-    if (state is ScanningSuccessfullyState) {
+    if (state is ScanningSuccessfullyState && _searchIsNotDone) {
+      _searchIsNotDone = false;
       _orderSummaryBloc
           .add(FindProductInOrderEvent(int.tryParse(state.barcode) ?? 0));
     }
@@ -608,6 +666,7 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
 
   _onListener(BuildContext context, OrderSummaryState state) async {
     if (state is ProductBelongOrderState) {
+      _searchIsNotDone = true;
       if (!state.product.belongsToOrder) {
         dialogAlert(
             context,
@@ -624,8 +683,9 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
         print("InvoiceId: $_currentInvoiceId");
         state.product.invoiceId = _currentInvoiceId ?? 0;
         final navKey = NavKey.navKey;
-        var prod = await DBProvider.db.getProductIfAlreadyScanned(state.product);
-        if(prod != null) {
+        var prod =
+            await DBProvider.db.getProductIfAlreadyScanned(state.product);
+        if (prod != null) {
           prod.productType = ProductType.RECEPTION;
           navKey.currentState
               .pushNamed(InputQuantityPage.route, arguments: prod)

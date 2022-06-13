@@ -13,6 +13,7 @@ class OrderSummaryBloc extends Bloc<OrderSummaryEvent, OrderSummaryState> {
 
   @override
   Stream<OrderSummaryState> mapEventToState(OrderSummaryEvent event) async* {
+    print(event);
     if (event is FindProductInOrderEvent) {
       var products = await DBProvider.db.getProductsByBarcode(
           code: event.barCode, productType: ProductType.ORDER);

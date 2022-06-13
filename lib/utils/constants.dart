@@ -15,6 +15,7 @@ const double topBarMiddleGap = 230.0;
 /*----------------------
   COLORS
  -----------------------*/
+const Color pacoAppGreen = Colors.green;
 const Color pacoAppBarColor = Color(0xFFEE3131);
 const Color pacoRedDisabledColor = Color(0xFFEAABAB);
 const Color textGray = Color(0xFF8a8a8a);

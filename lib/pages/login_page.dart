@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:package_info/package_info.dart';
 import 'package:pacointro/blocs/api_call_bloc.dart';
 import 'package:pacointro/blocs/api_call_event.dart';
 import 'package:pacointro/blocs/api_call_state.dart';
 import 'package:pacointro/blocs/login_bloc.dart';
-
 import 'package:pacointro/blocs/login_event.dart';
 import 'package:pacointro/blocs/login_state.dart';
 import 'package:pacointro/models/credentials_model.dart';
@@ -15,6 +15,7 @@ import 'package:pacointro/widgets/top_bar.dart';
 
 class LoginPage extends StatefulWidget {
   static String route = '/LoginPage';
+
   @override
   _LoginPageState createState() => _LoginPageState();
 }
@@ -25,6 +26,7 @@ class _LoginPageState extends State<LoginPage> {
   final FocusNode _passwordFocusNode = FocusNode();
   final LoginBloc _loginBloc = LoginBloc();
   CredentialModel credentials;
+
   // String errorMessage;
 
   //final ApiCallBloc _apiCallBloc = ApiCallBloc(repository: FakeRepository());
@@ -38,11 +40,6 @@ class _LoginPageState extends State<LoginPage> {
   var _controller = TextEditingController();
 
   //LoginBloc1 _bloc;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,6 +60,11 @@ class _LoginPageState extends State<LoginPage> {
               MediaQuery.of(context).orientation == Orientation.portrait
                   ? TopBar()
                   : Container(),
+              FutureBuilder(
+                  future: PackageInfo.fromPlatform(),
+                  builder: (context, snapshot) {
+                    return snapshot.hasData ? Text('v${(snapshot.data as PackageInfo)?.version ?? ""}', style: TextStyle(fontSize: 11, color: Colors.black54),) : Container();
+                  }),
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 64.0),

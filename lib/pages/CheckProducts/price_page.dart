@@ -52,144 +52,146 @@ class _PricePageState extends State<PricePage> {
                     withBackNavigation: true,
                   ),
                   Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: <Widget>[
-                          Column(
-                            children: <Widget>[
-                              Text(
-                                'DENUMIRE PRODUS',
-                                style: textStyle,
-                              ),
-                              // StreamBuilder<ApiResponse1<ProductModel>>(
-                              //     stream: _bloc.currentProductStream,
-                              //     builder: (context, snapshot) {
-                              //       return snapshot.hasData && snapshot.data != null
-                              _currentProduct != null
-                                  ? Text('${_currentProduct.name}',
-                                      textAlign: TextAlign.center,
-                                      style: textStyle.copyWith(
-                                          fontWeight: FontWeight.w700,
-                                          fontSize: 30,
-                                          color: pacoAppBarColor))
-                                  : Container(),
-                              //     }),
-                            ],
-                          ),
-                          Column(
-                            children: <Widget>[
-                              Text(
-                                'PREȚ',
-                                style: textStyle,
-                              ),
-                              // StreamBuilder<ApiResponse1<ProductModel>>(
-                              //     stream: _bloc.currentProductStream,
-                              //     builder: (context, snapshot) {
-                              //       return snapshot.hasData && snapshot.data != null
-                              _currentProduct != null
-                                  ? Container(
-                                      padding: EdgeInsets.all(8),
-                                      decoration: BoxDecoration(
-                                        color: pacoAppBarColor,
-                                        borderRadius: BorderRadius.circular(16),
-                                      ),
-                                      child: McCountingText(
-                                        begin: 0,
-                                        end: _currentProduct.price,
-                                        precision: 2,
-                                        style: textStyle.copyWith(
-                                            fontWeight: FontWeight.w700,
-                                            fontSize: 42,
-                                            color: pacoLightGray),
-                                        duration: Duration(seconds: 1),
-                                        curve: Curves.decelerate,
-                                      ),
-                                    )
-                                  : Container(),
-                              _currentProduct != null
-                                  ? Text('/${_currentProduct.measureUnit}')
-                                  : Container(),
-                              _currentProduct?.secondPrice != null ? Padding(
-                                padding: const EdgeInsets.only(top: 16.0),
-                                child: Text(
-                                  'PREȚ valabil pentru ${_currentProduct?.quantityWhereSecondPriceIsValidFor??0} ${_currentProduct?.measureUnit??""}',
+                    child: SingleChildScrollView(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: <Widget>[
+                            Column(
+                              children: <Widget>[
+                                Text(
+                                  'DENUMIRE PRODUS',
                                   style: textStyle,
                                 ),
-                              ) : Container(),
-                              _currentProduct?.secondPrice != null
-                                  ? Container(
-                                padding: EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: pacoAppBarColor,
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                                child: McCountingText(
-                                  begin: 0,
-                                  end: _currentProduct.secondPrice,
-                                  precision: 2,
-                                  style: textStyle.copyWith(
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 42,
-                                      color: pacoLightGray),
-                                  duration: Duration(seconds: 1),
-                                  curve: Curves.decelerate,
-                                ),
-                              )
-                                  : Container(),
-                              //     }),
-                              // StreamBuilder<ApiResponse1<ProductModel>>(
-                              //     stream: _bloc.currentProductStream,
-                              //     builder: (context, snapshot) {
-                              //       return snapshot.hasData && snapshot.data != null
-                              _currentProduct?.secondPrice != null
-                                  ? Text('/${_currentProduct.measureUnit}')
-                                  : Container(),
-                              //     }),
-                            ],
-                          ),
-                          RawMaterialButton(
-                            onPressed: () {
-                              dialogAlert(
-                                  context,
-                                  'Confirmare',
-                                  Text(
-                                      'Produsul va fi trimis la coș cu eticheta \"PREȚ INCORECT\". Vrei să faci asta?'),
-                                  onPressedPositive: () {
-                                BlocProvider.of<ApiCallBloc>(context).add(
-                                    PutProductWithIssueEvent(
-                                        _currentProduct.code,
-                                        productStatus(
-                                            ProductStatus.WRONG_PRICE)));
-                                Navigator.of(context).pop();
-                              }, onPressedNegative: () {
-                                Navigator.of(context).pop();
-                              });
-                            },
-                            child: Text(
-                              'Adaugă\nla coș',
-                              textAlign: TextAlign.center,
-                              style: textStyleBold,
+                                // StreamBuilder<ApiResponse1<ProductModel>>(
+                                //     stream: _bloc.currentProductStream,
+                                //     builder: (context, snapshot) {
+                                //       return snapshot.hasData && snapshot.data != null
+                                _currentProduct != null
+                                    ? Text('${_currentProduct.name}',
+                                        textAlign: TextAlign.center,
+                                        style: textStyle.copyWith(
+                                            fontWeight: FontWeight.w700,
+                                            fontSize: 30,
+                                            color: pacoAppBarColor))
+                                    : Container(),
+                                //     }),
+                              ],
                             ),
-                            shape: new CircleBorder(
-                                side: BorderSide(
-                                    color: pacoAppBarColor, width: 2)),
-                            elevation: 4.0,
-                            fillColor: Colors.white,
-                            padding: const EdgeInsets.all(30.0),
-                          ),
-                          OutlineButton(
-                            onPressed: () {
-                              final navKey = NavKey.navKey;
-                              navKey.currentState.pushNamed(DetailsPage.route,
-                                  arguments: _currentProduct);
-                            },
-                            child: Text('Alte detalii'),
-                            borderSide: BorderSide(
-                                color: pacoAppBarColor.withOpacity(0.5)),
-                          ),
-                        ],
+                            Column(
+                              children: <Widget>[
+                                Text(
+                                  'PREȚ',
+                                  style: textStyle,
+                                ),
+                                // StreamBuilder<ApiResponse1<ProductModel>>(
+                                //     stream: _bloc.currentProductStream,
+                                //     builder: (context, snapshot) {
+                                //       return snapshot.hasData && snapshot.data != null
+                                _currentProduct != null
+                                    ? Container(
+                                        padding: EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: pacoAppBarColor,
+                                          borderRadius: BorderRadius.circular(16),
+                                        ),
+                                        child: McCountingText(
+                                          begin: 0,
+                                          end: _currentProduct.price,
+                                          precision: 2,
+                                          style: textStyle.copyWith(
+                                              fontWeight: FontWeight.w700,
+                                              fontSize: 42,
+                                              color: pacoLightGray),
+                                          duration: Duration(seconds: 1),
+                                          curve: Curves.decelerate,
+                                        ),
+                                      )
+                                    : Container(),
+                                _currentProduct != null
+                                    ? Text('/${_currentProduct.measureUnit}')
+                                    : Container(),
+                                _currentProduct?.secondPrice != null ? Padding(
+                                  padding: const EdgeInsets.only(top: 16.0),
+                                  child: Text(
+                                    'PREȚ valabil pentru ${_currentProduct?.quantityWhereSecondPriceIsValidFor??0} ${_currentProduct?.measureUnit??""}',
+                                    style: textStyle,
+                                  ),
+                                ) : Container(),
+                                _currentProduct?.secondPrice != null
+                                    ? Container(
+                                  padding: EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: pacoAppBarColor,
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: McCountingText(
+                                    begin: 0,
+                                    end: _currentProduct.secondPrice,
+                                    precision: 2,
+                                    style: textStyle.copyWith(
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 42,
+                                        color: pacoLightGray),
+                                    duration: Duration(seconds: 1),
+                                    curve: Curves.decelerate,
+                                  ),
+                                )
+                                    : Container(),
+                                //     }),
+                                // StreamBuilder<ApiResponse1<ProductModel>>(
+                                //     stream: _bloc.currentProductStream,
+                                //     builder: (context, snapshot) {
+                                //       return snapshot.hasData && snapshot.data != null
+                                _currentProduct?.secondPrice != null
+                                    ? Text('/${_currentProduct.measureUnit}')
+                                    : Container(),
+                                //     }),
+                              ],
+                            ),
+                            RawMaterialButton(
+                              onPressed: () {
+                                dialogAlert(
+                                    context,
+                                    'Confirmare',
+                                    Text(
+                                        'Produsul va fi trimis la coș cu eticheta \"PREȚ INCORECT\". Vrei să faci asta?'),
+                                    onPressedPositive: () {
+                                  BlocProvider.of<ApiCallBloc>(context).add(
+                                      PutProductWithIssueEvent(
+                                          _currentProduct.code,
+                                          productStatus(
+                                              ProductStatus.WRONG_PRICE)));
+                                  Navigator.of(context).pop();
+                                }, onPressedNegative: () {
+                                  Navigator.of(context).pop();
+                                });
+                              },
+                              child: Text(
+                                'Adaugă\nla coș',
+                                textAlign: TextAlign.center,
+                                style: textStyleBold,
+                              ),
+                              shape: new CircleBorder(
+                                  side: BorderSide(
+                                      color: pacoAppBarColor, width: 2)),
+                              elevation: 4.0,
+                              fillColor: Colors.white,
+                              padding: const EdgeInsets.all(30.0),
+                            ),
+                            OutlineButton(
+                              onPressed: () {
+                                final navKey = NavKey.navKey;
+                                navKey.currentState.pushNamed(DetailsPage.route,
+                                    arguments: _currentProduct);
+                              },
+                              child: Text('Alte detalii'),
+                              borderSide: BorderSide(
+                                  color: pacoAppBarColor.withOpacity(0.5)),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),

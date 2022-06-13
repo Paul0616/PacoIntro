@@ -25,7 +25,7 @@ void main() {
         id: 28707,
         orderNumber: 11123,
         orderDate: DateTime.now().subtract(Duration(minutes: 75)),
-        supplierFiscalCode: 11885854,
+        supplierFiscalCode: "11885854",
         supplierName: "PROGRES DISTRIBUTIE SRL - BAUTURI",
         productsCount: 8,
         invoices:[

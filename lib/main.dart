@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pacointro/pages/CheckProducts/check_products_page.dart';
@@ -18,6 +20,7 @@ import 'package:pacointro/utils/nav_key.dart';
 void main() {
   BlocSupervisor.delegate = SimpleBlocDelegate();
   runApp(MyApp());
+  HttpOverrides.global = new MyHttpOverrides();
 }
 
 class MyApp extends StatelessWidget {
@@ -55,5 +58,13 @@ class SimpleBlocDelegate extends BlocDelegate {
   void onTransition(Bloc bloc, Transition transition) {
     super.onTransition(bloc, transition);
     print(transition);
+  }
+}
+
+class MyHttpOverrides extends HttpOverrides{
+  @override
+  HttpClient createHttpClient(SecurityContext context){
+    return super.createHttpClient(context)
+      ..badCertificateCallback = (X509Certificate cert, String host, int port)=> true;
   }
 }

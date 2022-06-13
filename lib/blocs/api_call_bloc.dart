@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -19,6 +21,7 @@ import 'api_call_event.dart';
 import 'api_call_state.dart';
 
 class ApiCallBloc extends Bloc<ApiCallEvent, ApiCallState> {
+  //final HttpClient _httpClient = Repository.customHttpClient(cert: Repository.ISRG_X1);
   final Repository repository = Repository(httpClient: http.Client());
 
   //final FakeRepository repository = FakeRepository();
@@ -222,7 +225,7 @@ class ApiCallBloc extends Bloc<ApiCallEvent, ApiCallState> {
           orderNumber: event.orderNumber,
           repository: currentLocation.name,
         );
-        List<ProductModel> orderedProducts = List<ProductModel>();
+        List<ProductModel> orderedProducts = [];
         print(response['data']);
         orderedProducts = (response['data'])
             .map((e) => ProductModel.fromMap(e))

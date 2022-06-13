@@ -5,7 +5,7 @@ class OrderModel {
   int id;
   int orderNumber;
   DateTime orderDate;
-  int supplierFiscalCode;
+  String supplierFiscalCode;
   String supplierName;
   int productsCount;
   List<InvoiceModel> invoices;
@@ -24,7 +24,7 @@ class OrderModel {
     data['id'] = this.id;
     data['orderNumber'] = this.orderNumber;
     data['orderDate'] = this.orderDate.millisecondsSinceEpoch;
-    data['supplierFiscalCode'] = this.supplierFiscalCode;
+    data['supplierFiscalCode'] = this.supplierFiscalCode.toString();
     data['supplierName'] = this.supplierName;
     data['productsCount'] = this.productsCount;
     data['invoices'] = this.invoices;
@@ -47,7 +47,7 @@ class OrderModel {
       orderNumber: json['orderNumber'],
       orderDate: DateTime.fromMillisecondsSinceEpoch(json['orderDate']),
       supplierName: json['supplierName'],
-      supplierFiscalCode: json['supplierFiscalCode'],
+      supplierFiscalCode: json['supplierFiscalCode'].toString(),
       productsCount: json['productsCount'],
       invoices: json['invoices']
           .map<InvoiceModel>((e) => InvoiceModel.fromMap(e))
@@ -61,7 +61,7 @@ class OrderModel {
         orderNumber: json["NUMARCOMANDA"],
         supplierName: json["FURNIZOR"],
         orderDate: DateFormat('yyyy-MM-dd HH:mm:ss').parse(json["DATA"]),
-        supplierFiscalCode: json["COD_FISCAL"],
+        supplierFiscalCode: json["COD_FISCAL"].toString(),
         productsCount: json["TOTAL_PRODUSE"]);
   }
 
