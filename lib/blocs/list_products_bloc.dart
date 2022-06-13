@@ -15,7 +15,7 @@ class ListProductsBloc extends Bloc<ListProductsEvent, ListProductsState> {
   Stream<ListProductsState> mapEventToState(ListProductsEvent event) async* {
     if (event is MakeBalanceEvent) {
       yield LoadingBalanceState('loading balance...');
-      List<BalanceItemModel> balanceItems = await makeBalance();
+      List<BalanceItemModel> balanceItems = await makeBalance(alphabeticalOrder: true);
 
       yield BalanceLoadedState(balanceItems);
     }

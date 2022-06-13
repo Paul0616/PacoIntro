@@ -205,7 +205,7 @@ class ApiCallBloc extends Bloc<ApiCallEvent, ApiCallState> {
           return _productMap;
         }).toList();
         data["location"] = (await prefs.getLocalLocation()).name;
-        //prettyPrintJson(data);
+       // prettyPrintJson(data);
         final Map<String, dynamic> response =
             await repository.postReception(data);
         yield ApiCallLoadedState(

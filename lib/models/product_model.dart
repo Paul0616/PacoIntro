@@ -11,7 +11,7 @@ class ProductModel extends BaseModel {
   bool belongsToOrder;
   int invoiceId;
   ProductType productType;
-  int createdAt = DateTime.now().millisecondsSinceEpoch;
+  int createdAt;
 
   ProductModel(
       {this.id,
@@ -36,7 +36,7 @@ class ProductModel extends BaseModel {
     return data;
   }
 
-  Map<String, dynamic> toDatabaseMap({ProductType productType}) {
+  Map<String, dynamic> toDatabaseMap({ProductType productType, bool isInsert = true}) {
     Map<String, dynamic> data = Map<String, dynamic>();
     if (this.id != null) data['id'] = this.id;
     data['code'] = this.code;
@@ -46,7 +46,8 @@ class ProductModel extends BaseModel {
     data['productType'] = productType == ProductType.ORDER ? 1 : 0;
     data['belongsToOrder'] = this.belongsToOrder ? 1 : 0;
     data['invoiceId'] = this.invoiceId;
-    data['createdAt'] = this.createdAt;
+    var dateInt = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+    data['createdAt'] = isInsert ? dateInt : this.createdAt;
     return data;
   }
 
@@ -62,6 +63,7 @@ class ProductModel extends BaseModel {
       invoiceId: json["invoiceId"],
       productType:
           json['productType'] == 1 ? ProductType.ORDER : ProductType.RECEPTION,
+      createdAt: json["createdAt"]
     );
   }
 
@@ -79,6 +81,7 @@ class ProductModel extends BaseModel {
       belongsToOrder: json["belongsToOrder"] == 1,
       productType:
           json['productType'] == 1 ? ProductType.ORDER : ProductType.RECEPTION,
+      createdAt:  json["createdAt"]
     );
   }
 }

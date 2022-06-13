@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:pacointro/models/product_model.dart';
+import 'package:pacointro/utils/constants.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
@@ -95,8 +96,9 @@ class DBProvider {
   Future<int> insertProduct(
       ProductModel product, ProductType productType) async {
     final db = await database;
+
     var raw = await db.insert(
-        tableProducts, product.toDatabaseMap(productType: productType),
+        tableProducts, product.toDatabaseMap(productType: productType, isInsert: product.id == null),
         conflictAlgorithm: ConflictAlgorithm.replace);
     return raw;
   }
@@ -194,7 +196,7 @@ class DBProvider {
   updateScannedQuantity({ProductModel product}) async {
     final db = await database;
     var res = await db.update(tableProducts,
-        product.toDatabaseMap(productType: ProductType.RECEPTION),
+        product.toDatabaseMap(productType: ProductType.RECEPTION, isInsert: false),
         where: "code = ? AND productType = ?", whereArgs: [product.code, 0]);
     return res;
   }

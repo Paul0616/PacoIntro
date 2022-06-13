@@ -127,7 +127,7 @@ Future<void> dialogAlert(BuildContext context, String title, Widget child,
   );
 }
 
-Future<List<BalanceItemModel>> makeBalance() async {
+Future<List<BalanceItemModel>> makeBalance({bool alphabeticalOrder = false}) async {
   List<BalanceItemModel> balanceItems = [];
   var order = await PreferencesRepository().getLocalOrder();
 
@@ -135,6 +135,9 @@ Future<List<BalanceItemModel>> makeBalance() async {
       .getProductsByOrderType(productType: ProductType.ORDER);
   List<ProductModel> receivedProducts = await DBProvider.db
       .getProductsByOrderType(productType: ProductType.RECEPTION);
+  if(!alphabeticalOrder) {
+    receivedProducts.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+  }
   for (ProductModel receivedProduct in receivedProducts) {
     var orderProduct = orderedProducts.firstWhere(
         (element) => element.code == receivedProduct.code,
